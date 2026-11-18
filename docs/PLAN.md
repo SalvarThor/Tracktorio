@@ -8,7 +8,7 @@ each phase. Items marked (ASK) need the user's decision before implementation.
 Goal: a trivial mod that loads in Factorio 2.1, passes static checks, and has one in-game
 test that Claude Code can run and read the result of without the user.
 
-- [ ] 0.1 Locate `factorio.exe`, the Factorio user data dir (normally
+- [x] 0.1 Locate `factorio.exe`, the Factorio user data dir (normally
       `%APPDATA%\Factorio`), the mods dir, `factorio-current.log` and `script-output\`.
       Confirm the exact Factorio version (`factorio.exe --version`) and that the
       `space-age`, `quality` and `elevated-rails` mods are present in the install's `data\`.
