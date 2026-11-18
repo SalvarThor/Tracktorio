@@ -52,9 +52,8 @@ Verified 2026-11-18 with the Steam client running: launching
 `bin\x64\factorio.exe` directly works unattended for `--version`, `--help`, `--dump-data`
 and `--test-scenario`. Steam doesn't relaunch it, nothing needs a click, and no window opens
 (`Running in headless mode`). A test run takes ~2.5 s wall-clock.
-Not yet verified: running with the Steam client **closed** (needs the user to close Steam).
-If that fails, the options are a `steam_appid.txt` (427520) next to the exe, or the
-standalone build from factorio.com.
+Also verified 2026-11-18 with the Steam client **closed**: the test suite passes the same
+way, and Steam is not started.
 
 ## In-game tests
 - `./tools/run-tests.ps1 [-Filter <text>] [-SelfTest]`: see the script header.
