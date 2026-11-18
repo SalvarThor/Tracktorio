@@ -4,6 +4,26 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.1.1 tier prototypes
+- Decision: all city definitions (tiers, rates, power, upgrade costs) live in one plain-data
+  module, `mod/shared/city_defs.lua`, read by both stages. `prototypes/cities.lua` builds
+  one assembling-machine per tier. Tier 1 keeps the MVP name `tt-city-<name>`, so MVP saves
+  load; tiers 2-3 are `tt-city-<name>-t<N>`. Each power tier has its own hidden generator
+  (`tt-power-generator`, `-t2`, `-t3`; 3 / 6 / 12 steam per tick). `config.CITY_COMPANIONS`
+  is derived from the defs.
+- Verified:
+  - output x1 / x2 / x4 for every city
+  - tier 2-3 smelting has no coal and draws 8.64 / 17.28 MW
+  - depot draws 0.84 / 1.68 / 3.36 MW
+  - no upgrade costs a city's own product
+  - a tier 2 power city delivers 8.00 MW to an 8 MW demand
+  - an electric smelter runs without coal
+- Test note: measure a power source with the generator's `energy_generated_last_tick`.
+  An electric-energy-interface consumer's buffer also drains by its own usage, so reading
+  it understated delivery (2.9 MW measured vs 8 MW actual).
+- Rejected: changing crafting speed at runtime (not possible: crafting speed is a
+  prototype property; modules and beacons are banned).
+
 ## 2026-11-18: City tier upgrades, design (user decisions, Phase 2.1)
 - 3 tiers at x1 / x2 / x4 of tier 1's cap (roughly yellow, red and blue belt for smelting).
 - A city's upgrade never uses its own product: the materials must come from another city,

@@ -77,7 +77,7 @@ return {
     end,
   },
   {
-    name = "mvp cities: only depot cities make coal fuel",
+    name = "mvp cities: only depot cities (any tier) make coal fuel",
     fn = function()
       local makers = {}
       for name, recipe in pairs(prototypes.recipe) do
@@ -85,8 +85,10 @@ return {
           if p.name == "tt-coal-fuel" then makers[#makers + 1] = name end
         end
       end
-      assert_.equals(#makers, 1, "recipes making coal fuel: " .. serpent.line(makers))
-      assert_.equals(makers[1], "tt-city-depot")
+      assert_.truthy(#makers > 0, "nothing makes coal fuel")
+      for _, m in ipairs(makers) do
+        assert_.truthy(string.find(m, "^tt%-city%-depot") ~= nil, "non-depot recipe makes coal fuel: " .. m)
+      end
     end,
   },
 }

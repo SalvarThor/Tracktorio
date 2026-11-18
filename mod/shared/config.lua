@@ -39,10 +39,18 @@ M.GOAL_TICK_INTERVAL = 60
 M.RATE_WINDOW_TICKS = 60 * 60
 
 -- Hidden companion entities placed with a city and joined by a linked fluidbox connection.
--- city name -> { entity, city_link_id, companion_link_id }
-M.CITY_COMPANIONS = {
-  ["tt-city-power"] = { entity = "tt-power-generator", city_link_id = 1, companion_link_id = 1 },
-}
+-- city entity name -> { entity, city_link_id, companion_link_id }. One generator per power
+-- city tier (shared/city_defs.lua).
+local city_defs = require("shared.city_defs")
+M.CITY_COMPANIONS = {}
+for _, def in ipairs(city_defs.list) do
+  for tier, t in ipairs(def.tiers) do
+    if t.generator_usage then
+      M.CITY_COMPANIONS[city_defs.entity_name(def.name, tier)] = {
+        entity = city_defs.generator_name(tier), city_link_id = 1, companion_link_id = 1 }
+    end
+  end
+end
 
 -- Free items (SPEC: train infrastructure, station logistics, extraction). Their recipes get
 -- no ingredients and stay gated by their vanilla technology.

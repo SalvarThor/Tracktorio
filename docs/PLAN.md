@@ -137,7 +137,7 @@ Stop. Report to the user.
 Follow the post-MVP order in SPEC.md. Break each step into items here before starting it,
 and get the user's OK on the breakdown.
 
-### Phase 2.1: city tier upgrades (PROPOSED, awaiting the user's OK)
+### Phase 2.1: city tier upgrades (approved by the user 2026-11-18)
 
 Decided with the user (DECISIONS.md, 2026-11-18):
 - 3 tiers at x1 / x2 / x4 of tier 1's cap.
@@ -160,7 +160,7 @@ Electric smelting power: an electric furnace makes 0.625 plates/s at 180 kW, so 
 needs 48 furnaces, about 8.6 MW. Upgrading the smelters therefore needs the power city
 upgraded first. That's an intended chain.
 
-- [ ] 2.1.1 Tier definitions and prototypes. Each upgradable city gets a per-tier table
+- [x] 2.1.1 Tier definitions and prototypes. Each upgradable city gets a per-tier table
       (speed, power, recipe) in `prototypes/cities.lua`, and the generator builds
       `tt-city-<name>-t2/-t3`. Tier 1 keeps its current name so MVP saves still load. Tier 2+
       smelting recipes have no coal. Each power city tier has its own hidden generator.
