@@ -1,0 +1,1 @@
+-- Settings stage: mod setting prototypes only.

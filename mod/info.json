@@ -1,0 +1,9 @@
+{
+  "name": "train-tycoon",
+  "version": "0.0.1",
+  "title": "Train Tycoon",
+  "author": "Salvar",
+  "description": "Trains are the whole game. Fixed-location cities do the production; you build the network that feeds them.",
+  "factorio_version": "2.1",
+  "dependencies": ["base >= 2.1.0", "space-age >= 2.1.0"]
+}
