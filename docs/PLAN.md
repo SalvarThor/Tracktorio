@@ -30,7 +30,7 @@ test that Claude Code can run and read the result of without the user.
 - [x] 0.6 Static checks: set up `lua-language-server --check` (or an equivalent that works
       headlessly on Windows) with Factorio 2.1 API type definitions. Wrap it in
       `tools/check.ps1`. A deliberate typo must fail it; clean code must pass.
-- [ ] 0.7 In-game test runner. First try Factorio Test (mod + `npx factorio-test` CLI) on
+- [x] 0.7 In-game test runner. (Native 2.1.24 `--test-scenario` used; see DECISIONS.md.) First try Factorio Test (mod + `npx factorio-test` CLI) on
       Windows. If that does not work, build the fallback: `tools/run-tests.ps1` starts
       `factorio.exe --start-server-load-scenario` with RCON enabled, triggers the tests
       through RCON, reads results the mod writes to `script-output\`, then shuts the server

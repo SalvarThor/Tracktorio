@@ -48,7 +48,20 @@ can delete the repo's files through it. Remove junctions with
   by the test runner).
 
 ## Unattended launch
-Filled in by 0.7 results.
+Verified 2026-11-18 with the Steam client running: launching
+`bin\x64\factorio.exe` directly works unattended for `--version`, `--help`, `--dump-data`
+and `--test-scenario`. Steam doesn't relaunch it, nothing needs a click, and no window opens
+(`Running in headless mode`). A test run takes ~2.5 s wall-clock.
+Not yet verified: running with the Steam client **closed** (needs the user to close Steam).
+If that fails, the options are a `steam_appid.txt` (427520) next to the exe, or the
+standalone build from factorio.com.
+
+## In-game tests
+- `./tools/run-tests.ps1 [-Filter <text>] [-SelfTest]`: see the script header.
+- Results: `.factorio\data\script-output\tt-test-results.json`. Each line also goes to
+  the log as `TT-TEST PASS|FAIL <name>`.
+- Exit codes: 0 pass, 1 test failures, 2 harness error (load error, mod crash, timeout,
+  no or stale results). The log tail is printed for 2.
 
 ## Toolchain
 - Node.js 26.13.1 (`winget install OpenJS.NodeJS.LTS`), `C:\Program Files\nodejs\`.

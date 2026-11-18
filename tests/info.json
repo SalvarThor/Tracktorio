@@ -1,0 +1,9 @@
+{
+  "name": "train-tycoon-tests",
+  "version": "0.0.1",
+  "title": "Train Tycoon: tests",
+  "author": "Salvar",
+  "description": "In-game automated tests for Train Tycoon. Dev instance only; never shipped.",
+  "factorio_version": "2.1",
+  "dependencies": ["train-tycoon"]
+}

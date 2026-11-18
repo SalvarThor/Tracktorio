@@ -4,6 +4,26 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: In-game tests use the native `--test-scenario` mode
+- Decision: tests run with Factorio 2.1.24's built-in `--test-scenario MOD/NAME`, which is
+  headless with a player, runs until `script.finish_test(passed)` and exits 0 or 1. The
+  scenario `tt-tests` lives in a separate mod `train-tycoon-tests` (`tests\`), junctioned
+  only into the dev instance. Its scenario script runs a small runner
+  (`tests\runner.lua`: sync tests plus `ctx:wait`/`ctx:wait_until` across ticks). Results go
+  to `script-output\tt-test-results.json`. `tools\run-tests.ps1` wraps it all.
+- Why: no RCON client, no server process, no Node and no extra mod dependency. One run
+  takes ~2.5 s. Load errors and uncaught mod errors exit 1 promptly with the error in the
+  log (verified). The runner sits in the scenario's own Lua state, so its `on_tick` can't
+  overwrite the mod's handlers. Tests inspect the mod through game state, `/tt-` commands and
+  remote interfaces.
+- Caveat (2.1 surprise): `--test-ticks N` exits with **0** when the tick limit is hit.
+  The wrapper therefore accepts a pass only if a results file carrying this run's id exists
+  and reports failed=0, passed>0.
+- Rejected: Factorio Test (needs Node, a portal mod dependency, and has unknown 2.1 support).
+  A server with RCON (more moving parts, and the process has to be killed).
+- Later: unit tests of mod internals, if needed, through a `tt-test` remote interface that
+  the mod registers only when `train-tycoon-tests` is active.
+
 ## 2026-11-18: Separate dev/test Factorio instance
 - Decision: all dev, test and playtest runs use a separate write-data dir at
   `<repo>\.factorio\` (gitignored), selected with `factorio.exe --config`. Its mods dir holds
