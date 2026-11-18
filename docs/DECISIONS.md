@@ -4,6 +4,30 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.7 limp mode
+- Decision: a hidden item `tt-limp-fuel` in the locomotive fuel category: 100 GJ, top speed
+  ×0.15 (1.2 → 0.18 tiles/tick, about 39 km/h), acceleration ×0.25. It is never an item
+  stack.
+- `scripts/limp.lua` tracks locomotives in an array (on built / script-raised / cloned
+  events, plus a full map scan on init and configuration change). Every 10 ticks it checks a
+  slice, so each locomotive is seen about once a second:
+  - Nothing burning and an empty fuel inventory: set `currently_burning` to the limp fuel
+    with a full `remaining_burning_fuel`.
+  - Limp fuel burning and real fuel present: clear `currently_burning`, and the burner takes
+    the real fuel.
+  - Invalid entries are swap-removed.
+- Verified:
+  - An unfuelled locomotive limps at max 0.18.
+  - A limping train drives a temporary-rail schedule, slowly.
+  - Refuelling ends limp mode within a pass.
+  - Fuelled locomotives are untouched.
+  - The poll picks up new locomotives by itself.
+- Cost: about 1.25 µs per locomotive per second, measured in A3.
+- Known limit: while limping, the burner never asks for fuel, so 2.1's "auto-pull fuel from
+  passengers" doesn't kick in. The player inserts fuel by hand (or an inserter does), and
+  the next pass restores normal running. Acceptable for MVP; revisit with reliability.
+- Rejected: the SPEC fallback (stop dead), which wasn't needed; a per-tick scan.
+
 ## 2026-11-18: 1.6 city UI
 - Hover: the vanilla entity tooltip (crafting machines already show their recipe and
   status), plus a "Click it for details" line in each city's description.

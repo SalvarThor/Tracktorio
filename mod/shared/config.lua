@@ -9,6 +9,17 @@ M.FREE_CRAFT_TIME = 0.002
 -- The only fuel category locomotives burn. tt-coal-fuel (depot cities) is in it.
 M.LOCOMOTIVE_FUEL_CATEGORY = "tt-locomotive"
 
+-- Limp mode: hidden reserve fuel burned by fuel-empty locomotives (DECISIONS.md A3, 1.7).
+M.LIMP_FUEL = "tt-limp-fuel"
+M.LIMP_FUEL_VALUE = "100GJ"         -- effectively never runs out; re-applied if it does
+M.LIMP_FUEL_JOULES = 100e9
+M.LIMP_TOP_SPEED = 0.15             -- x locomotive max speed (1.2 -> 0.18 tiles/tick, ~39 km/h)
+M.LIMP_ACCELERATION = 0.25
+-- Every LIMP_INTERVAL ticks a slice of locomotives is checked so each one is seen about
+-- once per LIMP_PASS_TICKS.
+M.LIMP_INTERVAL = 10
+M.LIMP_PASS_TICKS = 60
+
 -- City entity names (prototypes/cities.lua).
 M.CITY = {
   iron = "tt-city-iron-smelting",
