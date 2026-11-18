@@ -165,10 +165,14 @@ upgraded first. That's an intended chain.
       `tt-city-<name>-t2/-t3`. Tier 1 keeps its current name so MVP saves still load. Tier 2+
       smelting recipes have no coal. Each power city tier has its own hidden generator.
       Locale for every new prototype.
-- [ ] 2.1.2 Construction port. A small fixed container beside each upgradable city, placed
-      and protected like a city. Its slot filters list only the materials the next tier
-      still needs. Deliveries are counted and removed (the goal-box mechanism). It closes at
-      max tier.
+- [ ] 2.1.2 Construction port. A fixed 1x1 container on the tile west of the city's top-left
+      corner (its east side touches the city; north, west and south are free for
+      inserters). It is placed and protected like a city. No inserter or power between port
+      and city: once a second the script empties the port into the upgrade's progress
+      counter (the goal-box mechanism), and materials never enter the city. Slot filters
+      list only the materials the next tier still needs. It closes at max tier. Delivery
+      rate tops out around 7 plates/s (3 fast inserters); a 1x2 port is the fallback if
+      that is too slow.
 - [ ] 2.1.3 Upgrade in place. When the port is complete, the city is replaced by its next tier
       at the same position. Input and output contents carry over. Leftover inputs the new
       recipe can't use (coal after going electric) move to the port's output slot or are
