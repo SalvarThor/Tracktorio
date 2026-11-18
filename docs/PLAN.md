@@ -201,4 +201,5 @@ upgraded first. That's an intended chain.
       city on the power network); no errors in the log. Numbers fine for now; revisit after a
       full run. Finding: no visible sign of a city's tier in the world (2.1.7).
 - [ ] 2.1.7 Visual tier indicator on the city in the world (user request, playtest 2.1.6).
-      Form to be chosen by the user.
+      User chose pips: one per tier on the city's top edge, filled up to its tier. Built and
+      tested; waiting for a look in game.

@@ -4,6 +4,16 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.1.7 tier pips on cities
+- Decision: each tiered city shows one pip per tier along its top edge, filled gold up to its
+  tier, dark for the rest (user choice after playtest 2.1.6). Drawn with `rendering.draw_circle`
+  targeted at the city, so they vanish with it; the upgraded city is a new entity and gets
+  fresh pips from the `on_any_placed` hook. Render object ids live in `record.tier_marks`.
+  Every configuration change redraws missing pips (idempotent), and the mod version goes to
+  0.1.1 so existing saves get them; no storage schema change.
+- Why: readable at a glance and without language; no new art needed.
+- Rejected: text label (small when zoomed out), colour tint per tier (subtle, colour-only).
+
 ## 2026-11-18: 2.1.5 save migration (schema 2, mod version 0.1.0)
 - Decision: `state.migrate(steps)` runs on configuration change and from the test hook
   `tt-city.migrate`.

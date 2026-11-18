@@ -12,6 +12,7 @@ local map = require("scripts.map")
 local ports = require("scripts.ports")
 local upgrade = require("scripts.upgrade")
 local notify = require("scripts.notify")
+local tier_marks = require("scripts.tier_marks")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -34,6 +35,7 @@ city_remote.open_gui = function(player_index, entity)
   city_gui.open(player, entity)
 end
 city_remote.recent_messages = function() return notify.recent() end
+city_remote.tier_marks = function(entity) return tier_marks.status(entity) end
 city_remote.alerts_pending = function() return #(storage.tt_alerts or {}) end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.
@@ -73,7 +75,8 @@ migrate = function()
   goal.init()
   city_gui.init()
   notify.init()
-  state.migrate({ ensure_ports = ports.ensure_all, legacy_windows = city_gui.migrate_legacy })
+  state.migrate({ ensure_ports = ports.ensure_all, legacy_windows = city_gui.migrate_legacy,
+    ensure_tier_marks = tier_marks.ensure_all })
   local with_port, without = 0, 0
   for _, r in pairs(storage.tt_cities) do
     if r.port and r.port.valid then with_port = with_port + 1
