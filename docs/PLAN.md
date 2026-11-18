@@ -136,3 +136,51 @@ Stop. Report to the user.
 
 Follow the post-MVP order in SPEC.md. Break each step into items here before starting it,
 and get the user's OK on the breakdown.
+
+### Phase 2.1: city tier upgrades (PROPOSED, awaiting the user's OK)
+
+Decided with the user (DECISIONS.md, 2026-11-18):
+- 3 tiers at x1 / x2 / x4 of tier 1's cap.
+- A city's upgrade never uses its own product. Until intermediate cities exist, costs are
+  other cities' plates.
+- Smelting cities go electric from tier 2: no coal, they draw power like electric furnaces.
+- Materials are delivered to a construction port beside each city. The upgrade happens
+  automatically when the port has everything.
+
+Proposed numbers (tuning values, revisited in playtest):
+
+| City | T1 | T2 | T3 | T2 cost | T3 cost |
+|---|---|---|---|---|---|
+| Iron smelting | 900 plates/min, coal | 1800/min, ~8.6 MW, no coal | 3600/min, ~17.3 MW | 2,000 copper | 6,000 copper |
+| Copper smelting | same | same | same | 2,000 iron | 6,000 iron |
+| Depot | 2 fuel/s, 840 kW | 4/s, 1.68 MW | 8/s, 3.36 MW | 1,000 iron + 1,000 copper | 3,000 + 3,000 |
+| Power | 5.4 MW | 10.8 MW | 21.6 MW | 1,000 iron + 1,000 copper | 3,000 + 3,000 |
+
+Electric smelting power: an electric furnace makes 0.625 plates/s at 180 kW, so 30 plates/s
+needs 48 furnaces, about 8.6 MW. Upgrading the smelters therefore needs the power city
+upgraded first. That's an intended chain.
+
+- [ ] 2.1.1 Tier definitions and prototypes. Each upgradable city gets a per-tier table
+      (speed, power, recipe) in `prototypes/cities.lua`, and the generator builds
+      `tt-city-<name>-t2/-t3`. Tier 1 keeps its current name so MVP saves still load. Tier 2+
+      smelting recipes have no coal. Each power city tier has its own hidden generator.
+      Locale for every new prototype.
+- [ ] 2.1.2 Construction port. A small fixed container beside each upgradable city, placed
+      and protected like a city. Its slot filters list only the materials the next tier
+      still needs. Deliveries are counted and removed (the goal-box mechanism). It closes at
+      max tier.
+- [ ] 2.1.3 Upgrade in place. When the port is complete, the city is replaced by its next tier
+      at the same position. Input and output contents carry over. Leftover inputs the new
+      recipe can't use (coal after going electric) move to the port's output slot or are
+      dropped beside the city. The power city's generator is replaced and relinked, and
+      storage, the open window and rate sampling follow the new entity. Tests cover:
+      - new cap and power draw
+      - backpressure still working
+      - the power city's output
+- [ ] 2.1.4 UI. The city window shows the tier, the cap now and at the next tier, and the
+      next tier's materials with progress. The port has its own window. Map tags show the
+      tier ("Iron smelting city T2").
+- [ ] 2.1.5 Save migration and map. MVP saves get tier 1 records and ports placed on
+      configuration change. Check the scenario layout has room for every port. Tests load an
+      MVP-era state and upgrade it.
+- [ ] 2.1.6 `/playtest` round: upgrade path, numbers, port placement.

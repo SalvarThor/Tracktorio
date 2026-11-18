@@ -4,6 +4,28 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: City tier upgrades, design (user decisions, Phase 2.1)
+- 3 tiers at x1 / x2 / x4 of tier 1's cap (roughly yellow, red and blue belt for smelting).
+- A city's upgrade never uses its own product: the materials must come from another city,
+  so every upgrade adds a route. (User's point: own-product costs are a trivial
+  output-to-input loop.) With only MVP cities that means:
+  - iron city ← copper plates; copper city ← iron plates
+  - depot and power city ← both
+  When intermediate cities arrive (post-MVP 2), costs switch to their products.
+- Smelting cities go electric from tier 2: no coal, and they draw what electric furnaces
+  would for the same output. Upgrading changes what the station must deliver, not just the
+  rate.
+- Materials go into a construction port beside the city (like the goal box, it only takes
+  what is still needed). The upgrade happens automatically when the port has everything.
+- Rejected:
+  - 5 doubling tiers, or a gentle x1.5 / x2
+  - waiting for intermediates before building tiers
+  - extra coal-fuel costs
+  - a coal/electric choice at tier 2
+  - an Upgrade button
+  - delivering materials through the city's own inputs
+- Numbers are proposals in PLAN.md 2.1, to tune in playtest.
+
 ## 2026-11-18: 2.1 removed LuaEntity.fluidbox (playtest round 2 crash)
 - Finding (A7 addendum): `LuaEntity.fluidbox` and the `LuaFluidBox` class do not exist in
   2.1.24. Fluid access is through LuaEntity methods (`get_fluid`, `get_fluid_count`,
@@ -99,8 +121,8 @@ decided during the build.
   - every patch and the lake is at least 100 tiles from every city
 - Start inventory: 20 coal fuel (SPEC: hand-fueling helps at the start). Everything else is
   free to hand-craft.
-- Enemies off: turrets can't be crafted (1.1), so enemies would be unwinnable. **Flagged
-  for the user** (the spec doesn't say).
+- Enemies off: turrets can't be crafted (1.1), so enemies would be unwinnable. Confirmed
+  by the user at the end of Phase 1.
 - Own surface instead of nauvis: avoids clearing and regenerating nauvis inside on_init,
   and leaves nauvis untouched.
 - `run-tests.ps1` now also loads the shipped scenario for 300 ticks and fails on any script
