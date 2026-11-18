@@ -4,6 +4,15 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: Locomotives stay free; limp speed 10% (user decision)
+- Decision: rolling stock stays free (SPEC). Limp top speed goes from 15% to 10%
+  (1.2 → 0.12 tiles/tick, about 26 km/h). Acceleration stays at ×0.25.
+- Why: the cost of a train is running it (coal fuel, later reliability), not building it.
+  Free trains plus limp mode do allow a large, never-fuelled fleet of slow trains. The user
+  accepts that: a network that carries a hundred slow trains is a legitimate way to play.
+- Rejected: charging for locomotives (a rolling-stock city stays a possible post-MVP idea);
+  limp only towards a fueling stop; limp only after a first real refuel.
+
 ## 2026-11-18: Cities draw electricity like their vanilla equivalents (user decision)
 - Decision (SPEC updated): a city draws electricity when its vanilla equivalent uses
   electric buildings, at the power those buildings need for the same output.
@@ -91,7 +100,7 @@ decided during the build.
 
 ## 2026-11-18: 1.7 limp mode
 - Decision: a hidden item `tt-limp-fuel` in the locomotive fuel category: 100 GJ, top speed
-  ×0.15 (1.2 → 0.18 tiles/tick, about 39 km/h), acceleration ×0.25. It is never an item
+  ×0.15 (later 0.10, see "limp speed 10%"), acceleration ×0.25. It is never an item
   stack.
 - `scripts/limp.lua` tracks locomotives in an array (on built / script-raised / cloned
   events, plus a full map scan on init and configuration change). Every 10 ticks it checks a

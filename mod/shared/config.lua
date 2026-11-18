@@ -13,7 +13,7 @@ M.LOCOMOTIVE_FUEL_CATEGORY = "tt-locomotive"
 M.LIMP_FUEL = "tt-limp-fuel"
 M.LIMP_FUEL_VALUE = "100GJ"         -- effectively never runs out; re-applied if it does
 M.LIMP_FUEL_JOULES = 100e9
-M.LIMP_TOP_SPEED = 0.15             -- x locomotive max speed (1.2 -> 0.18 tiles/tick, ~39 km/h)
+M.LIMP_TOP_SPEED = 0.10             -- x locomotive max speed (1.2 -> 0.12 tiles/tick, ~26 km/h)
 M.LIMP_ACCELERATION = 0.25
 -- Every LIMP_INTERVAL ticks a slice of locomotives is checked so each one is seen about
 -- once per LIMP_PASS_TICKS.

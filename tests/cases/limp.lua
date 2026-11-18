@@ -3,7 +3,7 @@ local assert_ = require("__train-tycoon-tests__/assert")
 local h = require("__train-tycoon-tests__/helpers")
 
 local E = defines.direction.east
-local LIMP_MAX = 1.2 * 0.15
+local LIMP_MAX = 1.2 * 0.10
 
 --- Straight east-west line at y, from x0 for `len` tiles, and a locomotive near its start.
 local function line(x0, y, len)
