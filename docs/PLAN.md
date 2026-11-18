@@ -107,6 +107,10 @@ Goal: the MVP described in SPEC.md, playable start to win.
   - [x] Goal box kept accepting a metal past its target: slots for a met metal now close.
   - [x] `!` prompt runs Git Bash, so `! ./tools/playtest.ps1` failed: docs fixed.
   - [ ] Re-check the four fixes above in game (round 2).
+  Round 2 (2026-11-18) findings:
+  - [x] Crash clicking the power city: `LuaEntity.fluidbox` no longer exists in 2.1 (the
+        fluid-input path of the city window). Fixed with `get_fluid_count`, plus a regression
+        test that opens a fluid-starved city's window.
   - [x] Playtests and tests shared `.factorio\`, so tests couldn't run while a playtest was
         open: playtests now use `.factorio-play\` (no tests mod).
   - [x] Steam asks "run with custom arguments?" on GUI launch: accepted by the user (one click).

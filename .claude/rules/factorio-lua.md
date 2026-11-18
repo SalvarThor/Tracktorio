@@ -16,6 +16,14 @@ reflect 2.0 knowledge; if 2.1 differs, follow the docs and note it in DECISIONS.
 - Linked fluidbox connections: `LuaEntity.add_fluid_box_linked_connection`.
 - `RecipePrototype.raise_on_crafted` + `RecipeCraftedEvent` (crafting machines only).
 - Burner: writing `currently_burning` needs `remaining_burning_fuel` set too.
+- Fluids: `LuaEntity.fluidbox` and `LuaFluidBox` are gone. Use `entity.get_fluid(i)`,
+  `get_fluid_count(name)`, `get_fluid_box_prototype(i)`, `fluids_count` and the other
+  `*_fluid*` methods on LuaEntity.
+
+## Static check blind spot
+- An untyped parameter is `any` to the language server, so wrong API fields on it are not
+  caught (this let `entity.fluidbox` through; it crashed in playtest round 2). Annotate every
+  parameter that holds a Factorio object: `---@param entity LuaEntity`.
 
 ## Stages
 - Settings stage (`settings.lua`, ...): mod settings prototypes only.

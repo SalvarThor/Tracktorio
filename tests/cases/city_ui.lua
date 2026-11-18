@@ -61,6 +61,24 @@ return {
     end,
   },
   {
+    name = "city ui: a city with a fluid input reports it missing and its window opens",
+    fn = function(ctx)
+      -- regression (playtest round 2): clicking the power city crashed on LuaEntity.fluidbox
+      h.clear_area({ { 1190, -10 }, { 1210, 10 } })
+      local city = h.place_city("tt-city-power", { 1200.5, 0.5 })
+      city.insert({ name = "coal", count = 10 })
+      ctx:wait(60, function()
+        local i = info(city)
+        assert_.equals(i.status, "starved")
+        assert_.truthy(contains(i.missing, "water"), "missing " .. serpent.line(i.missing))
+        local p = assert(game.players[1])
+        remote.call("tt-city", "open_gui", p.index, city)
+        assert_.truthy(p.gui.screen["tt_city_frame"], "window not open")
+        p.opened = nil
+      end)
+    end,
+  },
+  {
     name = "city ui: detail window opens, refreshes and closes",
     fn = function(ctx)
       h.clear_area({ { 1150, -10 }, { 1170, 10 } })

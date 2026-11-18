@@ -4,6 +4,14 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.1 removed LuaEntity.fluidbox (playtest round 2 crash)
+- Finding (A7 addendum): `LuaEntity.fluidbox` and the `LuaFluidBox` class do not exist in
+  2.1.24. Fluid access is through LuaEntity methods (`get_fluid`, `get_fluid_count`,
+  `get_fluid_box_prototype`, `fluids_count`, ...).
+- Why it slipped through: the parameter was untyped, so the static check saw `any`. The
+  power tests never opened the window of a fluid-starved city. Both are now covered: a
+  regression test, and a rule to annotate Factorio-object parameters.
+
 ## 2026-11-18: Locomotives stay free; limp speed 10% (user decision)
 - Decision: rolling stock stays free (SPEC). Limp top speed goes from 15% to 10%
   (1.2 → 0.12 tiles/tick, about 26 km/h). Acceleration stays at ×0.25.

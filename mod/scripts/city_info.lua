@@ -27,19 +27,13 @@ local function recipe_of(entity)
   return r and prototypes.recipe[r.name] or nil
 end
 
---- Amount of a fluid currently in the entity's input fluidboxes.
+--- Amount of an ingredient fluid in the entity. 2.1 removed LuaEntity.fluidbox/LuaFluidBox;
+--- get_fluid_count covers all of the entity's fluid storages. A city's fluid ingredients and
+--- fluid products are different fluids (water in, steam out), so this is the input amount.
+---@param entity LuaEntity
+---@param name string
 local function input_fluid(entity, name)
-  local total = 0
-  local fb = entity.fluidbox
-  for i = 1, #fb do
-    local proto = fb.get_prototype(i)
-    local fluid = fb[i]
-    ---@diagnostic disable-next-line: undefined-field
-    if fluid and fluid.name == name and proto and proto.production_type == "input" then
-      total = total + fluid.amount
-    end
-  end
-  return total
+  return entity.get_fluid_count(name)
 end
 
 --- Ingredients the city is short of (names). Inputs that are completely absent are named
