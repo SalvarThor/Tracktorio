@@ -1,6 +1,7 @@
 -- City detail window, opened by clicking a city (custom input linked to "open-gui").
 -- storage.tt_city_gui[player_index] = the LuaEntity (city or port) shown while the window is open.
 local config = require("shared.config")
+local city_defs = require("shared.city_defs")
 local cities = require("scripts.cities")
 local city_info = require("scripts.city_info")
 local goal = require("scripts.goal")
@@ -75,7 +76,7 @@ local function add_status(body, entity, info)
     status, hint = { "tt-gui.city-status-low-power" }, { "tt-gui.city-hint-low-power" }
   elseif info.status == "no_power" then
     status, hint = { "tt-gui.city-status-no-power" }, { "tt-gui.city-hint-no-power" }
-  elseif info.status == "output_full" and entity.name == config.CITY.power then
+  elseif info.status == "output_full" and city_defs.is_power(entity.name) then
     status, hint = { "tt-gui.city-status-power-idle" }, { "tt-gui.city-hint-power-idle" }
   elseif info.status == "output_full" then
     status, hint = { "tt-gui.city-status-output-full" }, { "tt-gui.city-hint-output-full" }

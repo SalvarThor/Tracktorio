@@ -225,7 +225,7 @@ Proposed numbers (tuning values; power = the equivalent vanilla buildings):
 All get 3 tiers at x1/x2/x4 and a construction port; upgrades never use the city's own
 product. Gears and cables stay inside the cities; circuits are shipped.
 
-- [ ] 2.2.1 City framework: any fixed recipe with several inputs, tiers, power, port, window
+- [x] 2.2.1 City framework: any fixed recipe with several inputs, tiers, power, port, window
       and pips works from a city definition alone (no per-city code).
 - [ ] 2.2.2 Circuit, red science and green science cities: prototypes, recipes, power, tiers,
       costs, locale.

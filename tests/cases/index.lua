@@ -15,6 +15,7 @@ return {
     "__train-tycoon-tests__/cases/upgrade_ui",
     "__train-tycoon-tests__/cases/migration",
     "__train-tycoon-tests__/cases/tier_marks",
+    "__train-tycoon-tests__/cases/framework",
     "__train-tycoon-tests__/cases/city_ui",
     "__train-tycoon-tests__/cases/limp",
     "__train-tycoon-tests__/cases/map",

@@ -32,10 +32,10 @@ function M.tier_facts(entity_name)
   facts.product = p.name
   facts.product_type = p.type
   facts.per_min = (p.amount or 0) * 60 * proto.get_crafting_speed() / recipe.energy
-  -- "uses coal" as fuel: only meaningful for smelting (the depot and power city consume coal
-  -- as their main input at every tier)
+  -- "uses coal": only for cities that burn an ingredient as fuel (def.fuel); the depot and
+  -- power city consume coal as their main input at every tier
   for _, ing in ipairs(recipe.ingredients) do
-    if ing.name == "coal" and info.def.name ~= "depot" and info.def.name ~= "power" then facts.coal = true end
+    if info.def.fuel and ing.name == info.def.fuel then facts.coal = true end
   end
   if proto.electric_energy_source_prototype then facts.draw = proto.get_max_energy_usage() * 60 end
   local t = info.def.tiers[info.tier]

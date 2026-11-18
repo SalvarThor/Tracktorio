@@ -3,6 +3,9 @@ local M = {}
 
 M.surface = function() return game.surfaces[1] end
 
+-- on_string_translated results by request id (the runner fills this in).
+M.translations = {}
+
 --- Make a flat, empty test area: land tiles, no entities except characters.
 ---@param area BoundingBox {{x1,y1},{x2,y2}}
 function M.clear_area(area)

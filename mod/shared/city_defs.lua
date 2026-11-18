@@ -22,6 +22,7 @@ local function smelting(name, ore, plate, other_plate, map_color)
   end
   return {
     name = name,
+    fuel = "coal", -- an ingredient burnt as fuel: notifications say when a tier drops it
     graphics = { type = "furnace", name = "electric-furnace" },
     map_color = map_color,
     tiers = {
@@ -97,6 +98,13 @@ for _, def in ipairs(M.list) do
   for tier in ipairs(def.tiers) do
     M.by_entity[M.entity_name(def.name, tier)] = { def = def, tier = tier, max_tier = #def.tiers }
   end
+end
+
+--- Does this city entity feed a hidden generator (a power city of any tier)?
+---@param entity_name string
+function M.is_power(entity_name)
+  local info = M.by_entity[entity_name]
+  return info ~= nil and info.def.tiers[info.tier].generator_usage ~= nil
 end
 
 --- Entity name of the next tier, or nil at max tier / for non-tiered cities.

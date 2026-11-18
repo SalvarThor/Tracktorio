@@ -4,6 +4,18 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.2.1 city framework
+- Decision: city behaviour comes only from `shared/city_defs.lua`. Removed the two
+  per-city checks: "uses coal" now reads `def.fuel` (an ingredient burnt as fuel), and the
+  power-idle status uses `city_defs.is_power` (any tier with a generator). The second was a
+  real bug: an idle tier 2/3 power city said "output full". A framework test walks every
+  tier of every definition (window, pips, port, costs), and a locale test translates the
+  name of every `tt-` prototype through `request_translation` (proved to catch a removed
+  key).
+- Why: the new cities in 2.2.2-2.2.3 should need data and locale only.
+- Rejected: a static locale check in check.ps1 (prototype names are generated in the data
+  stage, so a static scan can't list them).
+
 ## 2026-11-18: Phase 2.2 scope (user decisions)
 - Decision: Phase 2.2 covers red and green science: circuit, red science and green science
   cities plus a research complex. The complex is a fixed lab prototype, so the engine runs

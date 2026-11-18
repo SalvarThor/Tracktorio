@@ -158,3 +158,8 @@ local function on_tick()
 end
 
 script.on_event(defines.events.on_tick, on_tick)
+-- Locale checks: tests call player.request_translation and read helpers.translations[id].
+local test_helpers = require("__train-tycoon-tests__/helpers")
+script.on_event(defines.events.on_string_translated, function(e)
+  test_helpers.translations[e.id] = e
+end)
