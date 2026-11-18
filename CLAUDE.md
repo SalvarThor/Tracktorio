@@ -83,5 +83,6 @@ Keep this section accurate. All game runs use the separate dev instance in `.fac
 - Create or repair the dev instance: `./tools/dev-instance.ps1` (the test and playtest scripts
   call it)
 - Launch game with the scenario for a playtest: `./tools/playtest.ps1 [-Scenario MOD/NAME]`
+  (from the user's `!` prompt, which is Git Bash: `! pwsh -NoProfile -File tools/playtest.ps1`)
 - Never `Remove-Item -Recurse` inside `.factorio\data\mods\`: those are junctions into the
   repo.
