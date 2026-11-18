@@ -38,7 +38,7 @@ test that Claude Code can run and read the result of without the user.
       must be reported as failed.
 - [x] 0.8 Debug command skeleton: `/tt-dump` writes a JSON snapshot of `storage` to
       `script-output\tt-dump.json`.
-- [ ] 0.9 Fill in the Commands section of CLAUDE.md and the placeholders in
+- [x] 0.9 Fill in the Commands section of CLAUDE.md and the placeholders in
       `.claude/skills/test/SKILL.md` and `.claude/skills/playtest/SKILL.md`.
 - [ ] 0.10 Investigate the technical assumptions below and record findings in
       DECISIONS.md. Do not implement them yet; report options where an assumption fails.

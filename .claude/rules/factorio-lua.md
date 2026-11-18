@@ -35,7 +35,19 @@ reflect 2.0 knowledge; if 2.1 differs, follow the docs and note it in DECISIONS.
 - Register event filters where the API supports them.
 
 ## Conventions
-- Prefix prototype names, storage keys, remote interfaces and commands with `tt-`.
+- Prefix prototype names, remote interfaces and commands with `tt-`. Storage keys use `tt_`
+  (`storage.tt_schema`), because Lua identifiers can't contain `-`.
+- Every `/tt-*` debug command has a function on the `tt-debug` remote interface, so tests can
+  call it.
+
+## Tests
+- Test cases live in `tests/cases/*.lua`, listed in `tests/cases/index.lua`. Each returns
+  `{ { name = ..., fn = function(ctx) ... end }, ... }`.
+- They run in the test scenario's Lua state, not the mod's. Reach the mod through game state,
+  `remote.call("tt-debug", ...)` and other remote interfaces.
+- Multi-tick tests: `ctx:wait(ticks, fn)` or `ctx:wait_until(pred, max_ticks, fn)`, one at a
+  time. Chain them by calling again inside `fn`.
+- `require` works only at load time (top level), never inside a test body.
 - One module per concern under `mod/scripts/`, required from `control.lua`.
 - Every prototype name has a locale entry.
 - Prototype renames need a migration file in `mod/migrations/`.

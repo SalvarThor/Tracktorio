@@ -70,12 +70,18 @@ docs/ENV.md              machine paths and commands (created in Phase 0)
 .claude/skills/          /test and /playtest procedures
 mod/                     the mod (info.json, settings.lua, data.lua, control.lua, locale/, ...)
 mod/scenarios/           the MVP scenario ships inside the mod
-tests/                   in-game automated tests
+tests/                   mod `train-tycoon-tests`: test scenario, runner, test cases
 tools/                   PowerShell helper scripts (launch server, run tests, read log)
 ```
 
 ## Commands
-Filled in during Phase 0. Keep this section accurate.
-- Static check: `<TBD in Phase 0>`
-- In-game tests: `<TBD in Phase 0>`
-- Launch game with the scenario for a playtest: `<TBD in Phase 0>`
+Keep this section accurate. All game runs use the separate dev instance in `.factorio\`
+(see docs/ENV.md), never the real `%APPDATA%\Factorio`. Invoke scripts as `./tools/<name>.ps1`.
+- Static check: `./tools/check.ps1` (`-Regenerate` after a Factorio update)
+- In-game tests: `./tools/run-tests.ps1` (`-Filter <text>`; `-SelfTest` checks the runner
+  itself). Exit 0 pass, 1 failures, 2 harness/game error.
+- Create or repair the dev instance: `./tools/dev-instance.ps1` (the test and playtest scripts
+  call it)
+- Launch game with the scenario for a playtest: `./tools/playtest.ps1 [-Scenario MOD/NAME]`
+- Never `Remove-Item -Recurse` inside `.factorio\data\mods\`: those are junctions into the
+  repo.
