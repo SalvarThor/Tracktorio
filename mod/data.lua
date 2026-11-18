@@ -2,3 +2,4 @@
 require("prototypes.fuel")
 require("prototypes.cities")
 require("prototypes.goal")
+require("prototypes.inputs")

@@ -4,6 +4,25 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.6 city UI
+- Hover: the vanilla entity tooltip (crafting machines already show their recipe and
+  status), plus a "Click it for details" line in each city's description.
+- Click: cities are `operable = false`, so the normal open-GUI click does nothing. The
+  custom input `tt-open-city` (`linked_game_control = "open-gui"`) opens a draggable window
+  (`scripts/city_gui.lua`) instead. It shows:
+  - status: running / starved, naming the missing input / output full
+  - inputs and outputs per cycle, with the max rate per minute
+  - the measured output per minute
+  It refreshes every 60 ticks and closes with E/Esc or the close button.
+- Rate: `scripts/city_info.lua` samples `products_finished` every 60 ticks over a 60 s
+  window. Output per minute = crafts per minute × product amount.
+- "Missing": inputs that are completely absent are named first. Only if none are absent does
+  it list those below one cycle's worth, so a slowly arriving input isn't blamed alongside
+  the one that isn't coming at all (found by a test).
+- Exposed for tests as `tt-city.info(entity)` and `tt-city.open_gui(player_index, entity)`.
+- Rejected: opening the vanilla assembler GUI (it would allow hand insertion and break
+  hands-off).
+
 ## 2026-11-18: 1.5 goal box and win condition
 - Decision: the goal box `tt-city-goal` is a 9x9 `container` (40 slots, filtered by script:
   half iron plates, half copper plates). Inserters can only deliver plates; the player can't

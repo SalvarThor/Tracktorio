@@ -1,0 +1,83 @@
+-- 1.6: city UI data (recipe, rate, status) and the detail window.
+local assert_ = require("__train-tycoon-tests__/assert")
+local h = require("__train-tycoon-tests__/helpers")
+
+local IRON = "tt-city-iron-smelting"
+
+local function info(city) return remote.call("tt-city", "info", city) end
+
+local function contains(list, value)
+  for _, v in ipairs(list or {}) do if v == value then return true end end
+  return false
+end
+
+return {
+  {
+    name = "city ui: recipe lists inputs, outputs and max rates",
+    fn = function()
+      h.clear_area({ { 990, -10 }, { 1010, 10 } })
+      local city = h.place_city(IRON, { 1000.5, 0.5 })
+      local i = info(city)
+      assert_.equals(#i.recipe.ingredients, 2, "ingredient count")
+      assert_.equals(i.recipe.products[1].name, "iron-plate")
+      assert_.equals(i.recipe.products[1].amount, 10)
+      -- 10 plates per 1 s cycle at speed 1.5 -> 900/min max
+      assert_.equals(math.floor(i.recipe.products[1].per_min_max + 0.5), 900)
+    end,
+  },
+  {
+    name = "city ui: starved status names the missing input",
+    fn = function(ctx)
+      local city = h.city_rig(IRON, 1040, { { name = "iron-ore", count = 100 } }, false)
+      ctx:wait(60 * 5, function()
+        local i = info(city)
+        assert_.equals(i.status, "starved")
+        assert_.truthy(contains(i.missing, "coal"), "missing " .. serpent.line(i.missing))
+        assert_.falsy(contains(i.missing, "iron-ore"), "ore reported missing")
+      end)
+    end,
+  },
+  {
+    name = "city ui: running status and a measured output rate",
+    fn = function(ctx)
+      local city = h.city_rig(IRON, 1080,
+        { { name = "iron-ore", count = 200 }, { name = "coal", count = 50 } }, true)
+      ctx:wait_until(function() return city.products_finished >= 2 end, 60 * 60, function()
+        ctx:wait(60 * 5, function()
+          local i = info(city)
+          assert_.truthy(i.status == "running" or i.status == "starved", "status " .. i.status)
+          assert_.truthy(i.recipe.products[1].per_min > 0, "rate " .. i.recipe.products[1].per_min)
+        end)
+      end)
+    end,
+  },
+  {
+    name = "city ui: output full status",
+    fn = function(ctx)
+      local city = h.city_rig(IRON, 1120, {}, false)
+      city.insert({ name = "iron-ore", count = 200 })
+      city.insert({ name = "coal", count = 20 })
+      ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function() end)
+    end,
+  },
+  {
+    name = "city ui: detail window opens, refreshes and closes",
+    fn = function(ctx)
+      h.clear_area({ { 1150, -10 }, { 1170, 10 } })
+      local city = h.place_city(IRON, { 1160.5, 0.5 })
+      local p = assert(game.players[1])
+      remote.call("tt-city", "open_gui", p.index, city)
+      local frame = p.gui.screen["tt_city_frame"]
+      assert_.truthy(frame, "window not open")
+      ---@cast frame LuaGuiElement
+      assert_.truthy(frame["body"]["status"], "no status line")
+      ctx:wait(61, function()
+        assert_.truthy(frame.valid, "window closed by refresh")
+        p.opened = nil -- closing raises on_gui_closed
+        ctx:wait(1, function()
+          assert_.falsy(p.gui.screen["tt_city_frame"], "window still open")
+        end)
+      end)
+    end,
+  },
+}

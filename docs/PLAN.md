@@ -86,7 +86,7 @@ Goal: the MVP described in SPEC.md, playable start to win.
 - [x] 1.5 Goal box and win condition: counts cumulative iron and copper plates delivered,
       targets from a runtime mod setting (default 20,000 each), victory when both totals
       are reached. Show progress to the player.
-- [ ] 1.6 Black box UI: recipe, current output rate/min, status (running, starved on which
+- [x] 1.6 Black box UI: recipe, current output rate/min, status (running, starved on which
       input, output full).
 - [ ] 1.7 Limp mode for fuel-empty trains (A3). No fueling restriction is enforced; hand
       fueling stays allowed. If limp mode proves too complex, (ASK) about the spec's
