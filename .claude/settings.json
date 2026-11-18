@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "~/AppData/Roaming/Factorio"
+    ],
+    "allow": [
+      "PowerShell(git status *)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)",
+      "PowerShell(git add *)",
+      "PowerShell(git commit *)",
+      "PowerShell(git init *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "PowerShell(npm install *)",
+      "PowerShell(npx factorio-test *)",
+      "PowerShell(lua-language-server *)",
+      "PowerShell(./tools/*)",
+      "PowerShell(Get-Content *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Test-Path *)",
+      "Read(~/AppData/Roaming/Factorio/**)",
+      "Edit(~/AppData/Roaming/Factorio/mods/mod-list.json)",
+      "WebFetch(domain:lua-api.factorio.com)",
+      "WebFetch(domain:wiki.factorio.com)",
+      "WebFetch(domain:mods.factorio.com)",
+      "WebFetch(domain:forums.factorio.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.npmjs.com)"
+    ],
+    "ask": [
+      "PowerShell(Remove-Item *)",
+      "Bash(rm *)",
+      "PowerShell(git push *)",
+      "Bash(git push *)",
+      "PowerShell(git remote *)",
+      "Bash(git remote *)",
+      "Edit(~/AppData/Roaming/Factorio/config/**)"
+    ],
+    "deny": [
+      "Edit(~/AppData/Roaming/Factorio/saves/**)",
+      "Write(~/AppData/Roaming/Factorio/saves/**)"
+    ]
+  }
+}
