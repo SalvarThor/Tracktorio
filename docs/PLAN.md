@@ -183,7 +183,15 @@ upgraded first. That's an intended chain.
       - the power city's output
 - [ ] 2.1.4 UI. The city window shows the tier, the cap now and at the next tier, and the
       next tier's materials with progress. The port has its own window. Map tags show the
-      tier ("Iron smelting city T2").
+      tier ("Iron smelting city T2"). Notifications (user request):
+      - On upgrade: a chat message with a map link, naming what changed for the station
+        (new cap; power draw; "no longer uses coal" when going electric). It adds a warning
+        if the city's pole network looks too weak for the new draw.
+      - A custom alert with the city's icon; clicking it zooms to the city, and it clears
+        after a while.
+      - Flying text over the city.
+      - One heads-up message when a port reaches 90%, so power can be ready before the
+        automatic swap.
 - [ ] 2.1.5 Save migration and map. MVP saves get tier 1 records and ports placed on
       configuration change. Check the scenario layout has room for every port. Tests load an
       MVP-era state and upgrade it.
