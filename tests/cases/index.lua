@@ -20,6 +20,7 @@ return {
     "__train-tycoon-tests__/cases/tier_marks",
     "__train-tycoon-tests__/cases/framework",
     "__train-tycoon-tests__/cases/city_ui",
+    "__train-tycoon-tests__/cases/ui_22",
     "__train-tycoon-tests__/cases/limp",
     "__train-tycoon-tests__/cases/map",
     "__train-tycoon-tests__/cases/e2e",
