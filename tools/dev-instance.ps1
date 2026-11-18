@@ -45,7 +45,8 @@ foreach ($link in $TT.Junctions.GetEnumerator()) {
 }
 
 $enabled = [ordered]@{}
-foreach ($m in @('base', 'elevated-rails', 'quality', 'recycler', 'space-age')) { $enabled[$m] = $true }
+foreach ($m in @('base', 'elevated-rails', 'recycler', 'space-age')) { $enabled[$m] = $true }
+$enabled['quality'] = $false   # train-tycoon declares "! quality"
 foreach ($m in $TT.Junctions.Keys) { if (Test-Path $TT.Junctions[$m]) { $enabled[$m] = $true } }
 foreach ($m in $Disable) { $enabled[$m] = $false }
 $modList = @{ mods = @($enabled.GetEnumerator() | ForEach-Object { [ordered]@{ name = $_.Key; enabled = $_.Value } }) }

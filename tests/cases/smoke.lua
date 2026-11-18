@@ -16,6 +16,12 @@ return {
     end,
   },
   {
+    name = "smoke: quality mod is not active",
+    fn = function()
+      assert_.falsy(script.active_mods["quality"], "quality is active")
+    end,
+  },
+  {
     name = "smoke: waiting across ticks works",
     fn = function(ctx)
       local start = game.tick

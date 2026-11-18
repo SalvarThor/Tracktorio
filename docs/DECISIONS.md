@@ -4,6 +4,23 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: Phase 0 follow-up decisions (user-approved)
+- **Quality:** `mod/info.json` declares `"! quality"`. The game refuses to load train-tycoon
+  with quality enabled ("Incompatible with quality", verified), and the dev instance runs
+  with quality disabled. A smoke test asserts quality is inactive.
+  Rejected: keeping quality loaded and neutralising it in data (more code, leaks
+  through UI/recipes). The recycler stays loaded (Space Age requires it) and is hidden in
+  data in 1.1.
+- **Power city (1.4):** engine-only design. Assembling-machine water + coal → `tt-steam`,
+  feeding a hidden `generator` inside the footprint through a linked fluidbox connection.
+  Probe it first in 1.4. Fallback: scripted electric-energy-interface driven by
+  `raise_on_crafted`.
+- **Limp mode (1.7):** reserve-fuel swap driven by a light poll of tracked locomotives
+  (spread across ticks), as measured in A3. The spec's "stops dead" fallback is not needed.
+- **Locomotive fuel:** a dedicated `tt-locomotive` fuel category. Solid, rocket and nuclear
+  fuel are not locomotive fuels until the post-MVP fuel cities add `tt-` fuels to that
+  category.
+
 ## 2026-11-18: Phase 0.10 findings for assumptions A1-A7 (Factorio 2.1.24)
 Method: 2.1.24 `runtime-api.json`/`prototype-api.json`, a `--dump-data` of `data.raw`, the
 2.1 changelog, and a throwaway probe mod run headless with `--test-scenario` in the dev
