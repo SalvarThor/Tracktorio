@@ -203,3 +203,40 @@ upgraded first. That's an intended chain.
 - [x] 2.1.7 Visual tier indicator on the city in the world (user request, playtest 2.1.6).
       User chose pips: one per tier on the city's top edge, filled up to its tier. Built and
       tested; playtest 2026-11-18: fine, radius cut to 75% (0.34).
+
+### Phase 2.2: intermediate cities, research complex, research gating (approved 2026-11-18)
+
+Decided with the user (DECISIONS.md, 2026-11-18):
+- Scope: red and green science. Oil and blue science come with the rocket chain (SPEC step 5).
+- The research complex is a fixed, protected lab prototype; the engine runs research. Labs
+  stay banned for the player. Tiers raise its research speed.
+- Research gates player items and bonuses only (vanilla tree). Every city works from the start.
+- The win condition stays the plates goal.
+
+Proposed numbers (tuning values; power = the equivalent vanilla buildings):
+
+| City | Inputs | Output T1 | Power T1 | Equivalent |
+|---|---|---|---|---|
+| Circuit city | 5 iron/s + 7.5 copper/s | 300 circuits/min | ~1.25 MW | 8 assemblers 2 |
+| Red science city | 2 iron/s + 1 copper/s | 60 packs/min | ~1.1 MW | 7 assemblers 2 |
+| Green science city | 5.5 iron/s + 1 circuit/s | 60 packs/min | ~1.5 MW | 10 assemblers 2 |
+| Research complex | red + green packs | speed of 20 labs | 1.2 MW | 20 labs |
+
+All get 3 tiers at x1/x2/x4 and a construction port; upgrades never use the city's own
+product. Gears and cables stay inside the cities; circuits are shipped.
+
+- [ ] 2.2.1 City framework: any fixed recipe with several inputs, tiers, power, port, window
+      and pips works from a city definition alone (no per-city code).
+- [ ] 2.2.2 Circuit, red science and green science cities: prototypes, recipes, power, tiers,
+      costs, locale.
+- [ ] 2.2.3 Research complex: lab-based city, protected, tiers by research speed, port. Its
+      window shows the current research and missing packs, or "no research selected".
+- [ ] 2.2.4 Research gating: every technology needing only red and green science is
+      researchable; techs needing other packs stay locked and visible; techs whose unlocks are
+      all banned stay as prerequisites. Tests prove the red/green tree can be completed.
+- [ ] 2.2.5 Upgrade costs use intermediates: tier 3 costs of the existing cities partly move to
+      circuits.
+- [ ] 2.2.6 Bigger map (about 960x600) with the new cities, a second iron patch and room for
+      every port. 2.1 saves get the new cities where the tiles are free, otherwise a message.
+- [ ] 2.2.7 UI and map tags for the new cities, including research complex statuses.
+- [ ] 2.2.8 `/playtest` round: research flow, rates, power demand, map layout.

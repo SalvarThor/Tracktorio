@@ -4,6 +4,16 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: Phase 2.2 scope (user decisions)
+- Decision: Phase 2.2 covers red and green science: circuit, red science and green science
+  cities plus a research complex. The complex is a fixed lab prototype, so the engine runs
+  research. Research gates player items and bonuses only; every city works from the start.
+  The plates goal stays the win condition.
+- Why: smallest slice that makes research a real shipping chain; vanilla lab behaviour needs
+  almost no script.
+- Rejected: blue science and oil now (doubles the phase; belongs with the rocket chain);
+  scripted research; research-gated city tiers or dormant cities; a research win condition.
+
 ## 2026-11-18: 2.1.7 tier pips on cities
 - Decision: each tiered city shows one pip per tier along its top edge, filled gold up to its
   tier, dark for the rest (user choice after playtest 2.1.6). Drawn with `rendering.draw_circle`
