@@ -1,0 +1,76 @@
+-- Upgrade a city to its next tier in place (PLAN 2.1.3), when its construction port is
+-- complete. The new tier gets its own port (or none at max tier), and the power city gets
+-- its new generator.
+local cities = require("scripts.cities")
+local ports = require("scripts.ports")
+
+local M = {}
+
+-- Called after a successful upgrade with (old_name, new_entity) (notifications, 2.1.4).
+local after_hooks = {}
+---@param fn fun(old_name: string, city: LuaEntity)
+function M.on_upgraded(fn) after_hooks[#after_hooks + 1] = fn end
+
+--- Items in an inventory as a list of stacks (name, count, quality).
+---@param inv LuaInventory?
+local function contents(inv)
+  local out = {}
+  if inv then
+    for _, c in ipairs(inv.get_contents()) do out[#out + 1] = { name = c.name, count = c.count, quality = c.quality } end
+  end
+  return out
+end
+
+--- Replace the record's city with its next tier. Returns the new entity, or nil.
+---@param record table
+function M.upgrade(record)
+  local old = record.entity
+  local target = record.upgrade and record.upgrade.target
+  if not (old and old.valid and target) then return nil end
+  local surface, position, force, old_name = old.surface, old.position, old.force, record.name
+  local old_unit = old.unit_number
+  local port_pos = record.port and record.port.valid and record.port.position or ports.port_position(old)
+
+  local inputs = contents(old.get_inventory(defines.inventory.crafter_input))
+  local outputs = contents(old.get_inventory(defines.inventory.crafter_output))
+
+  -- Forget the old record first, so on_object_destroyed does not tear down the new parts.
+  storage.tt_cities[old_unit] = nil
+  for _, key in ipairs({ "companion", "port" }) do
+    if record[key] and record[key].valid then record[key].destroy() end
+  end
+  old.destroy()
+
+  local city = cities.place(target, surface, position, force)
+
+  -- Restore contents. What the new recipe can't take (coal after going electric) is spilled
+  -- beside the port, for the player to pick up.
+  local input_inv = city.get_inventory(defines.inventory.crafter_input)
+  for _, stack in ipairs(inputs) do
+    local inserted = input_inv and input_inv.insert(stack) or 0
+    if inserted < stack.count then
+      surface.spill_item_stack({ position = port_pos, stack = { name = stack.name, count = stack.count - inserted, quality = stack.quality },
+        enable_looted = true, allow_belts = false })
+    end
+  end
+  local output_inv = city.get_inventory(defines.inventory.crafter_output)
+  for _, stack in ipairs(outputs) do
+    local inserted = output_inv and output_inv.insert(stack) or 0
+    if inserted < stack.count then
+      surface.spill_item_stack({ position = port_pos, stack = { name = stack.name, count = stack.count - inserted, quality = stack.quality },
+        enable_looted = true, allow_belts = false })
+    end
+  end
+
+  -- Open city windows follow the new entity.
+  for index, unit in pairs(storage.tt_city_gui or {}) do
+    if unit == old_unit then storage.tt_city_gui[index] = city.unit_number end
+  end
+
+  for _, fn in ipairs(after_hooks) do fn(old_name, city) end
+  return city
+end
+
+ports.on_complete(M.upgrade)
+
+return M

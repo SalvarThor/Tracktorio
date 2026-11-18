@@ -6,23 +6,8 @@ local IRON = "tt-city-iron-smelting"
 
 local function status(city) return remote.call("tt-city", "upgrade_status", city) end
 
-local function port_of(city)
-  local s = status(city)
-  return s and s.port
-end
-
---- Insert `count` of `item` into the port in port-sized chunks, counting after each.
-local function feed(city, item, count)
-  local port = assert(port_of(city), "no port")
-  local inv = assert(port.get_inventory(defines.inventory.chest))
-  while count > 0 do
-    local n = inv.insert({ name = item, count = count })
-    if n == 0 then return count end
-    count = count - n
-    remote.call("tt-city", "port_tick")
-  end
-  return 0
-end
+local port_of = h.port_of
+local feed = h.feed_port
 
 return {
   {
@@ -77,22 +62,21 @@ return {
     end,
   },
   {
-    name = "ports: a complete port closes and the upgrade is marked complete",
+    name = "ports: a complete port triggers the upgrade and stops taking that tier's material",
     fn = function()
       h.clear_area({ { 3630, -10 }, { 3652, 10 } })
       local city = h.place_city("tt-city-copper-smelting", { 3640.5, 0.5 })
+      local pos = city.position
       local port = assert(port_of(city))
       assert_.equals(status(city).cost["iron-plate"], 2000)
       assert_.equals(feed(city, "iron-plate", 2000), 0, "port refused part of the cost")
-      local s = status(city)
-      if s then -- 2.1.3 replaces the city on completion; the record then belongs to the new tier
-        assert_.truthy(s.complete or s.tier == 2, "not complete: " .. serpent.line(s.delivered))
-      end
-      assert_.falsy(port.valid and port.get_inventory(defines.inventory.chest).can_insert({ name = "iron-plate", count = 1 }),
-        "port still accepts iron after completion")
+      assert_.falsy(port.valid, "old port still there")
+      local now = assert(h.city_at(pos), "no city at the old position")
+      assert_.equals(now.name, "tt-city-copper-smelting-t2")
+      assert_.equals(status(now).cost["iron-plate"], 6000, "tier 3 cost")
+      assert_.equals(status(now).delivered["iron-plate"], 0, "tier 3 progress not fresh")
     end,
-  },
-  {
+  },  {
     name = "ports: destroying a city removes its port",
     fn = function(ctx)
       h.clear_area({ { 3660, -10 }, { 3682, 10 } })

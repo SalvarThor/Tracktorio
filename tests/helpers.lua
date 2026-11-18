@@ -69,6 +69,40 @@ function M.test_power(sub_pos, watts, buffer_ticks)
   return eei
 end
 
+--- Construction port of a city (nil if none).
+---@param city LuaEntity
+function M.port_of(city)
+  local s = remote.call("tt-city", "upgrade_status", city)
+  return s and s.port
+end
+
+--- Put `count` of `item` into a city's port in chunks, counting after each chunk (as the
+--- once-a-second port tick would). Returns what could not be inserted. If the city upgrades
+--- along the way, the rest is refused by the new port's filters and returned.
+---@param city LuaEntity
+---@param item string
+---@param count integer
+function M.feed_port(city, item, count)
+  local port = assert(M.port_of(city), "no port")
+  local inv = assert(port.get_inventory(defines.inventory.chest))
+  while count > 0 and port.valid do
+    local n = inv.insert({ name = item, count = count })
+    if n == 0 then return count end
+    count = count - n
+    remote.call("tt-city", "port_tick")
+  end
+  return count
+end
+
+--- The city entity now standing at a position (after an upgrade replaced it).
+---@param position MapPosition
+function M.city_at(position)
+  for _, e in pairs(M.surface().find_entities_filtered({ position = position, radius = 0.5 })) do
+    if string.find(e.name, "^tt%-city%-") then return e end
+  end
+  return nil
+end
+
 --- Tile size of a city prototype.
 function M.city_size(name)
   local box = prototypes.entity[name].selection_box

@@ -92,8 +92,10 @@ local on_complete = nil
 ---@param fn fun(record: table)
 function M.on_complete(fn) on_complete = fn end
 
---- Empty every port into its city's progress (every GOAL_TICK_INTERVAL ticks).
+--- Empty every port into its city's progress (every GOAL_TICK_INTERVAL ticks). Completed
+--- upgrades run after the loop: they replace entries of storage.tt_cities.
 function M.tick()
+  local completed = {}
   for _, record in pairs(storage.tt_cities) do
     local port, upgrade = record.port, record.upgrade
     if port and port.valid and upgrade and not upgrade.complete then
@@ -107,10 +109,13 @@ function M.tick()
       end
       if M.progress(upgrade) >= 1 then
         upgrade.complete = true
-        if on_complete then on_complete(record) end
+        completed[#completed + 1] = record
       end
       set_filters(record)
     end
+  end
+  if on_complete then
+    for _, record in ipairs(completed) do on_complete(record) end
   end
 end
 

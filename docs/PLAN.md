@@ -173,7 +173,7 @@ upgraded first. That's an intended chain.
       list only the materials the next tier still needs. It closes at max tier. Delivery
       rate tops out around 7 plates/s (3 fast inserters); a 1x2 port is the fallback if
       that is too slow.
-- [ ] 2.1.3 Upgrade in place. When the port is complete, the city is replaced by its next tier
+- [x] 2.1.3 Upgrade in place. When the port is complete, the city is replaced by its next tier
       at the same position. Input and output contents carry over. Leftover inputs the new
       recipe can't use (coal after going electric) move to the port's output slot or are
       dropped beside the city. The power city's generator is replaced and relinked, and

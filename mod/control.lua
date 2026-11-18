@@ -10,6 +10,7 @@ local city_gui = require("scripts.city_gui")
 local limp = require("scripts.limp")
 local map = require("scripts.map")
 local ports = require("scripts.ports")
+local upgrade = require("scripts.upgrade")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -22,6 +23,7 @@ city_remote.info = city_info.remote_info
 city_remote.has_window = function(entity) return city_gui.has_window(entity) end
 city_remote.upgrade_status = function(entity) return ports.status(entity) end
 city_remote.port_tick = function() ports.tick() end
+city_remote.upgrade_now = function(entity) return upgrade.upgrade(assert(storage.tt_cities[entity.unit_number])) end
 city_remote.open_gui = function(player_index, entity)
   local player = assert(game.get_player(player_index))
   city_gui.open(player, entity)

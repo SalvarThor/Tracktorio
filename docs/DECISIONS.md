@@ -4,6 +4,25 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.1.3 upgrade in place
+- Decision: `scripts/upgrade.lua` replaces a city when its port completes:
+  1. Copy input and output contents.
+  2. Remove the old storage record **before** destroying anything, so the deferred
+     `on_object_destroyed` finds nothing to clean.
+  3. Destroy the old city, its generator and its port.
+  4. Place the next tier with `cities.place`, which brings its own protections, generator
+     (relinked) and a fresh port for the following tier (none at max tier).
+  5. Restore what fits. What the new recipe can't take (coal after going electric) is
+     spilled beside the port.
+  6. Re-point open city windows to the new unit number. Rate samples restart.
+- Completions are collected during the port loop and swapped after it: adding table
+  entries while iterating with `pairs` is undefined in Lua.
+- Hook `upgrade.on_upgraded(old_name, city)` is for notifications (2.1.4). Tests use
+  `tt-city.upgrade_now(city)`.
+- Rejected: `create_entity{fast_replace = true}` (cities have no item or fast-replace
+  group, and explicit copying lets coal be handled on purpose); keeping one entity and
+  changing its speed (not possible).
+
 ## 2026-11-18: 2.1.2 construction ports
 - Decision: `tt-construction-port` is a 1x1 container on the tile west of a city's top-left
   corner (user's choice). Protected like a city, 4 filtered slots. `scripts/ports.lua`
