@@ -96,7 +96,7 @@ Goal: the MVP described in SPEC.md, playable start to win.
       feed, with one depot city near the start. Small map.
 - [x] 1.9 End-to-end in-game test: a scripted setup where a train hauls ore and coal to a
       smelting city and plates to the goal box, and the goal box registers the rate.
-- [ ] 1.10 `/playtest` round with the user. Fix findings. Tune targets.
+- [x] 1.10 `/playtest` round with the user. Fix findings. Tune targets.
   Round 1 (2026-11-18) findings:
   - [x] Power city showed as "Power city generator", couldn't be clicked and never showed
         "Output full": the hidden generator was selectable over the city. It now has no
@@ -106,8 +106,15 @@ Goal: the MVP described in SPEC.md, playable start to win.
   - [x] Map labels for cities: chart tags with icon and name.
   - [x] Goal box kept accepting a metal past its target: slots for a met metal now close.
   - [x] `!` prompt runs Git Bash, so `! ./tools/playtest.ps1` failed: docs fixed.
-  - [ ] Re-check the four fixes above in game (round 2).
+  - [x] Playtests and tests shared `.factorio\`, so tests couldn't run while a playtest was
+        open: playtests now use `.factorio-play\` (no tests mod).
+  - [x] Steam asks "run with custom arguments?" on GUI launch: accepted by the user (one click).
+  - [x] Cities need power (user, SPEC updated): the depot draws up to 840 kW (chemical plant
+        equivalent), shows No power / Low power; smelting cities stay coal-fired.
+  - [x] Limp speed lowered to 10%; locomotives stay free (user).
   Round 2 (2026-11-18) findings:
+  - [x] Re-checked in game: power city window, crafting menu, map tags, depot power, goal box
+        closing per metal and victory, limp 10%. `tt_hand_transfers` = 0, log clean.
   - [x] Crash clicking the power city: `LuaEntity.fluidbox` no longer exists in 2.1 (the
         fluid-input path of the city window). Fixed with `get_fluid_count`, plus a regression
         test that opens a fluid-starved city's window.
@@ -118,16 +125,11 @@ Goal: the MVP described in SPEC.md, playable start to win.
         accepting or closed, per metal).
   - [x] Low power couldn't be tested by hand: covered by an automated test (depot on a
         300 kW supply reports low power and keeps crafting slowly).
-  - Confirmed in game: power city window, crafting menu, map tags, depot power, goal box
-    closing per metal and victory, limp 10%. `tt_hand_transfers` = 0, log clean.
-  - [ ] Rates and the 20,000 goal: needs a longer playthrough (user).
-  - [x] Playtests and tests shared `.factorio\`, so tests couldn't run while a playtest was
-        open: playtests now use `.factorio-play\` (no tests mod).
-  - [x] Steam asks "run with custom arguments?" on GUI launch: accepted by the user (one click).
-  - [x] Cities need power (user, SPEC updated): the depot draws up to 840 kW (chemical plant
-        equivalent), shows No power / Low power; smelting cities stay coal-fired.
-  - [ ] Tune rates and the 20,000 goal (not yet assessed).
-
+  Carried over (user, at close):
+  - Rates and the 20,000 goal are judged in longer playthroughs, not tuned yet. City caps are
+    the first tier's limit; tier upgrades (post-MVP 1) raise them.
+  - Round 2's last fixes (window descriptions, power idle wording, goal box window) are
+    covered by tests but not yet seen in game.
 Stop. Report to the user.
 
 ## Phase 2 onwards
