@@ -1,0 +1,8 @@
+{
+  "name": "train-tycoon-dev",
+  "private": true,
+  "description": "Dev tooling only (FMTK type generation). The mod itself is in mod/.",
+  "devDependencies": {
+    "factoriomod-debug": "^2.1.9"
+  }
+}

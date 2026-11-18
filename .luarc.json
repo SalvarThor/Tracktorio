@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "Lua 5.2",
+  "runtime.builtin": { "io": "disable", "os": "disable", "coroutine": "disable" },
+  "runtime.plugin": "tools/types/factorio/plugin.lua",
+  "workspace.library": [
+    "tools/types/factorio/library",
+    "C:/Program Files (x86)/Steam/steamapps/common/Factorio/data/core/lualib"
+  ],
+  "workspace.ignoreDir": [".factorio", "node_modules", "tools/types", ".git"],
+  "workspace.checkThirdParty": false,
+  "diagnostics.globals": ["__DebugAdapter", "__Profiler"],
+  "diagnostics.disable": ["lowercase-global"],
+  "diagnostics.libraryFiles": "Disable",
+  "diagnostics.severity": {
+    "undefined-field": "Error",
+    "undefined-global": "Error",
+    "inject-field": "Warning"
+  }
+}

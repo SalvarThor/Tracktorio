@@ -27,7 +27,7 @@ test that Claude Code can run and read the result of without the user.
       `train-tycoon_<version>`. Enable it in `mod-list.json`. Confirm in
       `factorio-current.log` that the mod loads. (Done in the separate dev instance
       `.factorio\`, not the real user data dir; see DECISIONS.md.)
-- [ ] 0.6 Static checks: set up `lua-language-server --check` (or an equivalent that works
+- [x] 0.6 Static checks: set up `lua-language-server --check` (or an equivalent that works
       headlessly on Windows) with Factorio 2.1 API type definitions. Wrap it in
       `tools/check.ps1`. A deliberate typo must fail it; clean code must pass.
 - [ ] 0.7 In-game test runner. First try Factorio Test (mod + `npx factorio-test` CLI) on

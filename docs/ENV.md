@@ -51,4 +51,15 @@ can delete the repo's files through it. Remove junctions with
 Filled in by 0.7 results.
 
 ## Toolchain
-Filled in by 0.6.
+- Node.js 26.13.1 (`winget install OpenJS.NodeJS.LTS`), `C:\Program Files\nodejs\`.
+- lua-language-server 3.19.2 (`winget install LuaLS.lua-language-server`), on PATH as
+  `lua-language-server`.
+- FMTK (`factoriomod-debug` 2.1.9, repo devDependency) generates LuaLS types from the
+  install's `doc-html\*.json` into `tools\types\` (gitignored):
+  `npx fmtk luals-addon -d <runtime-api.json> -p <prototype-api.json> tools/types`.
+  `tools\check.ps1` does this automatically when the types are missing; run
+  `./tools/check.ps1 -Regenerate` after a Factorio update.
+- LuaLS config: `.luarc.json` (Lua 5.2, FMTK plugin, `undefined-global`/`undefined-field`
+  as errors, ignores `.factorio\` so the junctions aren't scanned twice).
+- winget changes PATH only for new shells. The tools scripts re-read PATH from the registry
+  so they work in an already-open session.
