@@ -9,6 +9,14 @@ paths:
 Verify API names against https://lua-api.factorio.com/latest/ when unsure. These rules
 reflect 2.0 knowledge; if 2.1 differs, follow the docs and note it in DECISIONS.md.
 
+## Known 2.1 changes (verified on 2.1.24; details in DECISIONS.md)
+- Items: `fuel_categories = {...}`, not `fuel_category` (load error).
+- Recipes: `categories = {...}`, not `category`/`additional_categories` (load error).
+  `energy_required` must be `> 0.001`.
+- Linked fluidbox connections: `LuaEntity.add_fluid_box_linked_connection`.
+- `RecipePrototype.raise_on_crafted` + `RecipeCraftedEvent` (crafting machines only).
+- Burner: writing `currently_burning` needs `remaining_burning_fuel` set too.
+
 ## Stages
 - Settings stage (`settings.lua`, ...): mod settings prototypes only.
 - Data stage (`data.lua`, `data-updates.lua`, `data-final-fixes.lua`): prototypes only, via

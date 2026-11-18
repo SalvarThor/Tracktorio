@@ -40,7 +40,7 @@ test that Claude Code can run and read the result of without the user.
       `script-output\tt-dump.json`.
 - [x] 0.9 Fill in the Commands section of CLAUDE.md and the placeholders in
       `.claude/skills/test/SKILL.md` and `.claude/skills/playtest/SKILL.md`.
-- [ ] 0.10 Investigate the technical assumptions below and record findings in
+- [x] 0.10 Investigate the technical assumptions below and record findings in
       DECISIONS.md. Do not implement them yet; report options where an assumption fails.
   - A1. Recipes with an empty ingredient list are allowed in 2.1 and craft instantly.
   - A2. A black box can be an `assembling-machine` prototype with `fixed_recipe`, a void
