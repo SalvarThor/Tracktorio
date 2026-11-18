@@ -18,6 +18,7 @@ limp.register_events()
 
 local city_remote = cities.remote_interface()
 city_remote.info = city_info.remote_info
+city_remote.has_window = function(entity) return city_gui.has_window(entity) end
 city_remote.open_gui = function(player_index, entity)
   local player = assert(game.get_player(player_index))
   city_gui.open(player, entity)

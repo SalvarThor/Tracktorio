@@ -57,12 +57,14 @@ function M.feeder(chest_pos, inserter_pos, direction, contents)
 end
 
 --- Test-only power: an electric-energy-interface producing `watts`, under a substation at
---- `sub_pos` (supply area 18x18). The EEI goes 3 tiles south of the substation.
-function M.test_power(sub_pos, watts)
+--- `sub_pos` (supply area 18x18). The EEI goes 3 tiles south of the substation. Its buffer
+--- holds `buffer_ticks` ticks of production (default 60); use 1 for a hard power cap.
+function M.test_power(sub_pos, watts, buffer_ticks)
+  watts = watts or 2e6
   local eei = M.create("electric-energy-interface", { sub_pos[1], sub_pos[2] + 3 })
-  eei.power_production = (watts or 2e6) / 60
+  eei.power_production = watts / 60
   eei.power_usage = 0
-  eei.electric_buffer_size = (watts or 2e6)
+  eei.electric_buffer_size = watts / 60 * (buffer_ticks or 60)
   M.create("substation", sub_pos)
   return eei
 end

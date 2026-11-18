@@ -1,7 +1,9 @@
 -- City detail window, opened by clicking a city (custom input linked to "open-gui").
 -- storage.tt_city_gui[player_index] = city unit_number while the window is open.
+local config = require("shared.config")
 local cities = require("scripts.cities")
 local city_info = require("scripts.city_info")
+local goal = require("scripts.goal")
 
 local M = {}
 
@@ -29,41 +31,64 @@ local function add_line(parent, entry, text)
   flow.add({ type = "label", caption = text })
 end
 
----@param frame LuaGuiElement
----@param info table
-local function fill(frame, info)
-  local body = frame.body
-  body.clear()
-  if not info.recipe then
-    body.add({ type = "label", caption = { "tt-gui.city-no-recipe" } })
-    return
-  end
+---@param body LuaGuiElement
+---@param caption any
+---@param bold boolean?
+---@param name string?
+local function add_text(body, caption, bold, name)
+  local label = body.add({ type = "label", name = name, caption = caption })
+  label.style.single_line = false
+  label.style.maximal_width = 360
+  if bold then label.style.font = "default-bold" end
+  return label
+end
 
-  -- status
-  local status_caption
+---@param body LuaGuiElement
+---@param entity LuaEntity
+local function add_description(body, entity)
+  local desc = add_text(body, entity.localised_description)
+  desc.style.font_color = { 0.8, 0.8, 0.8 }
+  body.add({ type = "line", direction = "horizontal" })
+end
+
+--- Status line (+ optional hint line) for a crafting city.
+---@param body LuaGuiElement
+---@param entity LuaEntity
+---@param info table
+local function add_status(body, entity, info)
+  local status, hint
   if info.status == "running" then
-    status_caption = { "tt-gui.city-status-running" }
+    status = { "tt-gui.city-status-running" }
   elseif info.status == "low_power" then
-    status_caption = { "tt-gui.city-status-low-power" }
+    status, hint = { "tt-gui.city-status-low-power" }, { "tt-gui.city-hint-low-power" }
   elseif info.status == "no_power" then
-    status_caption = { "tt-gui.city-status-no-power" }
+    status, hint = { "tt-gui.city-status-no-power" }, { "tt-gui.city-hint-no-power" }
+  elseif info.status == "output_full" and entity.name == config.CITY.power then
+    status, hint = { "tt-gui.city-status-power-idle" }, { "tt-gui.city-hint-power-idle" }
   elseif info.status == "output_full" then
-    status_caption = { "tt-gui.city-status-output-full" }
+    status, hint = { "tt-gui.city-status-output-full" }, { "tt-gui.city-hint-output-full" }
   elseif info.status == "starved" then
     local names = {}
     for _, n in ipairs(info.missing or {}) do
       names[#names + 1] = (prototypes.item[n] and "[item=" or "[fluid=") .. n .. "]"
     end
-    ---@type any
-    local missing = table.concat(names, " ")
-    status_caption = { "tt-gui.city-status-starved", missing }
+    status = { "tt-gui.city-status-starved", table.concat(names, " ") }
   else
-    status_caption = { "tt-gui.city-status-other", info.status_detail or "?" }
+    status = { "tt-gui.city-status-other", info.status_detail or "?" }
   end
-  local status = body.add({ type = "label", name = "status", caption = status_caption })
-  status.style.font = "default-bold"
+  add_text(body, status, true, "status")
+  if hint then add_text(body, hint, false, "hint") end
+end
 
-  -- recipe
+---@param body LuaGuiElement
+---@param entity LuaEntity
+local function fill_city(body, entity)
+  local info = city_info.info(entity)
+  if not info.recipe then
+    add_text(body, { "tt-gui.city-no-recipe" })
+    return
+  end
+  add_status(body, entity, info)
   body.add({ type = "label", caption = { "tt-gui.city-inputs" }, style = "caption_label" })
   for _, ing in ipairs(info.recipe.ingredients) do
     add_line(body, ing, { "tt-gui.city-input-line", fmt(ing.amount), fmt(ing.per_min_max) })
@@ -72,11 +97,37 @@ local function fill(frame, info)
   for _, p in ipairs(info.recipe.products) do
     add_line(body, p, { "tt-gui.city-output-line", fmt(p.amount), fmt(p.per_min), fmt(p.per_min_max) })
   end
-  ---@type any
-  local cycle = { "tt-gui.city-cycle", fmt(info.recipe.energy) }
-  body.add({ type = "label", caption = cycle })
+  add_text(body, { "tt-gui.city-cycle", fmt(info.recipe.energy) })
 end
 
+---@param body LuaGuiElement
+local function fill_goal(body)
+  local s = goal.status()
+  add_text(body, s.won and { "tt-gui.goal-status-won" } or { "tt-gui.goal-status-open" }, true, "status")
+  for _, key in ipairs({ "iron", "copper" }) do
+    local item = config.GOAL_ITEMS[key]
+    local done, target = s.delivered[key], s.targets[key]
+    add_line(body, { type = "item", name = item }, { "tt-gui.goal-window-line",
+      tostring(done), tostring(target), fmt(s.rates[key]),
+      done < target and { "tt-gui.goal-accepting" } or { "tt-gui.goal-closed" } })
+  end
+end
+
+---@param frame LuaGuiElement
+---@param entity LuaEntity
+local function fill(frame, entity)
+  local body = frame.body
+  body.clear()
+  add_description(body, entity)
+  if entity.name == config.CITY.goal then fill_goal(body) else fill_city(body, entity) end
+end
+
+--- Cities with a window: crafting cities and the goal box.
+---@param entity LuaEntity?
+function M.has_window(entity)
+  return cities.is_city(entity) and entity ~= nil
+    and (entity.type == "assembling-machine" or entity.name == config.CITY.goal)
+end
 ---@param player LuaPlayer
 ---@param entity LuaEntity
 function M.open(player, entity)
@@ -93,7 +144,7 @@ function M.open(player, entity)
   body.style.minimal_width = 300
   frame.auto_center = true
   storage.tt_city_gui[player.index] = entity.unit_number
-  fill(frame, city_info.info(entity))
+  fill(frame, entity)
   player.opened = frame
 end
 
@@ -113,7 +164,7 @@ function M.update_all()
     if not (player and frame and frame.valid and record and record.entity.valid) then
       if player then M.close(player) else storage.tt_city_gui[index] = nil end
     else
-      fill(frame, city_info.info(record.entity))
+      fill(frame, record.entity)
     end
   end
 end
@@ -123,7 +174,7 @@ local function on_open_input(e)
   local player = game.get_player(e.player_index)
   if not player then return end
   local selected = player.selected
-  if cities.is_city(selected) and selected and selected.type == "assembling-machine" then
+  if selected and M.has_window(selected) then
     M.open(player, selected)
   end
 end

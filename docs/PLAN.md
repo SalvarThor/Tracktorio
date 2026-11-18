@@ -111,6 +111,16 @@ Goal: the MVP described in SPEC.md, playable start to win.
   - [x] Crash clicking the power city: `LuaEntity.fluidbox` no longer exists in 2.1 (the
         fluid-input path of the city window). Fixed with `get_fluid_count`, plus a regression
         test that opens a fluid-starved city's window.
+  - [x] Power city window said "Output full: take products out": now "Idle: no power demand"
+        for the power city; other cities show a short status plus a hint line.
+  - [x] City windows now start with the same description as the tooltip.
+  - [x] Clicking the goal box did nothing: it now has a window (delivered / target / rate,
+        accepting or closed, per metal).
+  - [x] Low power couldn't be tested by hand: covered by an automated test (depot on a
+        300 kW supply reports low power and keeps crafting slowly).
+  - Confirmed in game: power city window, crafting menu, map tags, depot power, goal box
+    closing per metal and victory, limp 10%. `tt_hand_transfers` = 0, log clean.
+  - [ ] Rates and the 20,000 goal: needs a longer playthrough (user).
   - [x] Playtests and tests shared `.factorio\`, so tests couldn't run while a playtest was
         open: playtests now use `.factorio-play\` (no tests mod).
   - [x] Steam asks "run with custom arguments?" on GUI launch: accepted by the user (one click).
