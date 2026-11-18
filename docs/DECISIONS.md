@@ -4,6 +4,30 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.1.4 tier UI and upgrade notifications
+- City window: a tier section, "Tier N of 3: <what it does>". It shows the next tier's
+  description and each material with delivered / needed and a progress bar, and says where
+  the port is. Construction ports open the same section ("Construction port for X").
+- Window state now stores the shown LuaEntity (city or port) instead of a unit number. The
+  upgrade re-points only the windows that showed the replaced city or its port (captured
+  before destruction).
+- Notifications (`scripts/notify.lua`):
+  - An upgrade message to the force with a `[gps]` map link and what changed: rate or power
+    output, max draw, "no longer uses coal" when going electric.
+  - A custom alert with the city's icon (removed after 30 s).
+  - Local flying text for players on the same surface.
+  - A heads-up once per tier at 90% of materials.
+- Power warning: "not connected" if the city is off-grid. "Weak network" if the max draw of
+  all tracked cities on the city's electric network exceeds the output of the power cities
+  on that network. That's deterministic, and matches the numbers in the city windows; drills
+  and inserters come on top. Factorio has no simple "spare capacity" API.
+- Map tags get " (tier N)" on upgrade.
+- The last 20 messages are kept in `storage.tt_notify_log` (shown by `/tt-dump`, read by
+  tests).
+- Test note: test cases share one game. A test that changes the shared `tt-map-test`
+  surface broke later map tests, so each test that mutates a generated map uses its own
+  surface.
+
 ## 2026-11-18: 2.1.3 upgrade in place
 - Decision: `scripts/upgrade.lua` replaces a city when its port completes:
   1. Copy input and output contents.

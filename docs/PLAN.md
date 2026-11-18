@@ -181,7 +181,7 @@ upgraded first. That's an intended chain.
       - new cap and power draw
       - backpressure still working
       - the power city's output
-- [ ] 2.1.4 UI. The city window shows the tier, the cap now and at the next tier, and the
+- [x] 2.1.4 UI. The city window shows the tier, the cap now and at the next tier, and the
       next tier's materials with progress. The port has its own window. Map tags show the
       tier ("Iron smelting city T2"). Notifications (user request):
       - On upgrade: a chat message with a map link, naming what changed for the station

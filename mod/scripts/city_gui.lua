@@ -1,9 +1,11 @@
 -- City detail window, opened by clicking a city (custom input linked to "open-gui").
--- storage.tt_city_gui[player_index] = city unit_number while the window is open.
+-- storage.tt_city_gui[player_index] = the LuaEntity (city or port) shown while the window is open.
 local config = require("shared.config")
 local cities = require("scripts.cities")
 local city_info = require("scripts.city_info")
 local goal = require("scripts.goal")
+local ports = require("scripts.ports")
+local notify = require("scripts.notify")
 
 local M = {}
 
@@ -80,6 +82,32 @@ local function add_status(body, entity, info)
   if hint then add_text(body, hint, false, "hint") end
 end
 
+--- Tier, next tier and the construction materials with progress bars.
+---@param body LuaGuiElement
+---@param city LuaEntity
+local function add_tiers(body, city)
+  local s = ports.status(city)
+  if not s or s.max_tier <= 1 then return end
+  body.add({ type = "line", direction = "horizontal" })
+  add_text(body, { "tt-gui.tier-line", tostring(s.tier), tostring(s.max_tier), notify.describe(city.name) }, true, "tier")
+  if not s.next then
+    add_text(body, { "tt-gui.tier-top" })
+    return
+  end
+  local next_tier = s.tier + 1
+  add_text(body, { "tt-gui.tier-next", tostring(next_tier), notify.describe(s.next, city.name) })
+  local items = {}
+  for item in pairs(s.cost) do items[#items + 1] = item end
+  table.sort(items)
+  for _, item in ipairs(items) do
+    local got, need = math.min(s.delivered[item] or 0, s.cost[item]), s.cost[item]
+    add_line(body, { type = "item", name = item }, { "tt-gui.tier-material", tostring(got), tostring(need) })
+    local bar = body.add({ type = "progressbar", value = got / need })
+    bar.style.horizontally_stretchable = true
+  end
+  add_text(body, { "tt-gui.tier-where" })
+end
+
 ---@param body LuaGuiElement
 ---@param entity LuaEntity
 local function fill_city(body, entity)
@@ -98,6 +126,16 @@ local function fill_city(body, entity)
     add_line(body, p, { "tt-gui.city-output-line", fmt(p.amount), fmt(p.per_min), fmt(p.per_min_max) })
   end
   add_text(body, { "tt-gui.city-cycle", fmt(info.recipe.energy) })
+  add_tiers(body, entity)
+end
+
+--- The city a construction port belongs to.
+---@param port LuaEntity
+local function city_of_port(port)
+  for _, record in pairs(storage.tt_cities) do
+    if record.port == port and record.entity.valid then return record.entity end
+  end
+  return nil
 end
 
 ---@param body LuaGuiElement
@@ -119,14 +157,25 @@ local function fill(frame, entity)
   local body = frame.body
   body.clear()
   add_description(body, entity)
-  if entity.name == config.CITY.goal then fill_goal(body) else fill_city(body, entity) end
+  if entity.name == config.CITY.goal then
+    fill_goal(body)
+  elseif entity.name == config.PORT then
+    local city = city_of_port(entity)
+    if city then
+      add_text(body, { "tt-gui.port-for", city.localised_name }, true, "status")
+      add_tiers(body, city)
+    end
+  else
+    fill_city(body, entity)
+  end
 end
 
---- Cities with a window: crafting cities and the goal box.
+--- Entities with a window: crafting cities, the goal box and construction ports.
 ---@param entity LuaEntity?
 function M.has_window(entity)
-  return cities.is_city(entity) and entity ~= nil
-    and (entity.type == "assembling-machine" or entity.name == config.CITY.goal)
+  if not (entity and entity.valid) then return false end
+  if entity.name == config.PORT then return true end
+  return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.name == config.CITY.goal)
 end
 ---@param player LuaPlayer
 ---@param entity LuaEntity
@@ -143,7 +192,7 @@ function M.open(player, entity)
   local body = frame.add({ type = "frame", name = "body", direction = "vertical", style = "inside_shallow_frame_with_padding" })
   body.style.minimal_width = 300
   frame.auto_center = true
-  storage.tt_city_gui[player.index] = entity.unit_number
+  storage.tt_city_gui[player.index] = entity
   fill(frame, entity)
   player.opened = frame
 end
@@ -157,14 +206,13 @@ end
 
 --- Refresh open windows (called every GOAL_TICK_INTERVAL).
 function M.update_all()
-  for index, unit in pairs(storage.tt_city_gui) do
+  for index, entity in pairs(storage.tt_city_gui) do
     local player = game.get_player(index)
-    local record = storage.tt_cities[unit]
     local frame = player and player.gui.screen[FRAME]
-    if not (player and frame and frame.valid and record and record.entity.valid) then
+    if not (player and frame and frame.valid and type(entity) ~= "number" and entity.valid) then
       if player then M.close(player) else storage.tt_city_gui[index] = nil end
     else
-      fill(frame, record.entity)
+      fill(frame, entity)
     end
   end
 end

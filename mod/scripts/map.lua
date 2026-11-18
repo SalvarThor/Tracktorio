@@ -3,6 +3,7 @@
 -- and the cities are placed by this module at fixed positions.
 local config = require("shared.config")
 local cities = require("scripts.cities")
+local city_defs = require("shared.city_defs")
 
 local M = {}
 
@@ -125,6 +126,18 @@ function M.tick_tags()
     end
   end
   return placed
+end
+
+--- After an upgrade: the city's map tag shows its tier, e.g. "Iron smelting city (tier 2)".
+---@param city LuaEntity
+function M.retag(city)
+  local info = city_defs.by_entity[city.name]
+  if not info then return end
+  local pos = city.position
+  for _, tag in ipairs(city.force.find_chart_tags(city.surface, { { pos.x - 1, pos.y - 1 }, { pos.x + 1, pos.y + 1 } })) do
+    local base = string.gsub(tag.text, " %(tier %d+%)$", "")
+    tag.text = info.tier > 1 and (base .. " (tier " .. info.tier .. ")") or base
+  end
 end
 
 --- Create (if needed) and populate the map surface. Returns the surface.

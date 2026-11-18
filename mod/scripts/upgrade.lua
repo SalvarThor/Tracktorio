@@ -31,6 +31,12 @@ function M.upgrade(record)
   local old_unit = old.unit_number
   local port_pos = record.port and record.port.valid and record.port.position or ports.port_position(old)
 
+  -- Windows showing this city or its port, to re-point after the swap.
+  local viewers = {}
+  for index, shown in pairs(storage.tt_city_gui or {}) do
+    if shown == old or (record.port and shown == record.port) then viewers[#viewers + 1] = index end
+  end
+
   local inputs = contents(old.get_inventory(defines.inventory.crafter_input))
   local outputs = contents(old.get_inventory(defines.inventory.crafter_output))
 
@@ -62,10 +68,8 @@ function M.upgrade(record)
     end
   end
 
-  -- Open city windows follow the new entity.
-  for index, unit in pairs(storage.tt_city_gui or {}) do
-    if unit == old_unit then storage.tt_city_gui[index] = city.unit_number end
-  end
+  -- Open windows on the city or its old port follow the new city.
+  for _, index in ipairs(viewers) do storage.tt_city_gui[index] = city end
 
   for _, fn in ipairs(after_hooks) do fn(old_name, city) end
   return city

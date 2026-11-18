@@ -92,6 +92,11 @@ local on_complete = nil
 ---@param fn fun(record: table)
 function M.on_complete(fn) on_complete = fn end
 
+-- Called once when a port first reaches config.PORT_HEADS_UP of its cost (2.1.4).
+local on_heads_up = nil
+---@param fn fun(record: table)
+function M.on_heads_up(fn) on_heads_up = fn end
+
 --- Empty every port into its city's progress (every GOAL_TICK_INTERVAL ticks). Completed
 --- upgrades run after the loop: they replace entries of storage.tt_cities.
 function M.tick()
@@ -107,9 +112,13 @@ function M.tick()
           upgrade.delivered[item] = upgrade.delivered[item] + n
         end
       end
-      if M.progress(upgrade) >= 1 then
+      local progress = M.progress(upgrade)
+      if progress >= 1 then
         upgrade.complete = true
         completed[#completed + 1] = record
+      elseif progress >= config.PORT_HEADS_UP and not upgrade.heads_up_sent then
+        upgrade.heads_up_sent = true
+        if on_heads_up then on_heads_up(record) end
       end
       set_filters(record)
     end
