@@ -3,3 +3,11 @@ CLAUDE.local.md
 node_modules/
 *.zip
 *.log
+
+# Dev/test Factorio instance (config, write-data, junctions into mod/ and tests/)
+.factorio/
+
+# Local tooling and generated files
+tools/bin/
+tools/types/
+*.pid

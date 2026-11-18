@@ -17,7 +17,8 @@ test that Claude Code can run and read the result of without the user.
       reaches the user data dir, add the Factorio install dir so vanilla prototype files in
       `data\base` and `data\space-age` can be read, and adjust the `tools/` allow rule to
       match how scripts are actually invoked. Report any rule that did not match as expected.
-- [ ] 0.3 `git init`, add `.gitignore`, first commit of the starter files.
+- [x] 0.3 `git init`, add `.gitignore`, first commit of the starter files. (Repo and
+      initial commit already existed; this item extended `.gitignore`.)
 - [ ] 0.4 Mod skeleton in `mod/`: `info.json` (name `train-tycoon`, `factorio_version`
       matching 0.1, dependencies `base` and `space-age`), empty `settings.lua`, `data.lua`,
       `control.lua`, `locale/en/train-tycoon.cfg`.
