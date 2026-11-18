@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.2.6 bigger map (960 x 600, mod 0.2.0)
+- Decision: the map grows from 640 x 400 to 960 x 600. The MVP cities and patches keep
+  their positions (saves). New: circuit city (400, -200), red science city (400, 200),
+  green science city (-400, 0), research complex (-160, 230), second iron patch (420, 0).
+  Every patch and the lake stay at least 100 tiles from every city (test).
+- Existing saves: on configuration change, `map.extend` widens the surface's map gen
+  settings, turns out-of-map tiles inside the new bounds into grass, adds missing patches
+  and cities and tags them. A city spot taken by player buildings is never cleared: the
+  player gets one message with a map link and the spot is retried every second. Verified on
+  the latest playtest save: 5 -> 9 cities, nothing blocked, no errors.
+- Why: room for real routes between the new cities; no new game needed for a playtest save.
+- Rejected: a new surface for existing saves (loses the player's network).
+
 ## 2026-11-18: 2.2.5 tier 3 costs use circuits
 - Decision: tier 3 costs now include circuits. Smelting T3: 3000 of the other plate + 1000
   circuits (was 6000 plates). Depot and power T3: 2000 iron + 2000 copper + 1000 circuits

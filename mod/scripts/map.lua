@@ -9,8 +9,9 @@ local M = {}
 
 M.SURFACE = "train-tycoon"
 
--- Map is WIDTH x HEIGHT tiles centred on {0, 0}.
-M.WIDTH, M.HEIGHT = 640, 400
+-- Map is WIDTH x HEIGHT tiles centred on {0, 0}. 2.2.6 grew it from 640 x 400; existing
+-- surfaces are extended in place (M.extend).
+M.WIDTH, M.HEIGHT = 960, 600
 M.SPAWN = { x = 0, y = 4 }
 
 -- City centres (9x9 cities sit on tile centres).
@@ -21,6 +22,11 @@ M.CITIES = {
   { name = config.CITY.iron, x = 160, y = -96, label = "Iron smelting city", tag_icon = "iron-plate" },
   { name = config.CITY.copper, x = 160, y = 96, label = "Copper smelting city", tag_icon = "copper-plate" },
   { name = config.CITY.goal, x = 272, y = 0, label = "Goal box", tag_icon = "iron-chest" },
+  -- 2.2.6: intermediate cities and the research complex, on the grown map
+  { name = "tt-city-circuits", x = 400, y = -200, label = "Circuit city", tag_icon = "electronic-circuit" },
+  { name = "tt-city-red-science", x = 400, y = 200, label = "Red science city", tag_icon = "automation-science-pack" },
+  { name = "tt-city-green-science", x = -400, y = 0, label = "Green science city", tag_icon = "logistic-science-pack" },
+  { name = "tt-city-research", x = -160, y = 230, label = "Research complex", tag_icon = "lab" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).
@@ -28,6 +34,8 @@ M.PATCHES = {
   { name = "iron-ore", x = -240, y = -140, radius = 14, amount = 4000 },
   { name = "copper-ore", x = -240, y = 140, radius = 14, amount = 4000 },
   { name = "coal", x = -40, y = -165, radius = 12, amount = 4000 },
+  -- 2.2.6: circuits and science need more iron
+  { name = "iron-ore", x = 420, y = 0, radius = 14, amount = 4000 },
 }
 
 -- Lake (deep water in the middle).
@@ -77,17 +85,45 @@ end
 ---@param surface LuaSurface
 local function place_patches(surface)
   for _, p in ipairs(M.PATCHES) do
-    circle(p.x, p.y, p.radius, function(x, y, d)
+    local present = surface.count_entities_filtered({ name = p.name, position = { p.x + 0.5, p.y + 0.5 }, radius = p.radius }) > 0
+    if not present then circle(p.x, p.y, p.radius, function(x, y, d)
       local amount = math.floor(p.amount * (1 - 0.5 * d / p.radius))
       surface.create_entity({ name = p.name, position = { x + 0.5, y + 0.5 }, amount = amount })
-    end)
+    end) end
   end
 end
 
+-- Called once per city whose spot is blocked on an extended map (message to the player).
+local on_city_blocked = nil
+---@param fn fun(label: string, surface: LuaSurface, position: MapPosition)
+function M.on_city_blocked(fn) on_city_blocked = fn end
+
+--- Is any tier of this layout city standing at its spot?
+---@param surface LuaSurface
+local function city_present(surface, c)
+  for _, e in pairs(surface.find_entities_filtered({ position = { c.x + 0.5, c.y + 0.5 }, radius = 1 })) do
+    if cities.is_city(e) then return true end
+  end
+  return false
+end
+
+--- Place every layout city that is missing. Never removes anything: a blocked spot is
+--- reported once and retried (storage.tt_map_blocked) until it is clear.
 ---@param surface LuaSurface
 local function place_cities(surface)
+  storage.tt_map_blocked = storage.tt_map_blocked or {}
   for _, c in ipairs(M.CITIES) do
-    cities.place(c.name, surface, { c.x + 0.5, c.y + 0.5 }, "player")
+    if not city_present(surface, c) then
+      local pos = { c.x + 0.5, c.y + 0.5 }
+      local key = surface.name .. "/" .. c.name
+      if surface.can_place_entity({ name = c.name, position = pos, force = "player" }) then
+        cities.place(c.name, surface, pos, "player")
+        storage.tt_map_blocked[key] = nil
+      elseif not storage.tt_map_blocked[key] then
+        storage.tt_map_blocked[key] = true
+        if on_city_blocked then on_city_blocked(c.label, surface, { x = pos[1], y = pos[2] }) end
+      end
+    end
   end
 end
 
@@ -158,6 +194,47 @@ function M.generate(name)
   return surface
 end
 
+--- Grow an existing map surface to the current layout (2.1 saves: 640 x 400 -> 960 x 600)
+--- and add what it lacks: out-of-map tiles inside the new bounds become grass, missing
+--- patches and cities are placed (blocked city spots are reported and retried), new cities
+--- get tags. Idempotent.
+---@param surface LuaSurface
+function M.extend(surface)
+  local mgs = surface.map_gen_settings
+  if (mgs.width or 0) < M.WIDTH or (mgs.height or 0) < M.HEIGHT then
+    mgs.width, mgs.height = M.WIDTH, M.HEIGHT
+    surface.map_gen_settings = mgs
+  end
+  local area = { { -M.WIDTH / 2, -M.HEIGHT / 2 }, { M.WIDTH / 2, M.HEIGHT / 2 } }
+  local chunk_radius = math.ceil(math.max(M.WIDTH, M.HEIGHT) / 2 / 32) + 1
+  surface.request_to_generate_chunks({ 0, 0 }, chunk_radius)
+  surface.force_generate_chunk_requests()
+  local tiles = {}
+  for _, t in pairs(surface.find_tiles_filtered({ area = area, name = "out-of-map" })) do
+    tiles[#tiles + 1] = { name = "grass-1", position = t.position }
+  end
+  if #tiles > 0 then surface.set_tiles(tiles) end
+  place_patches(surface)
+  place_cities(surface)
+  game.forces["player"].chart(surface, area)
+  tag_cities(surface)
+end
+
+--- Retry blocked city spots (called every GOAL_TICK_INTERVAL); cheap when nothing waits.
+function M.retry_blocked()
+  if not (storage.tt_map_blocked and next(storage.tt_map_blocked)) then return end
+  local surfaces = {}
+  for key in pairs(storage.tt_map_blocked) do surfaces[string.match(key, "^(.*)/")] = true end
+  for name in pairs(surfaces) do
+    local surface = game.get_surface(name)
+    if surface then place_cities(surface); tag_cities(surface) else
+      for key in pairs(storage.tt_map_blocked) do
+        if string.match(key, "^(.*)/") == name then storage.tt_map_blocked[key] = nil end
+      end
+    end
+  end
+end
+
 --- Move a player to the map and give the starting items (once).
 ---@param player LuaPlayer
 function M.setup_player(player)
@@ -174,6 +251,9 @@ end
 function M.remote_interface()
   return {
     generate = function(name) return M.generate(name) end,
+    extend = function(name) M.extend(assert(game.get_surface(name or M.SURFACE))) end,
+    blocked = function() return storage.tt_map_blocked or {} end,
+    retry_blocked = function() M.retry_blocked() end,
     tick_tags = function() return M.tick_tags() end,
     setup_player = function(player_index) M.setup_player(assert(game.get_player(player_index))) end,
     layout = function()

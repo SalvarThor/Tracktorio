@@ -161,6 +161,17 @@ function M.port_blocked(record, position)
   tell(city.force --[[@as LuaForce]], message)
 end
 
+--- A new city's spot on an extended map is taken by something the player built (2.2.6).
+---@param label string
+---@param surface LuaSurface
+---@param position MapPosition
+function M.city_blocked(label, surface, position)
+  ---@type any
+  local message = { "tt-notify.city-blocked", label,
+    string.format("[gps=%d,%d,%s]", math.floor(position.x), math.floor(position.y), surface.name) }
+  tell(game.forces["player"], message)
+end
+
 --- Drop expired custom alerts (every GOAL_TICK_INTERVAL).
 function M.tick()
   local keep = {}

@@ -236,7 +236,7 @@ product. Gears and cables stay inside the cities; circuits are shipped.
       all banned stay as prerequisites. Tests prove the red/green tree can be completed.
 - [x] 2.2.5 Upgrade costs use intermediates: tier 3 costs of the existing cities partly move to
       circuits.
-- [ ] 2.2.6 Bigger map (about 960x600) with the new cities, a second iron patch and room for
+- [x] 2.2.6 Bigger map (about 960x600) with the new cities, a second iron patch and room for
       every port. 2.1 saves get the new cities where the tiles are free, otherwise a message.
 - [ ] 2.2.7 UI and map tags for the new cities, including research complex statuses.
 - [ ] 2.2.8 `/playtest` round: research flow, rates, power demand, map layout.

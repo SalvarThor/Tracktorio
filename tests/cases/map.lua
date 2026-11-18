@@ -102,4 +102,77 @@ return {
       p.teleport({ 0, 0 }, game.surfaces[1])
     end,
   },
+  {
+    name = "map: a 2.1-size map is extended in place with the new cities; a blocked spot waits",
+    fn = function()
+      local name = "tt-map-legacy"
+      local surface = remote.call("tt-map", "generate", name)
+      local l = layout()
+      local OLD_W, OLD_H = 640, 400
+      -- Turn it into a 2.1 map: only the MVP cities, no second iron patch, 640 x 400.
+      local new_cities = {}
+      for _, c in ipairs(l.cities) do
+        if math.abs(c.x) > 300 or math.abs(c.y) > 180 then
+          new_cities[#new_cities + 1] = c
+          for _, e in pairs(surface.find_entities_filtered({ position = { c.x + 0.5, c.y + 0.5 }, radius = 1 })) do e.destroy() end
+        end
+      end
+      assert_.truthy(#new_cities >= 4, "expected the new cities outside the old bounds")
+      local east_iron = l.patches[#l.patches]
+      for _, e in pairs(surface.find_entities_filtered({ name = "iron-ore", position = { east_iron.x, east_iron.y }, radius = east_iron.radius + 1 })) do
+        e.destroy()
+      end
+      local tiles = {}
+      for x = -l.width / 2, l.width / 2 - 1 do
+        for y = -l.height / 2, l.height / 2 - 1 do
+          if x < -OLD_W / 2 or x >= OLD_W / 2 or y < -OLD_H / 2 or y >= OLD_H / 2 then
+            tiles[#tiles + 1] = { name = "out-of-map", position = { x, y } }
+          end
+        end
+      end
+      surface.set_tiles(tiles)
+      local mgs = surface.map_gen_settings
+      mgs.width, mgs.height = OLD_W, OLD_H
+      surface.map_gen_settings = mgs
+      -- Ports of the destroyed cities go one tick later; remove them now.
+      for _, e in pairs(surface.find_entities_filtered({ name = "tt-construction-port" })) do
+        local near = false
+        for _, c in ipairs(new_cities) do if math.abs(e.position.x - c.x) < 8 and math.abs(e.position.y - c.y) < 8 then near = true end end
+        if near then e.destroy() end
+      end
+      -- The player built something where the green science city goes.
+      local green
+      for _, c in ipairs(new_cities) do if c.name == "tt-city-green-science" then green = c end end
+      assert(green, "no green science city in the layout")
+      surface.set_tiles({ { name = "grass-1", position = { green.x, green.y } } })
+      local chest = assert(surface.create_entity({ name = "iron-chest", position = { green.x + 0.5, green.y + 0.5 }, force = "player" }))
+
+      remote.call("tt-map", "extend", name)
+
+      assert_.equals(surface.map_gen_settings.width, l.width)
+      assert_.equals(surface.count_tiles_filtered({ name = "out-of-map",
+        area = { { -l.width / 2, -l.height / 2 }, { l.width / 2, l.height / 2 } } }), 0, "out-of-map tiles left")
+      assert_.truthy(surface.count_entities_filtered({ name = "iron-ore", position = { east_iron.x, east_iron.y }, radius = 2 }) > 0,
+        "second iron patch missing")
+      for _, c in ipairs(new_cities) do
+        local n = surface.count_entities_filtered({ name = c.name, position = { c.x + 0.5, c.y + 0.5 }, radius = 1 })
+        assert_.equals(n, c == green and 0 or 1, c.name)
+      end
+      assert_.truthy(chest.valid, "the player's chest was removed")
+      assert_.truthy(remote.call("tt-map", "blocked")[name .. "/" .. green.name], "blocked spot not recorded")
+      local said = false
+      for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
+        if type(m.message) == "table" and m.message[1] == "tt-notify.city-blocked" then said = true end
+      end
+      assert_.truthy(said, "no blocked-city message")
+      -- Clear the spot: the next retry places it.
+      chest.destroy()
+      remote.call("tt-map", "retry_blocked")
+      assert_.equals(surface.count_entities_filtered({ name = green.name, position = { green.x + 0.5, green.y + 0.5 }, radius = 1 }), 1)
+      -- Running it again changes nothing.
+      local before = surface.count_entities_filtered({ type = "assembling-machine" })
+      remote.call("tt-map", "extend", name)
+      assert_.equals(surface.count_entities_filtered({ type = "assembling-machine" }), before)
+    end,
+  },
 }

@@ -59,6 +59,7 @@ upgrade.on_upgraded(notify.upgraded)
 upgrade.on_upgraded(function(_, city) map.retag(city) end)
 ports.on_heads_up(notify.heads_up)
 ports.on_blocked(notify.port_blocked)
+map.on_city_blocked(notify.city_blocked)
 remote.add_interface("tt-goal", goal.remote_interface())
 remote.add_interface("tt-limp", limp.remote_interface())
 remote.add_interface("tt-map", map.remote_interface())
@@ -82,14 +83,20 @@ migrate = function()
   notify.init()
   state.migrate({ ensure_ports = ports.ensure_all, legacy_windows = city_gui.migrate_legacy,
     ensure_tier_marks = tier_marks.ensure_all, refresh_costs = ports.refresh_costs })
-  local with_port, without = 0, 0
+  research.init() -- start technologies added later (e.g. 2.2.3) reach existing saves
+  -- Grow an existing scenario map to the current layout (2.2.6: new cities, bigger map).
+  local surface = game.get_surface(map.SURFACE)
+  if surface then map.extend(surface) end
+  local total, with_port, without = 0, 0, 0
   for _, r in pairs(storage.tt_cities) do
+    if r.entity.valid then total = total + 1 end
     if r.port and r.port.valid then with_port = with_port + 1
     elseif r.entity.valid and require_next_tier(r.name) then without = without + 1 end
   end
-  log(string.format("tt: configuration changed: schema %s -> %d; cities with a port: %d, still waiting for a port tile: %d",
-    tostring(from), storage.tt_schema, with_port, without))
-  research.init() -- start technologies added later (e.g. 2.2.3) reach existing saves
+  local blocked = 0
+  for _ in pairs(storage.tt_map_blocked or {}) do blocked = blocked + 1 end
+  log(string.format("tt: configuration changed: schema %s -> %d; cities: %d (spots blocked: %d); with a port: %d, still waiting for a port tile: %d",
+    tostring(from), storage.tt_schema, total, blocked, with_port, without))
   limp.scan()
   goal_gui.rebuild_all()
 end
@@ -105,6 +112,7 @@ script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   city_info.sample()
   city_gui.update_all()
   map.tick_tags()
+  map.retry_blocked()
   notify.tick()
 end)
 
