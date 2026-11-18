@@ -79,7 +79,7 @@ Goal: the MVP described in SPEC.md, playable start to win.
 - [x] 1.2 Black box framework (A2): one definition table per box type (recipe profile,
       crafting speed, size, sprite), prototype generation in the data stage, script
       placement, protection and hands-off enforcement (A2) in the control stage.
-- [ ] 1.3 Iron smelting city, copper smelting city and depot city (coal in, `tt-coal-fuel`
+- [x] 1.3 Iron smelting city, copper smelting city and depot city (coal in, `tt-coal-fuel`
       out), plus the `tt-coal-fuel` item and the change that stops vanilla coal working as
       locomotive fuel (A4).
 - [ ] 1.4 Power city (A5).

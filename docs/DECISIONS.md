@@ -4,6 +4,18 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.3 smelting cities, depot city, coal fuel (rates are tuning values)
+- Iron smelting / copper smelting: 9x9, 10 ore + 1 coal → 10 plates, 1 s, speed 1.5. Cap is
+  15 plates/s (one yellow belt) and 1.5 coal/s.
+- Depot: 9x9, 2 coal → 1 `tt-coal-fuel`, 1 s, speed 2. Cap is 2 fuel/s.
+- `tt-coal-fuel` gives 10 MJ (coal is 4 MJ, so refining is a small bonus), with acceleration
+  and top-speed multipliers of 1. It's in fuel category `tt-locomotive`, which every burner
+  locomotive now burns exclusively. `auto_recycle = false`: Space Age otherwise generates a
+  `tt-coal-fuel-recycling` recipe (caught by a test).
+- Why: the spec leaves rates open. These give a fast network a real edge over a slow one at
+  the 20k-plate goal. To be tuned in the 1.10 playtest.
+- Placeholder sprites: scaled electric furnace (smelting) and assembling machine 3 (depot).
+
 ## 2026-11-18: 1.2 black box framework
 - Decision: `mod/prototypes/blackbox.lua` `make_city(def)` builds a recipe-category, a recipe
   and an `assembling-machine` named `tt-city-<name>` from one definition table:

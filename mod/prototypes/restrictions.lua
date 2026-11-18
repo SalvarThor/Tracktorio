@@ -48,6 +48,13 @@ for name, recipe in pairs(data.raw.recipe) do
   end
 end
 
+-- Locomotives burn only the locomotive fuel category (tt-coal-fuel), not vanilla coal.
+for _, loco in pairs(data.raw.locomotive) do
+  if loco.energy_source and loco.energy_source.type == "burner" then
+    loco.energy_source.fuel_categories = { config.LOCOMOTIVE_FUEL_CATEGORY }
+  end
+end
+
 -- The character can only hand-craft the free recipes.
 for _, character in pairs(data.raw.character) do
   character.crafting_categories = { config.FREE_CATEGORY }

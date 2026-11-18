@@ -56,4 +56,29 @@ function M.feeder(chest_pos, inserter_pos, direction, contents)
   return chest, ins
 end
 
+--- Tile size of a city prototype.
+function M.city_size(name)
+  local box = prototypes.entity[name].selection_box
+  return math.floor(box.right_bottom.x - box.left_top.x + 0.5)
+end
+
+--- Clear an area and build: input chest -> inserter -> city -> inserter -> output chest.
+--- The city is centred at {x + 0.5, 0.5}. Returns city, input chest, output chest (or nil).
+---@param name string city entity name
+---@param x number
+---@param contents ItemStackDefinition[] input chest contents
+---@param with_output boolean
+function M.city_rig(name, x, contents, with_output)
+  local size = M.city_size(name)
+  local half = size / 2
+  local top, bottom = 0.5 - half, 0.5 + half
+  M.clear_area({ { x - half - 4, top - 4 }, { x + half + 5, bottom + 5 } })
+  local city = M.place_city(name, { x + 0.5, 0.5 })
+  local N = defines.direction.north
+  local cin = M.feeder({ x + 0.5, top - 1.5 }, { x + 0.5, top - 0.5 }, N, contents)
+  local cout
+  if with_output then cout = M.feeder({ x + 0.5, bottom + 1.5 }, { x + 0.5, bottom + 0.5 }, N, {}) end
+  return city, cin, cout
+end
+
 return M

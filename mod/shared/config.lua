@@ -6,6 +6,16 @@ M.FREE_CATEGORY = "tt-free"
 -- Craft time of free recipes. The engine requires > 0.001 s; this crafts ~1 item per tick.
 M.FREE_CRAFT_TIME = 0.002
 
+-- The only fuel category locomotives burn. tt-coal-fuel (depot cities) is in it.
+M.LOCOMOTIVE_FUEL_CATEGORY = "tt-locomotive"
+
+-- City entity names (prototypes/cities.lua).
+M.CITY = {
+  iron = "tt-city-iron-smelting",
+  copper = "tt-city-copper-smelting",
+  depot = "tt-city-depot",
+}
+
 -- Free items (SPEC: train infrastructure, station logistics, extraction). Their recipes get
 -- no ingredients and stay gated by their vanilla technology.
 M.FREE_ITEMS = {
