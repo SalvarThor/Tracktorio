@@ -11,6 +11,15 @@ local M = {}
 
 M.PREFIX = "tt-city-"
 
+-- name -> function(entity) run after a city of that name is placed (registered at load time).
+local placed_hooks = {}
+
+---@param name string
+---@param fn fun(entity: LuaEntity)
+function M.on_placed(name, fn)
+  placed_hooks[name] = fn
+end
+
 ---@param name string?
 function M.is_city_name(name)
   return name ~= nil and string.sub(name, 1, #M.PREFIX) == M.PREFIX
@@ -62,6 +71,7 @@ function M.place(name, surface, position, force)
   end
   storage.tt_cities[entity.unit_number] = record
   script.register_on_object_destroyed(entity)
+  if placed_hooks[name] then placed_hooks[name](entity) end
   return entity
 end
 

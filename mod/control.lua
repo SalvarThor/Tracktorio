@@ -1,20 +1,35 @@
 -- Control stage: runtime only.
+local config = require("shared.config")
 local state = require("scripts.state")
 local research = require("scripts.research")
 local cities = require("scripts.cities")
+local goal = require("scripts.goal")
+local goal_gui = require("scripts.goal_gui")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
 cities.register_events()
 remote.add_interface("tt-city", cities.remote_interface())
+remote.add_interface("tt-goal", goal.remote_interface())
 
 script.on_init(function()
   state.init()
   cities.init()
+  goal.init()
   research.init()
+  goal_gui.rebuild_all()
 end)
 
 script.on_configuration_changed(function()
   state.migrate()
   cities.init()
+  goal.init()
+  goal_gui.rebuild_all()
+end)
+
+script.on_event(defines.events.on_player_created, goal_gui.on_player_created)
+
+script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
+  goal.tick()
+  goal_gui.update_all()
 end)

@@ -15,7 +15,15 @@ M.CITY = {
   copper = "tt-city-copper-smelting",
   depot = "tt-city-depot",
   power = "tt-city-power",
+  goal = "tt-city-goal",
 }
+
+-- Goal box: slots 1..GOAL_SLOTS/2 take iron plates, the rest copper plates.
+M.GOAL_SLOTS = 40
+M.GOAL_ITEMS = { iron = "iron-plate", copper = "copper-plate" }
+-- How often the goal box is emptied and counted, and the rate window (for the UI).
+M.GOAL_TICK_INTERVAL = 60
+M.RATE_WINDOW_TICKS = 60 * 60
 
 -- Hidden companion entities placed with a city and joined by a linked fluidbox connection.
 -- city name -> { entity, city_link_id, companion_link_id }

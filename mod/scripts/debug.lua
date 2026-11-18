@@ -52,8 +52,26 @@ local function cmd_dump(cmd)
   if player then player.print(msg) else log(msg) end
 end
 
+--- /tt-goal            print goal progress
+--- /tt-goal <iron> <copper>   set the targets (playtest tuning; remote twin: tt-goal.set_targets)
+---@param cmd CustomCommandData
+local function cmd_goal(cmd)
+  local player = cmd.player_index and game.get_player(cmd.player_index)
+  local args = {}
+  for word in string.gmatch(cmd.parameter or "", "%S+") do args[#args + 1] = tonumber(word) end
+  if #args >= 1 then
+    if player and not player.admin then player.print("tt-goal: admins only"); return end
+    remote.call("tt-goal", "set_targets", args[1], args[2] or args[1])
+  end
+  local s = remote.call("tt-goal", "status")
+  local msg = string.format("tt-goal: iron %d/%d, copper %d/%d, won=%s",
+    s.delivered.iron, s.targets.iron, s.delivered.copper, s.targets.copper, tostring(s.won))
+  if player then player.print(msg) else log(msg) end
+end
+
 function M.register()
   commands.add_command("tt-dump", "Write a JSON snapshot of Train Tycoon's storage to script-output/tt-dump.json.", cmd_dump)
+  commands.add_command("tt-goal", "Show goal progress. /tt-goal <iron> <copper> sets the targets.", cmd_goal)
   remote.add_interface("tt-debug", {
     dump = function() return M.dump() end,
   })

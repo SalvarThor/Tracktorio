@@ -83,7 +83,7 @@ Goal: the MVP described in SPEC.md, playable start to win.
       out), plus the `tt-coal-fuel` item and the change that stops vanilla coal working as
       locomotive fuel (A4).
 - [x] 1.4 Power city (A5).
-- [ ] 1.5 Goal box and win condition: counts cumulative iron and copper plates delivered,
+- [x] 1.5 Goal box and win condition: counts cumulative iron and copper plates delivered,
       targets from a runtime mod setting (default 20,000 each), victory when both totals
       are reached. Show progress to the player.
 - [ ] 1.6 Black box UI: recipe, current output rate/min, status (running, starved on which

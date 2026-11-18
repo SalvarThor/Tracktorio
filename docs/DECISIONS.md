@@ -4,6 +4,25 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.5 goal box and win condition
+- Decision: the goal box `tt-city-goal` is a 9x9 `container` (40 slots, filtered by script:
+  half iron plates, half copper plates). Inserters can only deliver plates; the player can't
+  open it (same city protections).
+- Every 60 ticks `scripts/goal.lua` empties every goal box and adds what it held to
+  `storage.tt_goal.delivered`, which only ever grows. Buffering upstream doesn't help, which
+  matches the SPEC.
+- Win when both totals reach the runtime-global settings `tt-goal-iron` / `tt-goal-copper`
+  (default 20000): `set_win_ending_info` + `set_game_state{game_finished, player_won,
+  can_continue = true}`. The game finishing doesn't stop the headless test runner (verified).
+- Progress panel top-left: delivered / target per metal, with a per-minute rate over a
+  60 s window.
+- Tuning: `/tt-goal <iron> <copper>` (admin), remote twin `tt-goal.set_targets`. A 2.1
+  finding: runtime-global settings can only be written by the owning mod, so tests and
+  scenarios go through the remote call.
+- Rejected: an assembling-machine "consumer" recipe (one recipe needing both metals would
+  count at the rate of the slower one); `raise_on_crafted` companions (more prototypes, same
+  result).
+
 ## 2026-11-18: 1.4 power city (engine-only, verified)
 - Decision: `tt-city-power` (9x9) runs 1 coal + 150 water → 150 steam at 165 °C, 1 s, at
   speed 1.2. Water comes in on the south edge (centre tile).

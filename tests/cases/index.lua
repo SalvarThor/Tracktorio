@@ -9,6 +9,8 @@ return {
     "__train-tycoon-tests__/cases/cities",
     "__train-tycoon-tests__/cases/mvp_cities",
     "__train-tycoon-tests__/cases/power",
+    -- keep last: winning finishes the game
+    "__train-tycoon-tests__/cases/goal",
   },
   selftest = {
     "__train-tycoon-tests__/cases/selftest",
