@@ -73,7 +73,7 @@ Stop. Report to the user.
 
 Goal: the MVP described in SPEC.md, playable start to win.
 
-- [ ] 1.1 Prototype restrictions (A6): remove transformation entities, vehicles and robots
+- [x] 1.1 Prototype restrictions (A6): remove transformation entities, vehicles and robots
       from the player; free logistics recipes (A1 or its fallback); MVP starting research.
       Quality and planets off.
 - [ ] 1.2 Black box framework (A2): one definition table per box type (recipe profile,

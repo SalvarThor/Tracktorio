@@ -4,6 +4,37 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.1 prototype restrictions
+- Decision: explicit item lists in `mod/shared/config.lua`.
+  - `FREE_ITEMS`: the recipe of the same name gets `ingredients = {}`, 0.002 s and category
+    `tt-free`.
+  - `BANNED_ITEMS`: every recipe making them is hidden and disabled, and technologies stop
+    unlocking them.
+- The character's `crafting_categories = {"tt-free"}`, so nothing else can be hand-crafted.
+  Items on neither list (turrets, walls, accumulators, armour, intermediates) are simply
+  uncraftable.
+- Non-primary recipes for free items (foundry `casting-pipe`) are hidden so they don't
+  duplicate the free recipe.
+- Technologies left with no effects are hidden, as are planet-discovery, space-platform and
+  rocket-silo techs.
+- Start research is set by the mod's `on_init` on the `player` force:
+  - railway
+  - automated-rail-transportation
+  - fluid-wagon
+  - electronics
+  - logistics
+  - electric-mining-drill
+  - steam-power (now only pipe, pipe-to-ground, offshore pump)
+  - fluid-handling
+  - electric-energy-distribution-1
+- Why: lists are explicit and testable. Hiding instead of deleting avoids broken references
+  (tips, simulations, other prototypes).
+- MVP has no labs, so nothing past the start set is reachable. The tech tree gets reworked
+  with the research complex (post-MVP 2).
+- Consequence for 1.8: turrets can't be crafted, so the MVP map needs enemies off.
+- Rejected: banning by entity type (`data.raw` names collide across types); deleting
+  prototypes.
+
 ## 2026-11-18: Phase 0 follow-up decisions (user-approved)
 - **Quality:** `mod/info.json` declares `"! quality"`. The game refuses to load train-tycoon
   with quality enabled ("Incompatible with quality", verified), and the dev instance runs
