@@ -165,7 +165,7 @@ upgraded first. That's an intended chain.
       `tt-city-<name>-t2/-t3`. Tier 1 keeps its current name so MVP saves still load. Tier 2+
       smelting recipes have no coal. Each power city tier has its own hidden generator.
       Locale for every new prototype.
-- [ ] 2.1.2 Construction port. A fixed 1x1 container on the tile west of the city's top-left
+- [x] 2.1.2 Construction port. A fixed 1x1 container on the tile west of the city's top-left
       corner (its east side touches the city; north, west and south are free for
       inserters). It is placed and protected like a city. No inserter or power between port
       and city: once a second the script empties the port into the upgrade's progress

@@ -1,7 +1,8 @@
 -- Black box cities at runtime: script placement, protection, hands-off enforcement, tracking.
 -- Cities are entities named "tt-city-*" (see prototypes/blackbox.lua).
 --
--- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, companion = LuaEntity? }
+-- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, companion = LuaEntity?,
+--   port = LuaEntity?, upgrade = table? (scripts/ports.lua) }
 -- storage.tt_hand_transfers = count of hand transfers that reached a city (should stay 0;
 --   operable=false is expected to block them, see DECISIONS.md A2).
 
@@ -20,6 +21,14 @@ function M.on_placed(name, fn)
   placed_hooks[name] = fn
 end
 
+-- functions(entity, record) run after any city is placed (registered at load time).
+local any_placed_hooks = {}
+
+---@param fn fun(entity: LuaEntity, record: table)
+function M.on_any_placed(fn)
+  any_placed_hooks[#any_placed_hooks + 1] = fn
+end
+
 ---@param name string?
 function M.is_city_name(name)
   return name ~= nil and string.sub(name, 1, #M.PREFIX) == M.PREFIX
@@ -35,8 +44,9 @@ function M.init()
   storage.tt_hand_transfers = storage.tt_hand_transfers or 0
 end
 
+--- Hands-off protection for cities and their attached entities.
 ---@param entity LuaEntity
-local function protect(entity)
+function M.protect(entity)
   entity.operable = false
   entity.destructible = false
   entity.minable_flag = false
@@ -60,19 +70,20 @@ function M.place(name, surface, position, force)
     create_build_effect_smoke = false,
   })
   assert(entity, "tt: could not place " .. name .. " at " .. serpent.line(position))
-  protect(entity)
+  M.protect(entity)
   local record = { entity = entity, name = name }
   local comp = config.CITY_COMPANIONS[name]
   if comp then
     local companion = surface.create_entity({ name = comp.entity, position = entity.position, force = entity.force })
     assert(companion, "tt: could not place companion " .. comp.entity)
-    protect(companion)
+    M.protect(companion)
     entity.add_fluid_box_linked_connection(comp.city_link_id, companion, comp.companion_link_id)
     record.companion = companion
   end
   storage.tt_cities[entity.unit_number] = record
   script.register_on_object_destroyed(entity)
   if placed_hooks[name] then placed_hooks[name](entity) end
+  for _, fn in ipairs(any_placed_hooks) do fn(entity, record) end
   return entity
 end
 
@@ -91,7 +102,11 @@ end
 local function on_object_destroyed(e)
   if e.type == defines.target_type.entity and e.useful_id then
     local record = storage.tt_cities[e.useful_id]
-    if record and record.companion and record.companion.valid then record.companion.destroy() end
+    if record then
+      for _, key in ipairs({ "companion", "port" }) do
+        if record[key] and record[key].valid then record[key].destroy() end
+      end
+    end
     storage.tt_cities[e.useful_id] = nil
   end
 end

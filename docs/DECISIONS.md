@@ -4,6 +4,20 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.1.2 construction ports
+- Decision: `tt-construction-port` is a 1x1 container on the tile west of a city's top-left
+  corner (user's choice). Protected like a city, 4 filtered slots. `scripts/ports.lua`
+  places one through a new any-city placement hook for every city with a next tier (none
+  for the goal box or max-tier cities). The port is destroyed with its city.
+- Every 60 ticks: count and remove port contents into `record.upgrade.delivered`, then
+  refilter the slots to what is still needed. Otherwise the placeholder `tt-port-closed`.
+  At 100% the upgrade is marked complete and an `on_complete` hook fires (2.1.3 does the
+  swap). Materials never enter the city, so no inserter or power sits between port and
+  city.
+- Exposed for tests and UI: `tt-city.upgrade_status(city)`, `tt-city.port_tick()`.
+- Not a `tt-city-` name on purpose: the port isn't a city (no window, rate sampling or map
+  tag), but it uses the same protection.
+
 ## 2026-11-18: 2.1.1 tier prototypes
 - Decision: all city definitions (tiers, rates, power, upgrade costs) live in one plain-data
   module, `mod/shared/city_defs.lua`, read by both stages. `prototypes/cities.lua` builds

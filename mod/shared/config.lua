@@ -34,6 +34,12 @@ M.GOAL_SLOTS = 40
 M.GOAL_ITEMS = { iron = "iron-plate", copper = "copper-plate" }
 -- Filter used for a metal whose target is met: the goal box stops accepting it.
 M.GOAL_CLOSED_ITEM = "tt-goal-closed"
+
+-- Construction port beside each upgradable city (PLAN 2.1.2).
+M.PORT = "tt-construction-port"
+M.PORT_SLOTS = 4
+M.PORT_CLOSED_ITEM = "tt-port-closed"
+M.PORT_HEADS_UP = 0.9 -- progress fraction for the "upgrade coming" message (2.1.4)
 -- How often the goal box is emptied and counted, and the rate window (for the UI).
 M.GOAL_TICK_INTERVAL = 60
 M.RATE_WINDOW_TICKS = 60 * 60

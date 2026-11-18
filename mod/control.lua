@@ -9,6 +9,7 @@ local city_info = require("scripts.city_info")
 local city_gui = require("scripts.city_gui")
 local limp = require("scripts.limp")
 local map = require("scripts.map")
+local ports = require("scripts.ports")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -19,6 +20,8 @@ limp.register_events()
 local city_remote = cities.remote_interface()
 city_remote.info = city_info.remote_info
 city_remote.has_window = function(entity) return city_gui.has_window(entity) end
+city_remote.upgrade_status = function(entity) return ports.status(entity) end
+city_remote.port_tick = function() ports.tick() end
 city_remote.open_gui = function(player_index, entity)
   local player = assert(game.get_player(player_index))
   city_gui.open(player, entity)
@@ -51,6 +54,7 @@ script.on_event(defines.events.on_player_created, goal_gui.on_player_created)
 
 script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   goal.tick()
+  ports.tick()
   goal_gui.update_all()
   city_info.sample()
   city_gui.update_all()
