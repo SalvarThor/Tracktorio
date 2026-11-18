@@ -19,13 +19,14 @@ test that Claude Code can run and read the result of without the user.
       match how scripts are actually invoked. Report any rule that did not match as expected.
 - [x] 0.3 `git init`, add `.gitignore`, first commit of the starter files. (Repo and
       initial commit already existed; this item extended `.gitignore`.)
-- [ ] 0.4 Mod skeleton in `mod/`: `info.json` (name `train-tycoon`, `factorio_version`
+- [x] 0.4 Mod skeleton in `mod/`: `info.json` (name `train-tycoon`, `factorio_version`
       matching 0.1, dependencies `base` and `space-age`), empty `settings.lua`, `data.lua`,
       `control.lua`, `locale/en/train-tycoon.cfg`.
-- [ ] 0.5 Make the mod live without copying: create a directory junction from the mods dir
+- [x] 0.5 Make the mod live without copying: create a directory junction from the mods dir
       to `mod/`. Verify whether the folder name must be `train-tycoon` or
       `train-tycoon_<version>`. Enable it in `mod-list.json`. Confirm in
-      `factorio-current.log` that the mod loads.
+      `factorio-current.log` that the mod loads. (Done in the separate dev instance
+      `.factorio\`, not the real user data dir; see DECISIONS.md.)
 - [ ] 0.6 Static checks: set up `lua-language-server --check` (or an equivalent that works
       headlessly on Windows) with Factorio 2.1 API type definitions. Wrap it in
       `tools/check.ps1`. A deliberate typo must fail it; clean code must pass.
