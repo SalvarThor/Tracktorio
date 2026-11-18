@@ -8,7 +8,7 @@ local cities = require("scripts.cities")
 
 local M = {}
 
-M.RADIUS = 0.45
+M.RADIUS = 0.34 -- 75% of the first draft (0.45), playtest 2.1.7
 M.SPACING = 1.2
 M.FILLED = { r = 1, g = 0.78, b = 0.2, a = 1 }
 M.EMPTY = { r = 0.15, g = 0.15, b = 0.15, a = 0.8 }
