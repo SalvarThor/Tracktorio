@@ -195,4 +195,5 @@ upgraded first. That's an intended chain.
 - [x] 2.1.5 Save migration and map. MVP saves get tier 1 records and ports placed on
       configuration change. Check the scenario layout has room for every port. Tests load an
       MVP-era state and upgrade it.
-- [ ] 2.1.6 `/playtest` round: upgrade path, numbers, port placement.
+- [ ] 2.1.6 `/playtest` round: upgrade path, numbers, port placement. (Playtest helper:
+      `/tt-port-fill <percent>` on the city or port under the cursor.)

@@ -27,6 +27,7 @@ city_remote.info = city_info.remote_info
 city_remote.has_window = function(entity) return city_gui.has_window(entity) end
 city_remote.upgrade_status = function(entity) return ports.status(entity) end
 city_remote.port_tick = function() ports.tick() end
+city_remote.port_fill = function(entity, fraction) ports.fill(entity, fraction) end
 city_remote.upgrade_now = function(entity) return upgrade.upgrade(assert(storage.tt_cities[entity.unit_number])) end
 city_remote.open_gui = function(player_index, entity)
   local player = assert(game.get_player(player_index))

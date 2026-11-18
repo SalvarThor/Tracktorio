@@ -153,6 +153,24 @@ function M.tick()
   end
 end
 
+--- Debug: set a city's progress to `fraction` (0..1) of each material; the next port tick
+--- handles heads-up / completion as if it had been delivered. Accepts the city or its port.
+---@param entity LuaEntity
+---@param fraction number
+function M.fill(entity, fraction)
+  local record = storage.tt_cities[entity.unit_number]
+  if not record then
+    for _, r in pairs(storage.tt_cities) do if r.port == entity then record = r end end
+  end
+  assert(record and record.upgrade, "not an upgradable city or port")
+  fraction = math.max(0, math.min(1, fraction))
+  for item, need in pairs(record.upgrade.cost) do
+    record.upgrade.delivered[item] = math.floor(need * fraction)
+  end
+  if fraction < config.PORT_HEADS_UP then record.upgrade.heads_up_sent = nil end
+  set_filters(record)
+end
+
 --- Upgrade status of a city, for the UI and tests.
 ---@param city LuaEntity
 function M.status(city)
