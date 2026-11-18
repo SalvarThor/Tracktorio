@@ -13,7 +13,7 @@ test that Claude Code can run and read the result of without the user.
       Confirm the exact Factorio version (`factorio.exe --version`) and that the
       `space-age`, `quality` and `elevated-rails` mods are present in the install's `data\`.
       Write all of it to `docs/ENV.md`.
-- [ ] 0.2 Fix up `.claude/settings.json` for the real paths: confirm `additionalDirectories`
+- [x] 0.2 Fix up `.claude/settings.json` for the real paths: confirm `additionalDirectories`
       reaches the user data dir, add the Factorio install dir so vanilla prototype files in
       `data\base` and `data\space-age` can be read, and adjust the `tools/` allow rule to
       match how scripts are actually invoked. Report any rule that did not match as expected.

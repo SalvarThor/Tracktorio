@@ -3,7 +3,8 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
-      "~/AppData/Roaming/Factorio"
+      "~/AppData/Roaming/Factorio",
+      "C:/Program Files (x86)/Steam/steamapps/common/Factorio"
     ],
     "allow": [
       "PowerShell(git status *)",
@@ -21,11 +22,16 @@
       "PowerShell(npx factorio-test *)",
       "PowerShell(lua-language-server *)",
       "PowerShell(./tools/*)",
+      "PowerShell(.\\tools\\*)",
+      "PowerShell(& ./tools/*)",
+      "PowerShell(pwsh -NoProfile -File tools/*)",
+      "PowerShell(winget list *)",
+      "PowerShell(node *)",
+      "PowerShell(npx fmtk *)",
       "PowerShell(Get-Content *)",
       "PowerShell(Get-ChildItem *)",
       "PowerShell(Test-Path *)",
       "Read(~/AppData/Roaming/Factorio/**)",
-      "Edit(~/AppData/Roaming/Factorio/mods/mod-list.json)",
       "WebFetch(domain:lua-api.factorio.com)",
       "WebFetch(domain:wiki.factorio.com)",
       "WebFetch(domain:mods.factorio.com)",
@@ -44,6 +50,8 @@
       "Edit(~/AppData/Roaming/Factorio/config/**)"
     ],
     "deny": [
+      "Edit(~/AppData/Roaming/Factorio/mods/**)",
+      "Write(~/AppData/Roaming/Factorio/mods/**)",
       "Edit(~/AppData/Roaming/Factorio/saves/**)",
       "Write(~/AppData/Roaming/Factorio/saves/**)"
     ]
