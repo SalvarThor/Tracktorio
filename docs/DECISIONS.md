@@ -4,6 +4,22 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.1.5 save migration (schema 2, mod version 0.1.0)
+- Decision: `state.migrate(steps)` runs on configuration change and from the test hook
+  `tt-city.migrate`.
+  - Schema 1 → 2 closes window records stored in the old format (a unit number).
+  - Every run calls `ports.ensure_all()`, which gives each upgradable city its port.
+  - The steps are idempotent.
+- Port placement never removes player entities. If the port tile is taken (an old save where
+  the player built there), the city waits: the player gets one message with a map link to
+  the tile, and `ports.tick` retries every second until the tile is clear.
+- The mod version goes 0.0.1 → 0.1.0, because `on_configuration_changed` does not fire for
+  an unchanged version. Verified on a real Phase 1 save (the playtest round 2 autosave)
+  loaded headless: "schema 1 -> 2; cities with a port: 4, still waiting: 0". It ran
+  180 ticks without errors.
+- Rejected: placing the port on the nearest free tile (the location must be predictable);
+  removing what blocks it.
+
 ## 2026-11-18: 2.1.4 tier UI and upgrade notifications
 - City window: a tier section, "Tier N of 3: <what it does>". It shows the next tier's
   description and each material with delivered / needed and a progress bar, and says where

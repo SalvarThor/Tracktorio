@@ -192,7 +192,7 @@ upgraded first. That's an intended chain.
       - Flying text over the city.
       - One heads-up message when a port reaches 90%, so power can be ready before the
         automatic swap.
-- [ ] 2.1.5 Save migration and map. MVP saves get tier 1 records and ports placed on
+- [x] 2.1.5 Save migration and map. MVP saves get tier 1 records and ports placed on
       configuration change. Check the scenario layout has room for every port. Tests load an
       MVP-era state and upgrade it.
 - [ ] 2.1.6 `/playtest` round: upgrade path, numbers, port placement.

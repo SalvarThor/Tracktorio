@@ -58,22 +58,46 @@ local function set_filters(record)
   end
 end
 
---- Place the port for a city (if it has a next tier and no port yet).
+--- Place the port for a city (if it has a next tier and no port yet). Returns true when the
+--- city has its port. Never removes anything: if the tile is taken (e.g. an old save where
+--- the player built there), it returns false and is retried every port tick.
 ---@param city LuaEntity
 ---@param record table
 function M.attach(city, record)
-  if record.port and record.port.valid then return end
-  if not city_defs.next_tier(record.name) then return end
+  if record.port and record.port.valid then return true end
+  if not city_defs.next_tier(record.name) then return false end
+  record.upgrade = record.upgrade or new_upgrade(record.name)
+  local pos = M.port_position(city)
+  if not city.surface.can_place_entity({ name = config.PORT, position = pos, force = city.force }) then return false end
   local port = city.surface.create_entity({
-    name = config.PORT, position = M.port_position(city), force = city.force, create_build_effect_smoke = false })
-  assert(port, "tt: could not place a construction port for " .. record.name)
+    name = config.PORT, position = pos, force = city.force, create_build_effect_smoke = false })
+  if not port then return false end
   cities.protect(port)
   record.port = port
-  record.upgrade = record.upgrade or new_upgrade(record.name)
+  record.port_blocked_notified = nil
   set_filters(record)
+  return true
 end
 
 cities.on_any_placed(M.attach)
+
+-- Called once per city whose port tile is blocked (message to the player).
+local on_blocked = nil
+---@param fn fun(record: table, position: MapPosition)
+function M.on_blocked(fn) on_blocked = fn end
+
+--- Give every upgradable city its port (migration, and retried every port tick).
+function M.ensure_all()
+  for _, record in pairs(storage.tt_cities) do
+    local city = record.entity
+    if city.valid and not (record.port and record.port.valid) and city_defs.next_tier(record.name) then
+      if not M.attach(city, record) and not record.port_blocked_notified then
+        record.port_blocked_notified = true
+        if on_blocked then on_blocked(record, M.port_position(city)) end
+      end
+    end
+  end
+end
 
 --- Fraction of the upgrade delivered (0..1), counting each material up to its cost.
 ---@param upgrade table?
@@ -100,6 +124,7 @@ function M.on_heads_up(fn) on_heads_up = fn end
 --- Empty every port into its city's progress (every GOAL_TICK_INTERVAL ticks). Completed
 --- upgrades run after the loop: they replace entries of storage.tt_cities.
 function M.tick()
+  M.ensure_all()
   local completed = {}
   for _, record in pairs(storage.tt_cities) do
     local port, upgrade = record.port, record.upgrade

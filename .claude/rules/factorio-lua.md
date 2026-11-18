@@ -37,6 +37,9 @@ reflect 2.0 knowledge; if 2.1 differs, follow the docs and note it in DECISIONS.
 - `script.on_load` must never write to `storage` or the game state. It may only restore
   metatables and local references.
 - Initialize state in `script.on_init`; migrate it in `script.on_configuration_changed`.
+- `on_configuration_changed` only fires when a mod version, the mod set or startup settings
+  change. Bump `mod/info.json` `version` with any storage-schema change (and `state.SCHEMA`),
+  or existing saves never run the migration.
 - No module-level variables that hold game state between ticks unless they are rebuilt
   identically from `storage` in `on_load`.
 - Never branch game logic on a specific player's view, GUI state or local client data.

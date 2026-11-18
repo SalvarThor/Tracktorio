@@ -1,17 +1,31 @@
 -- Persistent state in `storage` and its migrations.
 -- Storage keys use the prefix `tt_` (Lua identifiers can't contain '-').
+--
+-- Schema history:
+--   1  MVP (Phase 1)
+--   2  tier upgrades (Phase 2.1): construction ports, upgrade progress, window state holds
+--      the shown entity instead of a unit number
 
 local M = {}
 
-M.SCHEMA = 1
+M.SCHEMA = 2
 
 function M.init()
   storage.tt_schema = M.SCHEMA
 end
 
-function M.migrate()
-  storage.tt_schema = storage.tt_schema or 0
-  -- if storage.tt_schema < 2 then ... storage.tt_schema = 2 end
+--- Run on every configuration change. Each step must be idempotent; the module-level
+--- init()s have already created any missing tables. `steps` supplies the code that lives in
+--- other modules: { ensure_ports = fn, legacy_windows = fn }.
+---@param steps table
+function M.migrate(steps)
+  local from = storage.tt_schema or 0
+  if from < 2 then
+    -- 1 -> 2: windows stored a unit number; close them (the window is rebuilt on next click).
+    steps.legacy_windows()
+  end
+  -- Every version: every upgradable city has its port (also covers a blocked tile later).
+  steps.ensure_ports()
   storage.tt_schema = M.SCHEMA
 end
 

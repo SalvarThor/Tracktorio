@@ -16,7 +16,7 @@ return {
       assert_.truthy(t, "dump is not valid JSON")
       ---@cast t table
       assert_.equals(t.mod_version, script.active_mods["train-tycoon"])
-      assert_.equals(t.storage.tt_schema, 1, "storage.tt_schema")
+      assert_.equals(t.storage.tt_schema, 2, "storage.tt_schema")
     end,
   },
 }

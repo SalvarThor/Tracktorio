@@ -142,6 +142,18 @@ function M.heads_up(record)
   tell(city.force --[[@as LuaForce]], message)
 end
 
+--- A city's construction port tile is taken; tell the player once.
+---@param record table
+---@param position MapPosition
+function M.port_blocked(record, position)
+  local city = record.entity
+  if not (city and city.valid) then return end
+  ---@type any
+  local message = { "tt-notify.port-blocked", string.format("[gps=%d,%d,%s]", math.floor(position.x), math.floor(position.y), city.surface.name),
+    M.base_name(city.name) }
+  tell(city.force --[[@as LuaForce]], message)
+end
+
 --- Drop expired custom alerts (every GOAL_TICK_INTERVAL).
 function M.tick()
   local keep = {}

@@ -16,6 +16,16 @@ function M.init()
   storage.tt_city_gui = storage.tt_city_gui or {}
 end
 
+--- Schema 1 stored a unit number per open window: close those windows.
+function M.migrate_legacy()
+  for index, shown in pairs(storage.tt_city_gui) do
+    if type(shown) == "number" then
+      local player = game.get_player(index)
+      if player then M.close(player) else storage.tt_city_gui[index] = nil end
+    end
+  end
+end
+
 local function sprite_for(kind, name)
   return (kind == "fluid" and "fluid/" or "item/") .. name
 end
