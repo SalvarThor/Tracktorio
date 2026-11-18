@@ -84,6 +84,7 @@ migrate = function()
   end
   log(string.format("tt: configuration changed: schema %s -> %d; cities with a port: %d, still waiting for a port tile: %d",
     tostring(from), storage.tt_schema, with_port, without))
+  research.init() -- start technologies added later (e.g. 2.2.3) reach existing saves
   limp.scan()
   goal_gui.rebuild_all()
 end

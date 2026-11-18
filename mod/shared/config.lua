@@ -114,6 +114,9 @@ M.HIDDEN_TECH_PATTERNS = { "^planet%-discovery%-", "^space%-platform", "^rocket%
 
 -- Researched for the player force at game start (SPEC MVP starting research).
 M.START_TECHNOLOGIES = {
+  -- Space Age roots the whole tree here, triggered by crafting a lab; the research complex
+  -- takes the lab's place (2.2.3), so it starts researched.
+  "automation-science-pack",
   "railway",                        -- rail, locomotive, cargo wagon
   "automated-rail-transportation",  -- train stop, rail and chain signals
   "fluid-wagon",

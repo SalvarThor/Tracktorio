@@ -5,7 +5,14 @@ local defs = require("shared.city_defs")
 for _, def in ipairs(defs.list) do
   for tier, t in ipairs(def.tiers) do
     local suffix = tier == 1 and def.name or (def.name .. "-t" .. tier)
-    local protos = blackbox.make_city({
+    local protos = def.kind == "lab" and blackbox.make_lab({
+      name = suffix,
+      graphics = def.graphics,
+      inputs = def.inputs,
+      researching_speed = t.researching_speed,
+      power = t.power,
+      map_color = def.map_color,
+    }) or blackbox.make_city({
       name = suffix,
       graphics = def.graphics,
       crafting_speed = t.crafting_speed,

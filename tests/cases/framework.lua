@@ -33,7 +33,7 @@ return {
           else
             assert_.truthy(not (s.port and s.port.valid), name .. ": max tier has a port")
           end
-          assert_.truthy(info(city).recipe, name .. ": no recipe info")
+          assert_.truthy(info(city).recipe or info(city).lab, name .. ": no recipe or lab info")
           if s.port and s.port.valid then s.port.destroy() end -- the destroy event is a tick late
           city.destroy()
         end

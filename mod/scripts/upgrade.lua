@@ -37,8 +37,9 @@ function M.upgrade(record)
     if shown == old or (record.port and shown == record.port) then viewers[#viewers + 1] = index end
   end
 
-  local inputs = contents(old.get_inventory(defines.inventory.crafter_input))
-  local outputs = contents(old.get_inventory(defines.inventory.crafter_output))
+  local in_id = old.type == "lab" and defines.inventory.lab_input or defines.inventory.crafter_input
+  local inputs = contents(old.get_inventory(in_id))
+  local outputs = old.type == "lab" and {} or contents(old.get_inventory(defines.inventory.crafter_output))
 
   -- Forget the old record first, so on_object_destroyed does not tear down the new parts.
   storage.tt_cities[old_unit] = nil
@@ -51,7 +52,7 @@ function M.upgrade(record)
 
   -- Restore contents. What the new recipe can't take (coal after going electric) is spilled
   -- beside the port, for the player to pick up.
-  local input_inv = city.get_inventory(defines.inventory.crafter_input)
+  local input_inv = city.get_inventory(in_id)
   for _, stack in ipairs(inputs) do
     local inserted = input_inv and input_inv.insert(stack) or 0
     if inserted < stack.count then
@@ -59,7 +60,7 @@ function M.upgrade(record)
         enable_looted = true, allow_belts = false })
     end
   end
-  local output_inv = city.get_inventory(defines.inventory.crafter_output)
+  local output_inv = city.type ~= "lab" and city.get_inventory(defines.inventory.crafter_output) or nil
   for _, stack in ipairs(outputs) do
     local inserted = output_inv and output_inv.insert(stack) or 0
     if inserted < stack.count then

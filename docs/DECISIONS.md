@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.2.3 research complex
+- Decision: the research complex is a `lab` prototype built from the city definition
+  (`kind = "lab"`), protected like every city, taking red and green packs. Tiers: research
+  speed 20/40/80 (= labs), 1.2/2.4/4.8 MW (60 kW per lab). T2 costs 1000 iron + 1000
+  copper + 500 circuits, T3 3000 + 3000 + 2000 circuits. Its window shows the status (no
+  research selected, waiting for packs, can't research a tech that needs packs it doesn't
+  take), the current research, the packs inside and the speed. Upgrades keep the packs.
+- Found: in Space Age the whole tree hangs off the `automation-science-pack` technology,
+  whose research trigger is crafting a lab. The player can never craft one here, so no
+  research was possible. It is now a start technology (the complex replaces the lab), and
+  start technologies are re-applied on every configuration change so existing saves get it.
+  Other trigger technologies are handled in 2.2.4.
+- Why: vanilla lab behaviour (research speed bonuses, pack drain, queue) with no script.
+- Rejected: scripted research (user decision).
+
 ## 2026-11-18: 2.2.2 circuit, red science and green science cities
 - Decision: three electric cities. Tier 1 rates and power equal the vanilla assembling
   machine 2s (speed 0.75, 150 kW) that would make the same output, including the gears and

@@ -119,6 +119,20 @@ M.list = {
     { r = 0.85, g = 0.25, b = 0.25 }, 1100, red_recipe, 1, with_circuits(2000, 1000)),
   assembler_city("green-science", { type = "assembling-machine", name = "assembling-machine-2" },
     { r = 0.35, g = 0.85, b = 0.35 }, 1500, green_recipe, 1, with_circuits(2000, 1000)),
+  {
+    -- Research complex (PLAN 2.2.3): a lab prototype; the engine runs research. Tier 1 =
+    -- 20 labs (speed 1, 60 kW each). Its "product" is research, so any items may pay.
+    name = "research",
+    kind = "lab",
+    graphics = { type = "lab", name = "lab" },
+    map_color = { r = 0.4, g = 0.6, b = 0.95 },
+    inputs = { "automation-science-pack", "logistic-science-pack" },
+    tiers = {
+      { researching_speed = 20, power = "1200kW" },
+      { researching_speed = 40, power = "2400kW", cost = with_circuits(1000, 500) },
+      { researching_speed = 80, power = "4800kW", cost = with_circuits(3000, 2000) },
+    },
+  },
 }
 
 ---@param name string city definition name, e.g. "iron-smelting"

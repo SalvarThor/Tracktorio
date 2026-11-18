@@ -149,4 +149,48 @@ function M.make_city(def)
   return { category, recipe, entity }
 end
 
+--- Build a lab-type city (the research complex, PLAN 2.2.3). The engine runs research: the
+--- packs go in by inserter, research speed is the tier cap, power is drawn like labs.
+---   def: name, size, graphics (a lab), inputs (science pack names), researching_speed,
+---        power, map_color
+---@param def table
+---@return table[]
+function M.make_lab(def)
+  local name = M.PREFIX .. def.name
+  local size = def.size or 9
+  local half = size / 2
+  local src = source_prototype(def.graphics)
+  local src_size = math.max(1, math.floor(src.collision_box[2][1] - src.collision_box[1][1] + 0.6))
+  local factor = size / src_size
+  local on_animation, off_animation = table.deepcopy(src.on_animation), table.deepcopy(src.off_animation)
+  scale_sprites(on_animation, factor)
+  scale_sprites(off_animation, factor)
+  return { {
+    type = "lab",
+    name = name,
+    icon = src.icon,
+    icons = src.icons,
+    flags = {
+      "placeable-neutral", "not-rotatable", "not-blueprintable", "not-deconstructable",
+      "not-upgradable", "no-copy-paste", "not-flammable", "not-repairable",
+      "not-in-kill-statistics", "not-in-made-in",
+    },
+    minable = nil,
+    max_health = 10000,
+    collision_box = { { -half + 0.1, -half + 0.1 }, { half - 0.1, half - 0.1 } },
+    selection_box = { { -half, -half }, { half, half } },
+    map_color = def.map_color or { r = 0.85, g = 0.65, b = 0.2 },
+    on_animation = on_animation,
+    off_animation = off_animation,
+    working_sound = src.working_sound,
+    inputs = def.inputs,
+    researching_speed = def.researching_speed,
+    energy_source = { type = "electric", usage_priority = "secondary-input" },
+    energy_usage = def.power,
+    module_slots = 0,
+    allowed_effects = {},
+    impact_category = "metal",
+  } }
+end
+
 return M

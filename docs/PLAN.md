@@ -229,7 +229,7 @@ product. Gears and cables stay inside the cities; circuits are shipped.
       and pips works from a city definition alone (no per-city code).
 - [x] 2.2.2 Circuit, red science and green science cities: prototypes, recipes, power, tiers,
       costs, locale.
-- [ ] 2.2.3 Research complex: lab-based city, protected, tiers by research speed, port. Its
+- [x] 2.2.3 Research complex: lab-based city, protected, tiers by research speed, port. Its
       window shows the current research and missing packs, or "no research selected".
 - [ ] 2.2.4 Research gating: every technology needing only red and green science is
       researchable; techs needing other packs stay locked and visible; techs whose unlocks are

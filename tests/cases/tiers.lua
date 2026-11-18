@@ -3,9 +3,10 @@ local assert_ = require("__train-tycoon-tests__/assert")
 local h = require("__train-tycoon-tests__/helpers")
 local defs = require("__train-tycoon__/shared/city_defs")
 
---- Max output per minute of a city prototype's first product.
+--- Max output per minute of a city prototype's first product (labs: research speed).
 local function max_per_min(entity_name)
   local p = prototypes.entity[entity_name]
+  if p.type == "lab" then return p.get_researching_speed() end
   local r = assert(p.fixed_recipe, entity_name .. " has no fixed recipe")
   return r.products[1].amount * 60 * p.get_crafting_speed() / r.energy
 end
@@ -67,7 +68,7 @@ return {
         for tier = 2, #def.tiers do
           local t = def.tiers[tier]
           assert_.truthy(t.cost and #t.cost > 0, def.name .. " T" .. tier .. " has no cost")
-          for _, p in ipairs(t.recipe.results) do
+          for _, p in ipairs(t.recipe and t.recipe.results or {}) do
             for _, c in ipairs(t.cost) do
               assert_.truthy(c.name ~= p.name, def.name .. " T" .. tier .. " costs its own " .. p.name)
             end

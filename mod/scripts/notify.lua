@@ -27,6 +27,11 @@ function M.tier_facts(entity_name)
   local info = city_defs.by_entity[entity_name]
   local recipe = proto and proto.fixed_recipe
   local facts = { coal = false }
+  if proto and info and proto.type == "lab" then
+    facts.labs = proto.get_researching_speed()
+    facts.draw = proto.get_max_energy_usage() * 60
+    return facts
+  end
   if not (proto and recipe and info) then return facts end
   local p = recipe.products[1]
   facts.product = p.name
@@ -50,7 +55,9 @@ function M.describe(entity_name, previous)
   local f = M.tier_facts(entity_name)
   ---@type any[]
   local parts = { "" }
-  if f.output then
+  if f.labs then
+    parts[#parts + 1] = { "tt-notify.labs", tostring(math.floor(f.labs + 0.5)) }
+  elseif f.output then
     parts[#parts + 1] = { "tt-notify.power-out", mw(f.output) }
   elseif f.per_min then
     local icon = (f.product_type == "fluid" and "[fluid=" or "[item=") .. f.product .. "]"

@@ -119,10 +119,43 @@ local function add_tiers(body, city)
   add_text(body, { "tt-gui.tier-where" })
 end
 
+--- The research complex: status, current research and the packs inside.
+---@param body LuaGuiElement
+---@param entity LuaEntity
+---@param info table
+local function fill_lab(body, entity, info)
+  local function icons(list)
+    local out = {}
+    for _, n in ipairs(list or {}) do out[#out + 1] = "[item=" .. n .. "]" end
+    return table.concat(out, " ")
+  end
+  if info.status == "no_research" then
+    add_text(body, { "tt-gui.lab-status-no-research" }, true, "status")
+    add_text(body, { "tt-gui.lab-hint-no-research" }, false, "hint")
+  elseif info.unsupported and #info.unsupported > 0 then
+    add_text(body, { "tt-gui.lab-status-unsupported", icons(info.unsupported) }, true, "status")
+  elseif info.status == "missing_packs" then
+    add_text(body, { "tt-gui.lab-status-missing", icons(info.missing) }, true, "status")
+  else
+    add_status(body, entity, info)
+  end
+  if info.research then
+    add_text(body, { "tt-gui.lab-research", "[technology=" .. info.research .. "]",
+      prototypes.technology[info.research].localised_name }, false, "research")
+  end
+  body.add({ type = "label", caption = { "tt-gui.lab-packs" }, style = "caption_label" })
+  for _, p in ipairs(info.lab.packs) do
+    add_line(body, p, { "tt-gui.lab-pack-line", tostring(p.count) })
+  end
+  add_text(body, { "tt-gui.lab-speed", tostring(math.floor(info.lab.speed + 0.5)) })
+  add_tiers(body, entity)
+end
+
 ---@param body LuaGuiElement
 ---@param entity LuaEntity
 local function fill_city(body, entity)
   local info = city_info.info(entity)
+  if info.lab then return fill_lab(body, entity, info) end
   if not info.recipe then
     add_text(body, { "tt-gui.city-no-recipe" })
     return
@@ -186,7 +219,8 @@ end
 function M.has_window(entity)
   if not (entity and entity.valid) then return false end
   if entity.name == config.PORT then return true end
-  return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.name == config.CITY.goal)
+  return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.type == "lab"
+    or entity.name == config.CITY.goal)
 end
 ---@param player LuaPlayer
 ---@param entity LuaEntity

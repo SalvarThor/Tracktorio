@@ -62,9 +62,45 @@ local STARVED = {
   [defines.entity_status.no_ingredients] = true,
 }
 
+local LAB_STATUS = {
+  [defines.entity_status.working] = "running",
+  [defines.entity_status.low_power] = "low_power",
+  [defines.entity_status.no_power] = "no_power",
+  [defines.entity_status.no_research_in_progress] = "no_research",
+  [defines.entity_status.missing_science_packs] = "missing_packs",
+}
+
+--- Snapshot of the research complex (a lab, PLAN 2.2.3).
+---@param entity LuaEntity
+local function lab_info(entity)
+  local out = { name = entity.name, unit_number = entity.unit_number }
+  local inv = entity.get_inventory(defines.inventory.lab_input)
+  local accepts = {}
+  out.lab = { speed = entity.prototype.get_researching_speed(), packs = {} }
+  for _, pack in ipairs(entity.prototype.lab_inputs or {}) do
+    accepts[pack] = true
+    out.lab.packs[#out.lab.packs + 1] = { type = "item", name = pack, count = inv and inv.get_item_count(pack) or 0 }
+  end
+  local tech = entity.force.current_research
+  out.research = tech and tech.name or nil
+  out.status = LAB_STATUS[entity.status] or "other"
+  if out.status == "other" then
+    for k, v in pairs(defines.entity_status) do if v == entity.status then out.status_detail = k end end
+  end
+  if tech then
+    out.missing, out.unsupported = {}, {}
+    for _, ing in ipairs(tech.research_unit_ingredients) do
+      if not accepts[ing.name] then out.unsupported[#out.unsupported + 1] = ing.name
+      elseif (inv and inv.get_item_count(ing.name) or 0) == 0 then out.missing[#out.missing + 1] = ing.name end
+    end
+  end
+  return out
+end
+
 --- Snapshot of a city for the UI.
 ---@param entity LuaEntity
 function M.info(entity)
+  if entity.type == "lab" then return lab_info(entity) end
   local record = storage.tt_cities[entity.unit_number] or {}
   local recipe = recipe_of(entity)
   local out = { name = entity.name, unit_number = entity.unit_number }
