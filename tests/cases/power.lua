@@ -39,6 +39,15 @@ return {
     end,
   },
   {
+    name = "power: the hidden generator cannot be selected, so the city is what you hover",
+    fn = function()
+      local box = prototypes.entity["tt-power-generator"].selection_box
+      assert_.truthy(box.left_top.x == box.right_bottom.x and box.left_top.y == box.right_bottom.y,
+        "generator has a selection box: " .. serpent.line(box))
+      assert_.falsy(prototypes.entity["tt-power-generator"].selectable_in_game, "selectable_in_game")
+    end,
+  },
+  {
     name = "power: delivers electricity to a consumer on the pole network",
     fn = function(ctx)
       local city, eei = power_rig(540, 1000000) -- 1 MW

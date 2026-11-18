@@ -32,6 +32,8 @@ M.CITY = {
 -- Goal box: slots 1..GOAL_SLOTS/2 take iron plates, the rest copper plates.
 M.GOAL_SLOTS = 40
 M.GOAL_ITEMS = { iron = "iron-plate", copper = "copper-plate" }
+-- Filter used for a metal whose target is met: the goal box stops accepting it.
+M.GOAL_CLOSED_ITEM = "tt-goal-closed"
 -- How often the goal box is emptied and counted, and the rate window (for the UI).
 M.GOAL_TICK_INTERVAL = 60
 M.RATE_WINDOW_TICKS = 60 * 60

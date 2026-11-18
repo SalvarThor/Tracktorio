@@ -4,6 +4,25 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: Playtest round 1 fixes
+- Power city generator: `selectable_in_game = false`, no selection box. The
+  `not-selectable-in-game` flag alone still let it win selection over the city (2.1.24).
+- Non-free recipes get `hide_from_player_crafting`, so the crafting menu shows only free
+  items.
+- City map tags: `force.add_chart_tag` needs charted chunks, and charting is async, so tags
+  are queued at generation and placed from the 60-tick handler until all exist.
+- Goal box demand (user request): when a metal reaches its target, its slots are filtered
+  to the hidden placeholder `tt-goal-closed`, so inserters stop feeding it. Raising the
+  target reopens them. Overshoot is at most one counting interval (about 1 s of deliveries).
+
+## 2026-11-18: Hand-carrying cargo into chests is allowed (user decision, playtest 1.10)
+- Decision: the player may carry ore, coal or plates by hand into a chest whose inserter
+  feeds a city or the goal box. Only direct insertion into a city is blocked.
+- Why: like hand-fueling, it can't scale (20,000 plates by hand loses to any train), and it
+  helps the bootstrap (first coal to the power city and depot). No code.
+- Rejected: banning cargo items from the player inventory; letting the goal box accept only
+  inserters that pick up from cargo wagons.
+
 ## 2026-11-18: 1.9 end-to-end test
 - Decision: `tests/cases/e2e.lua` builds a 300-tile line with a two-headed train
   (loco-wagon-loco, hand-fuelled with coal fuel) and three stations:

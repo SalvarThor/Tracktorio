@@ -19,6 +19,17 @@ scale_sprites(picture, size)
 
 data:extend({
   {
+    -- Slot filter for a goal metal that has reached its target: nothing can match it, so
+    -- inserters stop delivering that metal (playtest 1.10).
+    type = "item",
+    name = config.GOAL_CLOSED_ITEM,
+    icon = "__core__/graphics/icons/mip/slot-item-in-hand.png",
+    hidden = true,
+    hidden_in_factoriopedia = true,
+    stack_size = 1,
+    auto_recycle = false,
+  },
+  {
     type = "container",
     name = config.CITY.goal,
     icon = source.icon,

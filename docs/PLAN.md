@@ -97,6 +97,21 @@ Goal: the MVP described in SPEC.md, playable start to win.
 - [x] 1.9 End-to-end in-game test: a scripted setup where a train hauls ore and coal to a
       smelting city and plates to the goal box, and the goal box registers the rate.
 - [ ] 1.10 `/playtest` round with the user. Fix findings. Tune targets.
+  Round 1 (2026-11-18) findings:
+  - [x] Power city showed as "Power city generator", couldn't be clicked and never showed
+        "Output full": the hidden generator was selectable over the city. It now has no
+        selection box.
+  - [x] Crafting menu listed non-free recipes as red, uncraftable entries: now hidden from
+        player crafting.
+  - [x] Map labels for cities: chart tags with icon and name.
+  - [x] Goal box kept accepting a metal past its target: slots for a met metal now close.
+  - [x] `!` prompt runs Git Bash, so `! ./tools/playtest.ps1` failed: docs fixed.
+  - [ ] Re-check the four fixes above in game (round 2).
+  - [ ] Playtests and tests share `.factorio\`, so tests can't run while a playtest is open.
+        Give playtests their own write-data folder.
+  - [ ] Steam asks "run with custom arguments?" when the GUI is launched directly (headless
+        runs don't). Decide: accept the click, or another launch method.
+  - [ ] Tune rates and the 20,000 goal (not yet assessed).
 
 Stop. Report to the user.
 

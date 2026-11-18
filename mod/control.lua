@@ -53,6 +53,7 @@ script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   goal_gui.update_all()
   city_info.sample()
   city_gui.update_all()
+  map.tick_tags()
 end)
 
 script.on_nth_tick(config.LIMP_INTERVAL, limp.tick)

@@ -55,6 +55,14 @@ for _, loco in pairs(data.raw.locomotive) do
   end
 end
 
+-- Keep the crafting menu to the free recipes: everything else would show as an uncraftable
+-- red entry (playtest 1.10). Machines (cities) still see their own recipes.
+for _, recipe in pairs(data.raw.recipe) do
+  if not has_category(recipe, config.FREE_CATEGORY) then
+    recipe.hide_from_player_crafting = true
+  end
+end
+
 -- The character can only hand-craft the free recipes.
 for _, character in pairs(data.raw.character) do
   character.crafting_categories = { config.FREE_CATEGORY }

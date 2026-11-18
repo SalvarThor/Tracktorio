@@ -101,6 +101,17 @@ return {
     end,
   },
   {
+    name = "restrictions: the crafting menu shows only free recipes",
+    fn = function()
+      for _, name in ipairs({ "iron-gear-wheel", "electronic-circuit", "gun-turret", "stone-wall" }) do
+        assert_.truthy(prototypes.recipe[name].hidden_from_player_crafting, name .. " shown in crafting menu")
+      end
+      for _, name in ipairs(FREE) do
+        assert_.falsy(prototypes.recipe[name].hidden_from_player_crafting, name .. " hidden from crafting menu")
+      end
+    end,
+  },
+  {
     name = "restrictions: planets and platforms technologies are hidden",
     fn = function()
       for _, name in ipairs({ "space-platform", "planet-discovery-vulcanus", "rocket-silo" }) do

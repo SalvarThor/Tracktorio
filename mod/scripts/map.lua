@@ -14,11 +14,12 @@ M.SPAWN = { x = 0, y = 4 }
 
 -- City centres (9x9 cities sit on tile centres).
 M.CITIES = {
-  { name = config.CITY.depot, x = 0, y = -24 },   -- near the start
-  { name = config.CITY.power, x = -64, y = 40 },
-  { name = config.CITY.iron, x = 160, y = -96 },
-  { name = config.CITY.copper, x = 160, y = 96 },
-  { name = config.CITY.goal, x = 272, y = 0 },
+  -- label/tag_icon: the map tag (tag text is a plain string, not localised)
+  { name = config.CITY.depot, x = 0, y = -24, label = "Depot city", tag_icon = "tt-coal-fuel" }, -- near the start
+  { name = config.CITY.power, x = -64, y = 40, label = "Power city", tag_icon = "small-electric-pole" },
+  { name = config.CITY.iron, x = 160, y = -96, label = "Iron smelting city", tag_icon = "iron-plate" },
+  { name = config.CITY.copper, x = 160, y = 96, label = "Copper smelting city", tag_icon = "copper-plate" },
+  { name = config.CITY.goal, x = 272, y = 0, label = "Goal box", tag_icon = "iron-chest" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).
@@ -89,6 +90,43 @@ local function place_cities(surface)
   end
 end
 
+--- Put a labelled map tag on every city of the surface. Charting is asynchronous, so tags
+--- that can't be placed yet are retried from tick_tags (storage.tt_map_tags_pending).
+---@param surface LuaSurface
+local function tag_cities(surface)
+  storage.tt_map_tags_pending = storage.tt_map_tags_pending or {}
+  storage.tt_map_tags_pending[surface.name] = true
+end
+
+--- Place pending city map tags (called every GOAL_TICK_INTERVAL). Returns tags placed.
+function M.tick_tags()
+  local pending = storage.tt_map_tags_pending
+  if not pending then return 0 end
+  local placed = 0
+  for surface_name in pairs(pending) do
+    local surface = game.get_surface(surface_name)
+    if not surface then
+      pending[surface_name] = nil
+    else
+      local force = game.forces["player"]
+      local all = true
+      for _, c in ipairs(M.CITIES) do
+        local pos = { x = c.x + 0.5, y = c.y + 0.5 }
+        if #force.find_chart_tags(surface, { { pos.x - 1, pos.y - 1 }, { pos.x + 1, pos.y + 1 } }) == 0 then
+          local tag = force.add_chart_tag(surface, {
+            position = pos,
+            icon = { type = "item", name = c.tag_icon },
+            text = c.label,
+          })
+          if tag then placed = placed + 1 else all = false end
+        end
+      end
+      if all then pending[surface_name] = nil end
+    end
+  end
+  return placed
+end
+
 --- Create (if needed) and populate the map surface. Returns the surface.
 ---@param name string? surface name (default M.SURFACE)
 function M.generate(name)
@@ -103,6 +141,7 @@ function M.generate(name)
   place_patches(surface)
   place_cities(surface)
   game.forces["player"].chart(surface, { { -M.WIDTH / 2, -M.HEIGHT / 2 }, { M.WIDTH / 2, M.HEIGHT / 2 } })
+  tag_cities(surface)
   return surface
 end
 
@@ -122,6 +161,7 @@ end
 function M.remote_interface()
   return {
     generate = function(name) return M.generate(name) end,
+    tick_tags = function() return M.tick_tags() end,
     setup_player = function(player_index) M.setup_player(assert(game.get_player(player_index))) end,
     layout = function()
       return { width = M.WIDTH, height = M.HEIGHT, spawn = M.SPAWN, cities = M.CITIES,

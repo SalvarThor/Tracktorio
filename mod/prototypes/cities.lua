@@ -77,7 +77,8 @@ data:extend({
       "not-selectable-in-game", "not-rotatable", "not-in-kill-statistics", "not-upgradable", "no-copy-paste" },
     max_health = 10000,
     collision_box = { { -4.4, -4.4 }, { 4.4, 4.4 } },
-    selection_box = { { -4.5, -4.5 }, { 4.5, 4.5 } },
+    -- no selection box: hovering/clicking must reach the city underneath (playtest 1.10)
+    selectable_in_game = false,
     collision_mask = { layers = {} },
     effectivity = 1,
     fluid_usage_per_tick = 3, -- 180 steam/s

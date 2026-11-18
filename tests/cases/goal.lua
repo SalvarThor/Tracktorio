@@ -58,6 +58,27 @@ return {
     end,
   },
   {
+    name = "goal: stops accepting a metal once its target is met",
+    fn = function(ctx)
+      local s = status()
+      local iron_target = s.delivered.iron + 10
+      remote.call("tt-goal", "set_targets", iron_target, s.delivered.copper + 100000)
+      local box, cin = h.city_rig(GOAL, 960, { { name = "iron-plate", count = 40 } }, false)
+      ctx:wait_until(function() return status().delivered.iron >= iron_target end, 60 * 60, function()
+        ctx:wait(60 * 10, function()
+          remote.call("tt-goal", "tick")
+          local inv = assert(box.get_inventory(defines.inventory.chest))
+          assert_.falsy(inv.can_insert({ name = "iron-plate", count = 1 }), "still accepts iron")
+          assert_.truthy(inv.can_insert({ name = "copper-plate", count = 1 }), "copper closed too")
+          assert_.truthy(status().delivered.iron <= iron_target + 5, "overshoot " .. (status().delivered.iron - iron_target))
+          assert_.truthy(cin.get_item_count("iron-plate") >= 20, "kept taking iron: " .. cin.get_item_count("iron-plate") .. " left")
+          remote.call("tt-goal", "set_targets", 20000, 20000)
+          assert_.truthy(inv.can_insert({ name = "iron-plate", count = 1 }), "raising the target did not reopen iron")
+        end)
+      end)
+    end,
+  },
+  {
     name = "goal: reaching both targets wins, one alone does not",
     fn = function(ctx)
       local s = status()

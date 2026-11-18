@@ -92,3 +92,6 @@ Default order, open to change:
 6. Elevated rails.
 7. Nuclear power city.
 8. Procedural map generation.
+9. Water city: water comes only from water cities and must be shipped (by fluid wagon) to
+   where it is used, such as the power city. Offshore pumps are removed from the player.
+   (User request, playtest 1.10.)

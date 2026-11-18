@@ -26,15 +26,29 @@ function M.targets()
   }
 end
 
+--- Slot filters follow the totals: a metal whose target is met is filtered to a placeholder
+--- nothing can match, so the box stops accepting it (it only takes what it still needs).
 ---@param entity LuaEntity
 local function set_filters(entity)
   local inv = assert(entity.get_inventory(defines.inventory.chest))
   local half = math.floor(#inv / 2)
+  local t = M.targets()
+  local d = storage.tt_goal and storage.tt_goal.delivered or { iron = 0, copper = 0 }
+  local want = {
+    iron = d.iron < t.iron and config.GOAL_ITEMS.iron or config.GOAL_CLOSED_ITEM,
+    copper = d.copper < t.copper and config.GOAL_ITEMS.copper or config.GOAL_CLOSED_ITEM,
+  }
   for i = 1, #inv do
-    inv.set_filter(i, { name = i <= half and config.GOAL_ITEMS.iron or config.GOAL_ITEMS.copper })
+    local name = i <= half and want.iron or want.copper
+    local current = inv.get_filter(i)
+    if not current or current.name ~= name then inv.set_filter(i, { name = name }) end
   end
 end
 cities.on_placed(config.CITY.goal, set_filters)
+
+local function refresh_filters()
+  for _, box in ipairs(cities.list(config.CITY.goal)) do set_filters(box) end
+end
 
 --- Delivered plates per minute over the rate window: { iron = n, copper = n }.
 function M.rates()
@@ -75,6 +89,7 @@ function M.tick()
       end
     end
   end
+  refresh_filters()
   local samples = g.samples
   samples[#samples + 1] = { game.tick, g.delivered.iron, g.delivered.copper }
   while #samples > 1 and samples[1][1] < game.tick - config.RATE_WINDOW_TICKS do
@@ -100,6 +115,7 @@ end
 function M.set_targets(iron, copper)
   if iron then settings.global["tt-goal-iron"] = { value = math.max(1, math.floor(iron)) } end
   if copper then settings.global["tt-goal-copper"] = { value = math.max(1, math.floor(copper)) } end
+  refresh_filters()
   check_win()
 end
 

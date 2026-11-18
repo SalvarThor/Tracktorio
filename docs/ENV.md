@@ -52,6 +52,10 @@ Verified 2026-11-18 with the Steam client running: launching
 `bin\x64\factorio.exe` directly works unattended for `--version`, `--help`, `--dump-data`
 and `--test-scenario`. Steam doesn't relaunch it, nothing needs a click, and no window opens
 (`Running in headless mode`). A test run takes ~2.5 s wall-clock.
+GUI launches (`tools\playtest.ps1`) behave differently: Steam opens and shows a dialog asking
+whether to run Factorio with custom arguments, and the game starts after the user approves
+it (playtest 1.10). Headless runs (`--test-scenario`, `--dump-data`) show no dialog.
+
 Also verified 2026-11-18 with the Steam client **closed**: the test suite passes the same
 way, and Steam is not started.
 

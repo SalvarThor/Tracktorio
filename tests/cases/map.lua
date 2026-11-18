@@ -56,6 +56,23 @@ return {
     end,
   },
   {
+    name = "map: every city gets a labelled map tag",
+    fn = function(ctx)
+      local surface = assert(game.get_surface(SURFACE))
+      local force = game.forces["player"]
+      ctx:wait_until(function()
+        remote.call("tt-map", "tick_tags")
+        return #force.find_chart_tags(surface) >= #layout().cities
+      end, 60 * 30, function()
+        local labels = {}
+        for _, t in ipairs(force.find_chart_tags(surface)) do labels[t.text] = true end
+        for _, c in ipairs(layout().cities) do
+          assert_.truthy(labels[c.label], "no tag " .. c.label)
+        end
+      end)
+    end,
+  },
+  {
     name = "map: generation is reproducible",
     fn = function()
       local a = assert(game.get_surface(SURFACE))
