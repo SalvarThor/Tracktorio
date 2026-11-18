@@ -43,6 +43,11 @@ city_remote.migrate = function(from_schema)
   if from_schema then storage.tt_schema = from_schema end
   migrate()
 end
+-- Tests: give a city's pending upgrade an old-style cost (as an earlier save has it).
+city_remote.set_upgrade_cost = function(entity, cost, delivered)
+  local record = assert(storage.tt_cities[entity.unit_number])
+  record.upgrade.cost, record.upgrade.delivered = cost, delivered
+end
 city_remote.strip_to_mvp = function(entity)
   local record = assert(storage.tt_cities[entity.unit_number])
   if record.port and record.port.valid then record.port.destroy() end
@@ -76,7 +81,7 @@ migrate = function()
   city_gui.init()
   notify.init()
   state.migrate({ ensure_ports = ports.ensure_all, legacy_windows = city_gui.migrate_legacy,
-    ensure_tier_marks = tier_marks.ensure_all })
+    ensure_tier_marks = tier_marks.ensure_all, refresh_costs = ports.refresh_costs })
   local with_port, without = 0, 0
   for _, r in pairs(storage.tt_cities) do
     if r.port and r.port.valid then with_port = with_port + 1

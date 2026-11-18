@@ -78,7 +78,8 @@ return {
       local pos = city.position
       h.feed_port(city, "iron-plate", 1000); h.feed_port(city, "copper-plate", 1000)
       local t2 = assert(h.city_at(pos))
-      h.feed_port(t2, "iron-plate", 3000); h.feed_port(t2, "copper-plate", 3000)
+      h.feed_port(t2, "iron-plate", 2000); h.feed_port(t2, "copper-plate", 2000)
+      h.feed_port(t2, "electronic-circuit", 1000)
       local t3 = assert(h.city_at(pos))
       assert_.equals(t3.name, "tt-city-depot-t3")
       assert_.falsy(h.port_of(t3), "tier 3 has a port")

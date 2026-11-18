@@ -4,6 +4,16 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.2.5 tier 3 costs use circuits
+- Decision: tier 3 costs now include circuits. Smelting T3: 3000 of the other plate + 1000
+  circuits (was 6000 plates). Depot and power T3: 2000 iron + 2000 copper + 1000 circuits
+  (was 3000 + 3000). Tier 2 costs are unchanged, so the first upgrades need no circuit
+  city. Every configuration change refreshes pending upgrades from the definitions, keeping
+  deliveries of items still in the cost (so a 2.1 save's T2 city with 4000 of 6000 copper
+  is 3000/3000 copper and 0/1000 circuits afterwards; anything over the new amount is lost).
+- Why: makes the circuit city part of the upgrade path, not just of science.
+- Rejected: refunding overpaid plates (they are already consumed; small and rare).
+
 ## 2026-11-18: 2.2.4 research gating
 - Found (2.1.24 + Space Age, probed in game): with `automation-science-pack` researched at
   start, the red/green zone is 27 technologies, all reachable with the research complex.

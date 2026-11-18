@@ -72,4 +72,19 @@ return {
       end
     end,
   },
+  {
+    name = "migration: a pending upgrade picks up changed costs and keeps its deliveries",
+    fn = function()
+      local x = 5400
+      h.clear_area({ { x - 12, -12 }, { x + 12, 12 } })
+      local city = h.place_city("tt-city-iron-smelting-t2", { x + 0.5, 0.5 })
+      remote.call("tt-city", "set_upgrade_cost", city, { ["copper-plate"] = 6000 }, { ["copper-plate"] = 4000 })
+      remote.call("tt-city", "migrate")
+      local s = assert(remote.call("tt-city", "upgrade_status", city))
+      assert_.equals(s.cost["copper-plate"], 3000)
+      assert_.equals(s.cost["electronic-circuit"], 1000)
+      assert_.equals(s.delivered["copper-plate"], 4000)
+      assert_.equals(s.delivered["electronic-circuit"], 0)
+    end,
+  },
 }

@@ -73,7 +73,8 @@ return {
       assert_.falsy(port.valid, "old port still there")
       local now = assert(h.city_at(pos), "no city at the old position")
       assert_.equals(now.name, "tt-city-copper-smelting-t2")
-      assert_.equals(status(now).cost["iron-plate"], 6000, "tier 3 cost")
+      assert_.equals(status(now).cost["iron-plate"], 3000, "tier 3 cost")
+      assert_.equals(status(now).cost["electronic-circuit"], 1000, "tier 3 circuits")
       assert_.equals(status(now).delivered["iron-plate"], 0, "tier 3 progress not fresh")
     end,
   },  {

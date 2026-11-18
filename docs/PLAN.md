@@ -234,7 +234,7 @@ product. Gears and cables stay inside the cities; circuits are shipped.
 - [x] 2.2.4 Research gating: every technology needing only red and green science is
       researchable; techs needing other packs stay locked and visible; techs whose unlocks are
       all banned stay as prerequisites. Tests prove the red/green tree can be completed.
-- [ ] 2.2.5 Upgrade costs use intermediates: tier 3 costs of the existing cities partly move to
+- [x] 2.2.5 Upgrade costs use intermediates: tier 3 costs of the existing cities partly move to
       circuits.
 - [ ] 2.2.6 Bigger map (about 960x600) with the new cities, a second iron patch and room for
       every port. 2.1 saves get the new cities where the tiles are free, otherwise a message.

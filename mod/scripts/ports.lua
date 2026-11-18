@@ -99,6 +99,23 @@ function M.ensure_all()
   end
 end
 
+--- Bring pending upgrades in line with the current definitions (costs changed in 2.2.5).
+--- Deliveries of items still in the cost are kept; items no longer in it are dropped.
+function M.refresh_costs()
+  for _, record in pairs(storage.tt_cities) do
+    local upgrade = record.upgrade
+    if upgrade and not upgrade.complete then
+      local fresh = new_upgrade(record.name)
+      if fresh and fresh.target == upgrade.target then
+        for item in pairs(fresh.cost) do fresh.delivered[item] = upgrade.delivered[item] or 0 end
+        fresh.heads_up_sent = upgrade.heads_up_sent
+        record.upgrade = fresh
+        set_filters(record)
+      end
+    end
+  end
+end
+
 --- Fraction of the upgrade delivered (0..1), counting each material up to its cost.
 ---@param upgrade table?
 function M.progress(upgrade)

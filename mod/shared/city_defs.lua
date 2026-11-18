@@ -32,13 +32,20 @@ local function smelting(name, ore, plate, other_plate, map_color)
       -- 30 plates/s = 48 furnaces = 8.64 MW; 60 plates/s = 17.28 MW.
       { crafting_speed = 3, power = "8.64MW", recipe = recipe(false),
         cost = cost({ { name = other_plate, count = 2000 } }) },
+      -- T3 (2.2.5): part of the cost moves to circuits
       { crafting_speed = 6, power = "17.28MW", recipe = recipe(false),
-        cost = cost({ { name = other_plate, count = 6000 } }) },
+        cost = cost({ { name = other_plate, count = 3000 }, { name = "electronic-circuit", count = 1000 } }) },
     },
   }
 end
 
 local function both_plates(n) return { { name = "iron-plate", count = n }, { name = "copper-plate", count = n } } end
+
+local function with_circuits(plates, circuits)
+  local c = both_plates(plates)
+  c[#c + 1] = { name = "electronic-circuit", count = circuits }
+  return c
+end
 
 local depot_recipe = { energy_required = 1, ingredients = { item("coal", 2) }, results = { item("tt-coal-fuel", 1) } }
 
@@ -64,11 +71,6 @@ local function assembler_city(name, graphics, map_color, power_t1, recipe, speed
   }
 end
 
-local function with_circuits(plates, circuits)
-  local c = both_plates(plates)
-  c[#c + 1] = { name = "electronic-circuit", count = circuits }
-  return c
-end
 
 -- Circuits: 1 iron + 1.5 copper each (3 cables). 5 circuits/s needs 3.33 assemblers for
 -- circuits + 5 for cables = 8.33 x 150 kW = 1.25 MW.
@@ -94,7 +96,7 @@ M.list = {
     tiers = {
       { crafting_speed = 2, power = "840kW", recipe = depot_recipe },
       { crafting_speed = 4, power = "1.68MW", recipe = depot_recipe, cost = both_plates(1000) },
-      { crafting_speed = 8, power = "3.36MW", recipe = depot_recipe, cost = both_plates(3000) },
+      { crafting_speed = 8, power = "3.36MW", recipe = depot_recipe, cost = with_circuits(2000, 1000) },
     },
   },
   {
@@ -110,7 +112,7 @@ M.list = {
     tiers = {
       { crafting_speed = 1.2, recipe = power_recipe, generator_usage = 3 },
       { crafting_speed = 2.4, recipe = power_recipe, generator_usage = 6, cost = both_plates(1000) },
-      { crafting_speed = 4.8, recipe = power_recipe, generator_usage = 12, cost = both_plates(3000) },
+      { crafting_speed = 4.8, recipe = power_recipe, generator_usage = 12, cost = with_circuits(2000, 1000) },
     },
   },
   assembler_city("circuits", { type = "assembling-machine", name = "electromagnetic-plant" },
