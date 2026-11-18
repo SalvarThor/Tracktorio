@@ -43,6 +43,10 @@ local function fill(frame, info)
   local status_caption
   if info.status == "running" then
     status_caption = { "tt-gui.city-status-running" }
+  elseif info.status == "low_power" then
+    status_caption = { "tt-gui.city-status-low-power" }
+  elseif info.status == "no_power" then
+    status_caption = { "tt-gui.city-status-no-power" }
   elseif info.status == "output_full" then
     status_caption = { "tt-gui.city-status-output-full" }
   elseif info.status == "starved" then

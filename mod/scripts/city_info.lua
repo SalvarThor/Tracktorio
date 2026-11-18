@@ -106,8 +106,12 @@ function M.info(entity)
   end
 
   local status = entity.status
-  if status == defines.entity_status.working or status == defines.entity_status.low_power then
+  if status == defines.entity_status.working then
     out.status = "running"
+  elseif status == defines.entity_status.low_power then
+    out.status = "low_power"
+  elseif status == defines.entity_status.no_power then
+    out.status = "no_power"
   elseif status == defines.entity_status.full_output then
     out.status = "output_full"
   elseif status and STARVED[status] then

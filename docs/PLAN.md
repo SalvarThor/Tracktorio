@@ -107,10 +107,11 @@ Goal: the MVP described in SPEC.md, playable start to win.
   - [x] Goal box kept accepting a metal past its target: slots for a met metal now close.
   - [x] `!` prompt runs Git Bash, so `! ./tools/playtest.ps1` failed: docs fixed.
   - [ ] Re-check the four fixes above in game (round 2).
-  - [ ] Playtests and tests share `.factorio\`, so tests can't run while a playtest is open.
-        Give playtests their own write-data folder.
-  - [ ] Steam asks "run with custom arguments?" when the GUI is launched directly (headless
-        runs don't). Decide: accept the click, or another launch method.
+  - [x] Playtests and tests shared `.factorio\`, so tests couldn't run while a playtest was
+        open: playtests now use `.factorio-play\` (no tests mod).
+  - [x] Steam asks "run with custom arguments?" on GUI launch: accepted by the user (one click).
+  - [x] Cities need power (user, SPEC updated): the depot draws up to 840 kW (chemical plant
+        equivalent), shows No power / Low power; smelting cities stay coal-fired.
   - [ ] Tune rates and the 20,000 goal (not yet assessed).
 
 Stop. Report to the user.

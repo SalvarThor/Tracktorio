@@ -10,9 +10,12 @@
 [CmdletBinding()]
 param(
     # Extra mods to disable in mod-list.json (for probes, e.g. -Disable quality,recycler)
-    [string[]]$Disable = @()
+    [string[]]$Disable = @(),
+    # "test" (.factorio) or "play" (.factorio-play)
+    [ValidateSet('test', 'play')][string]$Instance = 'test'
 )
 $ErrorActionPreference = 'Stop'
+$TTInstance = $Instance
 . "$PSScriptRoot\common.ps1"
 
 New-Item -ItemType Directory -Force $TT.ConfigDir, $TT.ModsDir, $TT.ScriptOutput | Out-Null
@@ -30,7 +33,10 @@ master-volume=0
 "@ | Set-Content -Path $TT.Config -Encoding utf8NoBOM
 
 # Junctions: <mods>\<name> -> repo folder. Recreate if pointing elsewhere.
-foreach ($link in $TT.Junctions.GetEnumerator()) {
+# The playtest instance gets the mod only, not the tests mod.
+$links = [ordered]@{}
+foreach ($k in $TT.Junctions.Keys) { if ($Instance -eq 'test' -or $k -ne 'train-tycoon-tests') { $links[$k] = $TT.Junctions[$k] } }
+foreach ($link in $links.GetEnumerator()) {
     $path = Join-Path $TT.ModsDir $link.Key
     $target = $link.Value
     if (-not (Test-Path $target)) { continue }
@@ -47,7 +53,7 @@ foreach ($link in $TT.Junctions.GetEnumerator()) {
 $enabled = [ordered]@{}
 foreach ($m in @('base', 'elevated-rails', 'recycler', 'space-age')) { $enabled[$m] = $true }
 $enabled['quality'] = $false   # train-tycoon declares "! quality"
-foreach ($m in $TT.Junctions.Keys) { if (Test-Path $TT.Junctions[$m]) { $enabled[$m] = $true } }
+foreach ($m in $links.Keys) { if (Test-Path $links[$m]) { $enabled[$m] = $true } }
 foreach ($m in $Disable) { $enabled[$m] = $false }
 $modList = @{ mods = @($enabled.GetEnumerator() | ForEach-Object { [ordered]@{ name = $_.Key; enabled = $_.Value } }) }
 $modList | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $TT.ModsDir 'mod-list.json') -Encoding utf8NoBOM

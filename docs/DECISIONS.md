@@ -4,6 +4,30 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: Cities draw electricity like their vanilla equivalents (user decision)
+- Decision (SPEC updated): a city draws electricity when its vanilla equivalent uses
+  electric buildings, at the power those buildings need for the same output.
+  - The city generator takes an optional `power`, which gives an electric energy source
+    (secondary-input) with `energy_usage = power`.
+  - The engine draws it while crafting, slows down on low power and stops without it. Idle
+    drain is the engine default (1/30).
+- MVP:
+  - The depot counts as chemical plants: 210 kW and 0.5 fuel/s each, so 4 of them make
+    2 fuel/s = 840 kW.
+  - Smelting cities stay coal-fired (coal is the fuel ingredient); electric smelting is a
+    later upgrade.
+  - The goal box needs no power.
+- The city window shows "No power" / "Running slowly: not enough power".
+- Consequence for bootstrapping: coal fuel now needs a working power city (water + coal)
+  and a pole line to the depot. The starting 20 coal fuel is meant to cover that.
+- Rejected: treating the depot as assembling machine 2 (about 600 kW); keeping it unpowered.
+
+## 2026-11-18: Playtests get their own instance
+- `.factorio-play\` (`dev-instance.ps1 -Instance play`, used by `playtest.ps1`) loads
+  train-tycoon only. Factorio locks a running game's write-data folder, so with a shared
+  folder tests couldn't run during a playtest. The Steam "custom arguments" dialog on GUI
+  launch is accepted (user).
+
 ## 2026-11-18: Playtest round 1 fixes
 - Power city generator: `selectable_in_game = false`, no selection box. The
   `not-selectable-in-game` flag alone still let it win selection over the city (2.1.24).

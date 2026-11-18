@@ -29,9 +29,11 @@ local defs = {
   },
   {
     -- 2 coal -> 1 coal fuel per second at speed 2: cap 2 fuel/s.
+    -- Counts as chemical plants (210 kW, 0.5 fuel/s each): 4 plants = 840 kW at full output.
     name = "depot",
     graphics = { type = "assembling-machine", name = "assembling-machine-3" },
     crafting_speed = 2,
+    power = "840kW",
     recipe = {
       energy_required = 1,
       ingredients = { item("coal", 2) },

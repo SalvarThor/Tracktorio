@@ -2,9 +2,10 @@
 local assert_ = require("__train-tycoon-tests__/assert")
 local h = require("__train-tycoon-tests__/helpers")
 
-local function converts(city_name, x, inputs, output_item)
+local function converts(city_name, x, inputs, output_item, powered)
   return function(ctx)
     local city, _, cout = h.city_rig(city_name, x, inputs, true)
+    if powered then h.test_power({ x + 7, 0 }) end
     ctx:wait_until(function() return cout.get_item_count(output_item) > 0 end, 60 * 30, function()
       assert_.truthy(city.products_finished > 0, "products_finished")
     end)
@@ -24,7 +25,28 @@ return {
   },
   {
     name = "mvp cities: depot city turns coal into coal fuel",
-    fn = converts("tt-city-depot", 280, { { name = "coal", count = 50 } }, "tt-coal-fuel"),
+    fn = converts("tt-city-depot", 280, { { name = "coal", count = 50 } }, "tt-coal-fuel", true),
+  },
+  {
+    name = "mvp cities: depot needs electricity (840 kW at full output)",
+    fn = function(ctx)
+      local p = prototypes.entity["tt-city-depot"]
+      local watts = p.get_max_energy_usage() * 60
+      assert_.truthy(math.abs(watts - 840000) < 1000, "max usage " .. watts .. " W")
+      local city = h.city_rig("tt-city-depot", 3000, { { name = "coal", count = 50 } }, false)
+      ctx:wait(60 * 10, function()
+        assert_.equals(city.products_finished, 0, "crafted without power")
+        assert_.equals(remote.call("tt-city", "info", city).status, "no_power")
+      end)
+    end,
+  },
+  {
+    name = "mvp cities: smelting cities need no electricity",
+    fn = function()
+      for _, n in ipairs({ "tt-city-iron-smelting", "tt-city-copper-smelting" }) do
+        assert_.falsy(prototypes.entity[n].electric_energy_source_prototype, n .. " is electric")
+      end
+    end,
   },
   {
     name = "mvp cities: smelting needs coal (starves on ore alone)",

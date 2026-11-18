@@ -56,6 +56,17 @@ function M.feeder(chest_pos, inserter_pos, direction, contents)
   return chest, ins
 end
 
+--- Test-only power: an electric-energy-interface producing `watts`, under a substation at
+--- `sub_pos` (supply area 18x18). The EEI goes 3 tiles south of the substation.
+function M.test_power(sub_pos, watts)
+  local eei = M.create("electric-energy-interface", { sub_pos[1], sub_pos[2] + 3 })
+  eei.power_production = (watts or 2e6) / 60
+  eei.power_usage = 0
+  eei.electric_buffer_size = (watts or 2e6)
+  M.create("substation", sub_pos)
+  return eei
+end
+
 --- Tile size of a city prototype.
 function M.city_size(name)
   local box = prototypes.entity[name].selection_box

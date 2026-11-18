@@ -11,3 +11,4 @@ node_modules/
 tools/bin/
 tools/types/
 *.pid
+.factorio-play/

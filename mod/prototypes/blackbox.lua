@@ -15,6 +15,8 @@
 --   fluid_boxes     optional list of { production_type = "input"|"output",
 --                   position = {x, y} (edge tile, relative to centre), direction = defines.direction.*,
 --                   or linked_id = n for a hidden linked connection; optional filter, volume }
+--   power           optional electric draw at full output, e.g. "840kW" (SPEC: cities whose
+--                   vanilla equivalent is electric draw that power). Omitted = no power.
 --   map_color       optional color
 --   extra           optional table merged into the entity prototype
 
@@ -132,8 +134,10 @@ function M.make_city(def)
     show_recipe_icon_on_map = true,
     crafting_categories = { name },
     crafting_speed = def.crafting_speed or 1,
-    energy_source = { type = "void" },
-    energy_usage = "1W",
+    -- Electric cities: the engine draws energy_usage while crafting, slows down on low power
+    -- and stops with none; idle drain is the engine default (1/30 of energy_usage).
+    energy_source = def.power and { type = "electric", usage_priority = "secondary-input" } or { type = "void" },
+    energy_usage = def.power or "1W",
     module_slots = 0,
     allowed_effects = {},
     fluid_boxes = make_fluid_boxes(def.fluid_boxes, src.fluid_boxes and src or data.raw["assembling-machine"]["assembling-machine-2"]),

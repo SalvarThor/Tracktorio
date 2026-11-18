@@ -28,6 +28,13 @@ All black boxes are the same entity concept with different recipe profiles.
 Shared behaviour:
 
 - Conversion runs at the rate of the slowest input, capped by tier.
+- Decided: a city draws electricity from the player's pole network when its vanilla
+  equivalent uses electric buildings. It draws what those buildings would need for the same
+  output, runs slower on low power and stops without it. Cities whose equivalent burns fuel
+  (the coal-fired smelting cities) take that fuel as an ingredient instead. Electric
+  smelting is a later upgrade that swaps coal for electricity. MVP: the depot counts as
+  chemical plants (840 kW at full output); smelting cities and the goal box need no power.
+  (User decision, playtest 1.10.)
 - A full output stalls the box and an empty input starves it, so backpressure works like a backed-up belt.
 - Tier upgrades happen by delivering construction materials to the box.
 - Placement is fixed by the world, never by the player, so every link in the chain is a real route.

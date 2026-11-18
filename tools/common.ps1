@@ -2,7 +2,11 @@
 # Machine paths are documented in docs\ENV.md; keep both in sync.
 
 $repo = Split-Path $PSScriptRoot -Parent
-$root = Join-Path $repo '.factorio'
+# Two instances: "test" (.factorio, used by check/run-tests) and "play" (.factorio-play, used
+# by playtest.ps1), so tests can run while a playtest is open. Set $TTInstance before
+# dot-sourcing to pick one.
+if (-not $TTInstance) { $TTInstance = 'test' }
+$root = Join-Path $repo $(if ($TTInstance -eq 'play') { '.factorio-play' } else { '.factorio' })
 $writeData = Join-Path $root 'data'
 
 $TT = [ordered]@{

@@ -7,7 +7,7 @@
     "tools/types/factorio/library",
     "C:/Program Files (x86)/Steam/steamapps/common/Factorio/data/core/lualib"
   ],
-  "workspace.ignoreDir": [".factorio", "node_modules", "tools/types", ".git"],
+  "workspace.ignoreDir": [".factorio", ".factorio-play", "node_modules", "tools/types", ".git"],
   "workspace.checkThirdParty": false,
   "diagnostics.globals": ["__DebugAdapter", "__Profiler"],
   "diagnostics.disable": ["lowercase-global"],
