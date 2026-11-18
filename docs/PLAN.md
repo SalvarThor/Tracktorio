@@ -36,7 +36,7 @@ test that Claude Code can run and read the result of without the user.
       through RCON, reads results the mod writes to `script-output\`, then shuts the server
       down. Whichever works, one trivial test must pass and one deliberately failing test
       must be reported as failed.
-- [ ] 0.8 Debug command skeleton: `/tt-dump` writes a JSON snapshot of `storage` to
+- [x] 0.8 Debug command skeleton: `/tt-dump` writes a JSON snapshot of `storage` to
       `script-output\tt-dump.json`.
 - [ ] 0.9 Fill in the Commands section of CLAUDE.md and the placeholders in
       `.claude/skills/test/SKILL.md` and `.claude/skills/playtest/SKILL.md`.

@@ -4,6 +4,7 @@
 return {
   normal = {
     "__train-tycoon-tests__/cases/smoke",
+    "__train-tycoon-tests__/cases/debug",
   },
   selftest = {
     "__train-tycoon-tests__/cases/selftest",

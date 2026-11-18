@@ -4,6 +4,14 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: Storage key prefix is `tt_`; debug commands have a remote twin
+- Decision: storage keys use `tt_` (e.g. `storage.tt_schema`), not `tt-`. Every `/tt-*`
+  debug command calls a function that is also exposed on the remote interface `tt-debug`.
+- Why: Lua identifiers can't contain `-`, and `storage["tt-x"]` everywhere is noisy. Scripts
+  can't execute console commands, and `helpers` can't read files (2.1.24), so tests reach
+  the same code through `remote.call("tt-debug", ...)`, which returns the data.
+- Rejected: `storage["tt-..."]` keys; reading script-output back from tests (no API).
+
 ## 2026-11-18: In-game tests use the native `--test-scenario` mode
 - Decision: tests run with Factorio 2.1.24's built-in `--test-scenario MOD/NAME`, which is
   headless with a player, runs until `script.finish_test(passed)` and exits 0 or 1. The
