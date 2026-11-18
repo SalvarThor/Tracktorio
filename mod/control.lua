@@ -8,6 +8,7 @@ local goal_gui = require("scripts.goal_gui")
 local city_info = require("scripts.city_info")
 local city_gui = require("scripts.city_gui")
 local limp = require("scripts.limp")
+local map = require("scripts.map")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -24,6 +25,7 @@ end
 remote.add_interface("tt-city", city_remote)
 remote.add_interface("tt-goal", goal.remote_interface())
 remote.add_interface("tt-limp", limp.remote_interface())
+remote.add_interface("tt-map", map.remote_interface())
 
 script.on_init(function()
   state.init()

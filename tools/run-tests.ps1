@@ -93,4 +93,16 @@ if ($SelfTest) {
 }
 
 if ($r.ExitCode -ne 0 -or $results.failed -gt 0 -or $results.passed -eq 0) { exit 1 }
+
+# Scenario smoke: the shipped MVP scenario must load and run without script errors.
+# (--test-ticks exits 0 when the ticks run out, 1 on any error.)
+if (-not $Filter) {
+    $s = Invoke-TTFactorio -TimeoutSec 180 -Arguments @(
+        '--test-scenario', 'train-tycoon/train-tycoon', '--test-ticks', '300', '--disable-audio')
+    if ($s.TimedOut -or $s.ExitCode -ne 0) {
+        Write-Host "SCENARIO SMOKE FAILED: train-tycoon/train-tycoon (exit $($s.ExitCode))"
+        Show-LogTail; exit 2
+    }
+    Write-Host 'scenario smoke: train-tycoon/train-tycoon loads and runs 300 ticks'
+}
 exit 0

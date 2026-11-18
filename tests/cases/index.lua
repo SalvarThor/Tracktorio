@@ -11,6 +11,7 @@ return {
     "__train-tycoon-tests__/cases/power",
     "__train-tycoon-tests__/cases/city_ui",
     "__train-tycoon-tests__/cases/limp",
+    "__train-tycoon-tests__/cases/map",
     -- keep last: winning finishes the game
     "__train-tycoon-tests__/cases/goal",
   },

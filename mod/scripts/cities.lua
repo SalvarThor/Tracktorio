@@ -52,6 +52,7 @@ end
 function M.place(name, surface, position, force)
   assert(M.is_city_name(name), "tt: not a city: " .. tostring(name))
   assert(prototypes.entity[name], "tt: unknown city prototype: " .. name)
+  M.init() -- the scenario may place cities before this mod's on_init has run
   local entity = surface.create_entity({
     name = name,
     position = position,

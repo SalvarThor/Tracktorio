@@ -4,6 +4,31 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.8 MVP scenario map
+- Decision: `scripts/map.lua` (remote `tt-map`) builds the map on its own surface,
+  `train-tycoon`. Map gen is grass only, 640x400, no resources, trees, cliffs, water or
+  enemies (`no_enemies_mode`, `peaceful_mode`). Lake, patches and cities are placed by
+  script at fixed positions, so the map is fully reproducible (a test builds it twice and
+  compares).
+- The scenario (`mod/scenarios/train-tycoon`) only calls `tt-map.generate` and
+  `tt-map.setup_player`.
+- Layout (tile coordinates):
+  - spawn (0, 4); depot city (0, -24)
+  - power city (-64, 40); iron smelting (160, -96); copper smelting (160, 96)
+  - goal box (272, 0)
+  - iron ore (-240, -140) r14; copper ore (-240, 140) r14; coal (-40, -165) r12
+    (each patch is over 200k)
+  - lake (60, 165) r10
+  - every patch and the lake is at least 100 tiles from every city
+- Start inventory: 20 coal fuel (SPEC: hand-fueling helps at the start). Everything else is
+  free to hand-craft.
+- Enemies off: turrets can't be crafted (1.1), so enemies would be unwinnable. **Flagged
+  for the user** (the spec doesn't say).
+- Own surface instead of nauvis: avoids clearing and regenerating nauvis inside on_init,
+  and leaves nauvis untouched.
+- `run-tests.ps1` now also loads the shipped scenario for 300 ticks and fails on any script
+  error.
+
 ## 2026-11-18: 1.7 limp mode
 - Decision: a hidden item `tt-limp-fuel` in the locomotive fuel category: 100 GJ, top speed
   ×0.15 (1.2 → 0.18 tiles/tick, about 39 km/h), acceleration ×0.25. It is never an item
