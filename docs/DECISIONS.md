@@ -4,6 +4,23 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.9 end-to-end test
+- Decision: `tests/cases/e2e.lua` builds a 300-tile line with a two-headed train
+  (loco-wagon-loco, hand-fuelled with coal fuel) and three stations:
+  - **A:** chests load 100 ore and 10 coal (leaves after 3 s of inactivity).
+  - **B:** inserters feed the iron smelting city and load its plates back (leaves at
+    100 plates).
+  - **C:** filtered fast inserters unload plates into the goal box.
+- It passes when the goal box counts the 100 plates and reports a rate (about 77 s game
+  time). It also checks the city crafted and the train never went into limp mode.
+- 2.1.24 rail geometry, measured with a throwaway calibration run:
+  - Straight rails snap to odd coordinates.
+  - An eastbound stop sits 2 tiles south of the rail centre; a westbound one 2 tiles north.
+  - The wagon of a loco-wagon-loco train stops 10 tiles behind the stop.
+  The test hard-codes these.
+- Test-rig power comes from vanilla electric-energy-interfaces under substations. That's
+  test-only; the real game uses the power city.
+
 ## 2026-11-18: 1.8 MVP scenario map
 - Decision: `scripts/map.lua` (remote `tt-map`) builds the map on its own surface,
   `train-tycoon`. Map gen is grass only, 640x400, no resources, trees, cliffs, water or
