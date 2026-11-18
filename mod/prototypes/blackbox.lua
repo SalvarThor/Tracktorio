@@ -13,7 +13,8 @@
 --   crafting_speed  number (tier cap)
 --   recipe          { energy_required, ingredients, results } (2.1 ingredient/product format)
 --   fluid_boxes     optional list of { production_type = "input"|"output",
---                   position = {x, y} (edge tile, relative to centre), direction = defines.direction.* }
+--                   position = {x, y} (edge tile, relative to centre), direction = defines.direction.*,
+--                   or linked_id = n for a hidden linked connection; optional filter, volume }
 --   map_color       optional color
 --   extra           optional table merged into the entity prototype
 
@@ -44,16 +45,20 @@ local function make_fluid_boxes(defs, pipe_source)
   local base = pipe_source.fluid_boxes and pipe_source.fluid_boxes[1]
   local boxes = {}
   for _, f in ipairs(defs) do
+    local connection
+    if f.linked_id then
+      -- hidden link to a companion entity (e.g. the power city's generator)
+      connection = { connection_type = "linked", linked_connection_id = f.linked_id, flow_direction = f.production_type }
+    else
+      connection = { flow_direction = f.production_type, direction = f.direction, position = f.position }
+    end
     boxes[#boxes + 1] = {
       production_type = f.production_type,
       volume = f.volume or 1000,
-      pipe_picture = base and table.deepcopy(base.pipe_picture) or nil,
-      pipe_covers = base and table.deepcopy(base.pipe_covers) or nil,
-      pipe_connections = { {
-        flow_direction = f.production_type,
-        direction = f.direction,
-        position = f.position,
-      } },
+      filter = f.filter,
+      pipe_picture = (not f.linked_id and base) and table.deepcopy(base.pipe_picture) or nil,
+      pipe_covers = (not f.linked_id and base) and table.deepcopy(base.pipe_covers) or nil,
+      pipe_connections = { connection },
       secondary_draw_orders = { north = -1 },
     }
   end

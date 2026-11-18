@@ -14,6 +14,13 @@ M.CITY = {
   iron = "tt-city-iron-smelting",
   copper = "tt-city-copper-smelting",
   depot = "tt-city-depot",
+  power = "tt-city-power",
+}
+
+-- Hidden companion entities placed with a city and joined by a linked fluidbox connection.
+-- city name -> { entity, city_link_id, companion_link_id }
+M.CITY_COMPANIONS = {
+  ["tt-city-power"] = { entity = "tt-power-generator", city_link_id = 1, companion_link_id = 1 },
 }
 
 -- Free items (SPEC: train infrastructure, station logistics, extraction). Their recipes get

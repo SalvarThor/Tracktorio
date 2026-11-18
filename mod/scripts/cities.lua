@@ -1,9 +1,11 @@
 -- Black box cities at runtime: script placement, protection, hands-off enforcement, tracking.
 -- Cities are entities named "tt-city-*" (see prototypes/blackbox.lua).
 --
--- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string }
+-- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, companion = LuaEntity? }
 -- storage.tt_hand_transfers = count of hand transfers that reached a city (should stay 0;
 --   operable=false is expected to block them, see DECISIONS.md A2).
+
+local config = require("shared.config")
 
 local M = {}
 
@@ -49,7 +51,16 @@ function M.place(name, surface, position, force)
   })
   assert(entity, "tt: could not place " .. name .. " at " .. serpent.line(position))
   protect(entity)
-  storage.tt_cities[entity.unit_number] = { entity = entity, name = name }
+  local record = { entity = entity, name = name }
+  local comp = config.CITY_COMPANIONS[name]
+  if comp then
+    local companion = surface.create_entity({ name = comp.entity, position = entity.position, force = entity.force })
+    assert(companion, "tt: could not place companion " .. comp.entity)
+    protect(companion)
+    entity.add_fluid_box_linked_connection(comp.city_link_id, companion, comp.companion_link_id)
+    record.companion = companion
+  end
+  storage.tt_cities[entity.unit_number] = record
   script.register_on_object_destroyed(entity)
   return entity
 end
@@ -68,6 +79,8 @@ end
 ---@param e EventData.on_object_destroyed
 local function on_object_destroyed(e)
   if e.type == defines.target_type.entity and e.useful_id then
+    local record = storage.tt_cities[e.useful_id]
+    if record and record.companion and record.companion.valid then record.companion.destroy() end
     storage.tt_cities[e.useful_id] = nil
   end
 end

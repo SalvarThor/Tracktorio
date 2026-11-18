@@ -4,6 +4,24 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.4 power city (engine-only, verified)
+- Decision: `tt-city-power` (9x9) runs 1 coal + 150 water → 150 steam at 165 °C, 1 s, at
+  speed 1.2. Water comes in on the south edge (centre tile).
+- Steam goes out through a `linked` fluidbox to a hidden `generator`, `tt-power-generator`:
+  - same footprint, empty collision mask, not selectable
+  - 3 steam/tick, so 5.4 MW cap
+- Control places the generator with the city (`config.CITY_COMPANIONS`), links them with
+  `add_fluid_box_linked_connection`, protects it, and destroys it with the city.
+- Verified by tests:
+  - A pole beside the city carries 1 MW to a consumer.
+  - With no demand the city reaches `full_output` and stops burning coal (backpressure).
+  - It starves without water.
+  - The generator is removed with the city.
+- Note: after `full_output` first shows, one more craft still flows into the generator's own
+  200-unit buffer before everything holds still.
+- Rejected: a scripted electric-energy-interface (needs script to fake backpressure);
+  `burner-generator` (no water input).
+
 ## 2026-11-18: 1.3 smelting cities, depot city, coal fuel (rates are tuning values)
 - Iron smelting / copper smelting: 9x9, 10 ore + 1 coal → 10 plates, 1 s, speed 1.5. Cap is
   15 plates/s (one yellow belt) and 1.5 coal/s.
