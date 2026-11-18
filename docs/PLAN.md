@@ -231,7 +231,7 @@ product. Gears and cables stay inside the cities; circuits are shipped.
       costs, locale.
 - [x] 2.2.3 Research complex: lab-based city, protected, tiers by research speed, port. Its
       window shows the current research and missing packs, or "no research selected".
-- [ ] 2.2.4 Research gating: every technology needing only red and green science is
+- [x] 2.2.4 Research gating: every technology needing only red and green science is
       researchable; techs needing other packs stay locked and visible; techs whose unlocks are
       all banned stay as prerequisites. Tests prove the red/green tree can be completed.
 - [ ] 2.2.5 Upgrade costs use intermediates: tier 3 costs of the existing cities partly move to

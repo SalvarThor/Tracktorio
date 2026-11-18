@@ -10,6 +10,7 @@ return {
     "__train-tycoon-tests__/cases/mvp_cities",
     "__train-tycoon-tests__/cases/intermediates",
     "__train-tycoon-tests__/cases/research",
+    "__train-tycoon-tests__/cases/gating",
     "__train-tycoon-tests__/cases/power",
     "__train-tycoon-tests__/cases/tiers",
     "__train-tycoon-tests__/cases/ports",

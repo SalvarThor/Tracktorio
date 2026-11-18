@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.2.4 research gating
+- Found (2.1.24 + Space Age, probed in game): with `automation-science-pack` researched at
+  start, the red/green zone is 27 technologies, all reachable with the research complex.
+  Useful unlocks: long-handed and fast inserters, fast belts, circuit network, steel chest,
+  lamp, toolbelt. Many others unlock things the player can't build or craft (engine units,
+  steel plate, turrets, ammo, armour, radar, repair packs, walls, landfill); they stay as
+  prerequisites, per the plan. Everything past them needs blue (or other) packs, which
+  the complex doesn't take: visible and locked.
+- Two trigger technologies inside the zone wait for later content and stay vanilla: `steel-axe`
+  (craft 50 steel plates; needs a steel city) and `oil-processing` (mine crude oil; the map
+  has no oil yet). Tests list them, so a new blocker shows up as a failure.
+- Why: vanilla tree, no prototype changes needed beyond the start technology.
+- Rejected: rewriting trigger techs into pack costs (not needed in this scope); hiding the
+  military branch (enemies are off, but it is vanilla and harmless; can revisit).
+
 ## 2026-11-18: 2.2.3 research complex
 - Decision: the research complex is a `lab` prototype built from the city definition
   (`kind = "lab"`), protected like every city, taking red and green packs. Tiers: research
