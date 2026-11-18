@@ -6,6 +6,7 @@ return {
     "__train-tycoon-tests__/cases/smoke",
     "__train-tycoon-tests__/cases/debug",
     "__train-tycoon-tests__/cases/restrictions",
+    "__train-tycoon-tests__/cases/cities",
   },
   selftest = {
     "__train-tycoon-tests__/cases/selftest",

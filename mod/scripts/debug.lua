@@ -5,6 +5,32 @@ local M = {}
 
 M.DUMP_FILE = "tt-dump.json"
 
+--- Copy of a value that JSON can hold: Lua objects become small descriptive tables.
+local function sanitize(v, seen)
+  local t = type(v)
+  if t == "userdata" then
+    local ok, desc = pcall(function()
+      if not v.valid then return { object = v.object_name, valid = false } end
+      local d = { object = v.object_name, valid = true }
+      if v.object_name == "LuaEntity" then
+        d.name, d.unit_number, d.position = v.name, v.unit_number, v.position
+      end
+      return d
+    end)
+    return ok and desc or tostring(v)
+  elseif t == "table" then
+    if seen[v] then return "<cycle>" end
+    seen[v] = true
+    local out = {}
+    for k, val in pairs(v) do out[tostring(k)] = sanitize(val, seen) end
+    seen[v] = nil
+    return out
+  elseif t == "function" then
+    return "<function>"
+  end
+  return v
+end
+
 --- Write a JSON snapshot of storage to script-output/tt-dump.json and return the JSON.
 ---@param player_index uint? write only on this player's machine (nil = everywhere/server)
 ---@return string
@@ -12,7 +38,7 @@ function M.dump(player_index)
   local json = helpers.table_to_json({
     tick = game.tick,
     mod_version = script.active_mods["train-tycoon"],
-    storage = storage,
+    storage = sanitize(storage, {}),
   })
   helpers.write_file(M.DUMP_FILE, json, false, player_index)
   return json

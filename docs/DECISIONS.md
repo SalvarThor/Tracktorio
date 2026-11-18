@@ -4,6 +4,28 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 1.2 black box framework
+- Decision: `mod/prototypes/blackbox.lua` `make_city(def)` builds a recipe-category, a recipe
+  and an `assembling-machine` named `tt-city-<name>` from one definition table:
+  - size, graphics source, crafting speed, recipe, fluid boxes
+  - `fixed_recipe`, void energy, no item, not minable
+  - flags: not-blueprintable, not-deconstructable, not-rotatable, no-copy-paste
+- Control (`scripts/cities.lua`) places cities by script, sets operable / destructible /
+  minable_flag / rotatable to false, tracks them in `storage.tt_cities`, and drops them
+  through `on_object_destroyed`. It is exposed as the remote interface `tt-city`
+  (`place` returns the LuaEntity, `list`, `hand_transfers`).
+- Cities are recognised by the `tt-city-` name prefix, so no runtime registry is needed.
+  The tests mod builds its own `tt-city-test` with the same generator in its data stage.
+- Hands-off, belt and braces: `on_gui_opened` closes any city GUI, and
+  `on_player_fast_transferred` counts transfers that reach a city
+  (`storage.tt_hand_transfers`; expected 0, checked in playtest).
+- Placeholder sprite: the source machine's `graphics_set`, with every sprite's scale and
+  shift multiplied by size / source size.
+- 2.1 note: `game.get_entity_by_unit_number` only works for prototypes with the
+  `get-by-unit-number` flag. Remote calls pass LuaEntity objects directly instead.
+- Rejected: one prototype per tier (tiers are post-MVP); a scripted crafting loop (the
+  engine already does slowest-input and backpressure, verified by tests).
+
 ## 2026-11-18: 1.1 prototype restrictions
 - Decision: explicit item lists in `mod/shared/config.lua`.
   - `FREE_ITEMS`: the recipe of the same name gets `ingredients = {}`, 0.002 s and category

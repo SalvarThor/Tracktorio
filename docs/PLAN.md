@@ -76,7 +76,7 @@ Goal: the MVP described in SPEC.md, playable start to win.
 - [x] 1.1 Prototype restrictions (A6): remove transformation entities, vehicles and robots
       from the player; free logistics recipes (A1 or its fallback); MVP starting research.
       Quality and planets off.
-- [ ] 1.2 Black box framework (A2): one definition table per box type (recipe profile,
+- [x] 1.2 Black box framework (A2): one definition table per box type (recipe profile,
       crafting speed, size, sprite), prototype generation in the data stage, script
       placement, protection and hands-off enforcement (A2) in the control stage.
 - [ ] 1.3 Iron smelting city, copper smelting city and depot city (coal in, `tt-coal-fuel`
