@@ -4,6 +4,20 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-18: 2.2.2 circuit, red science and green science cities
+- Decision: three electric cities. Tier 1 rates and power equal the vanilla assembling
+  machine 2s (speed 0.75, 150 kW) that would make the same output, including the gears and
+  cables made inside:
+  - circuits: 300/min from 5 iron/s + 7.5 copper/s, 1.25 MW (batch 2 iron + 3 copper -> 2)
+  - red science: 60/min from 2 iron/s + 1 copper/s, 1.1 MW
+  - green science: 60/min from 4.5 iron/s + 1 circuit/s, 1.5 MW (the plan table said 5.5
+    iron; one belt craft makes two belts, so it is 4.5)
+  - tiers x1/x2/x4; T2 costs 1000 iron + 1000 copper; T3 costs 3000 + 3000 for circuits and
+    2000 + 2000 + 1000 circuits for both science cities (never the city's own product)
+  - placeholder sprites: electromagnetic plant, assembling machine 1 and 2
+- Why: SPEC power rule; small batches keep the buffer inside a city small.
+- Rejected: 10-circuit batches (25 plates per craft; a slow start for a fresh station).
+
 ## 2026-11-18: 2.2.1 city framework
 - Decision: city behaviour comes only from `shared/city_defs.lua`. Removed the two
   per-city checks: "uses coal" now reads `def.fuel` (an ingredient burnt as fuel), and the

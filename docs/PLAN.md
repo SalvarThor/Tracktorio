@@ -219,7 +219,7 @@ Proposed numbers (tuning values; power = the equivalent vanilla buildings):
 |---|---|---|---|---|
 | Circuit city | 5 iron/s + 7.5 copper/s | 300 circuits/min | ~1.25 MW | 8 assemblers 2 |
 | Red science city | 2 iron/s + 1 copper/s | 60 packs/min | ~1.1 MW | 7 assemblers 2 |
-| Green science city | 5.5 iron/s + 1 circuit/s | 60 packs/min | ~1.5 MW | 10 assemblers 2 |
+| Green science city | 4.5 iron/s + 1 circuit/s | 60 packs/min | ~1.5 MW | 10 assemblers 2 |
 | Research complex | red + green packs | speed of 20 labs | 1.2 MW | 20 labs |
 
 All get 3 tiers at x1/x2/x4 and a construction port; upgrades never use the city's own
@@ -227,7 +227,7 @@ product. Gears and cables stay inside the cities; circuits are shipped.
 
 - [x] 2.2.1 City framework: any fixed recipe with several inputs, tiers, power, port, window
       and pips works from a city definition alone (no per-city code).
-- [ ] 2.2.2 Circuit, red science and green science cities: prototypes, recipes, power, tiers,
+- [x] 2.2.2 Circuit, red science and green science cities: prototypes, recipes, power, tiers,
       costs, locale.
 - [ ] 2.2.3 Research complex: lab-based city, protected, tiers by research speed, port. Its
       window shows the current research and missing packs, or "no research selected".

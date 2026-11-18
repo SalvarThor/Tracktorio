@@ -48,6 +48,41 @@ local power_recipe = {
   results = { { type = "fluid", name = "steam", amount = 150, temperature = M.POWER_STEAM_TEMP } },
 }
 
+-- Intermediate cities (PLAN 2.2.2). Power = the vanilla assembling machine 2s (speed 0.75,
+-- 150 kW) that would make the same output; gears and cables are made inside the city.
+local function assembler_city(name, graphics, map_color, power_t1, recipe, speed_t1, t3_cost)
+  local function mw(f) return string.format("%gkW", power_t1 * f) end
+  return {
+    name = name,
+    graphics = graphics,
+    map_color = map_color,
+    tiers = {
+      { crafting_speed = speed_t1, power = mw(1), recipe = recipe },
+      { crafting_speed = speed_t1 * 2, power = mw(2), recipe = recipe, cost = both_plates(1000) },
+      { crafting_speed = speed_t1 * 4, power = mw(4), recipe = recipe, cost = t3_cost },
+    },
+  }
+end
+
+local function with_circuits(plates, circuits)
+  local c = both_plates(plates)
+  c[#c + 1] = { name = "electronic-circuit", count = circuits }
+  return c
+end
+
+-- Circuits: 1 iron + 1.5 copper each (3 cables). 5 circuits/s needs 3.33 assemblers for
+-- circuits + 5 for cables = 8.33 x 150 kW = 1.25 MW.
+local circuit_recipe = { energy_required = 0.2,
+  ingredients = { item("iron-plate", 2), item("copper-plate", 3) }, results = { item("electronic-circuit", 2) } }
+-- Red science: 1 gear (2 iron) + 1 copper, 5 s. 1 pack/s = 6.67 + 0.67 assemblers = 1.1 MW.
+local red_recipe = { energy_required = 1,
+  ingredients = { item("iron-plate", 2), item("copper-plate", 1) }, results = { item("automation-science-pack", 1) } }
+-- Green science: inserter (1 circuit, 1 gear, 1 iron) + belt (half of 1 gear + 1 iron -> 2),
+-- 6 s: 4.5 iron + 1 circuit per pack. 1 pack/s = 8 + 0.67 + 0.33 + 1 (gears) = 10 assemblers
+-- = 1.5 MW.
+local green_recipe = { energy_required = 2,
+  ingredients = { item("iron-plate", 9), item("electronic-circuit", 2) }, results = { item("logistic-science-pack", 2) } }
+
 M.list = {
   smelting("iron-smelting", "iron-ore", "iron-plate", "copper-plate", { r = 0.55, g = 0.6, b = 0.7 }),
   smelting("copper-smelting", "copper-ore", "copper-plate", "iron-plate", { r = 0.8, g = 0.45, b = 0.25 }),
@@ -78,6 +113,12 @@ M.list = {
       { crafting_speed = 4.8, recipe = power_recipe, generator_usage = 12, cost = both_plates(3000) },
     },
   },
+  assembler_city("circuits", { type = "assembling-machine", name = "electromagnetic-plant" },
+    { r = 0.3, g = 0.7, b = 0.35 }, 1250, circuit_recipe, 0.5, both_plates(3000)),
+  assembler_city("red-science", { type = "assembling-machine", name = "assembling-machine-1" },
+    { r = 0.85, g = 0.25, b = 0.25 }, 1100, red_recipe, 1, with_circuits(2000, 1000)),
+  assembler_city("green-science", { type = "assembling-machine", name = "assembling-machine-2" },
+    { r = 0.35, g = 0.85, b = 0.35 }, 1500, green_recipe, 1, with_circuits(2000, 1000)),
 }
 
 ---@param name string city definition name, e.g. "iron-smelting"
