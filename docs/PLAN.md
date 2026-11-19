@@ -325,7 +325,7 @@ with the heavy oil cracked); solid fuel 10 light oil -> 1 (vanilla); rocket fuel
 fuel + 10 light oil -> 1 (vanilla). One refinery city at tier 1 feeds both fuel depots at
 tier 1. Tiers x1/x2/x4; costs plates at tier 2, plates + circuits at tier 3.
 
-- [ ] 2.4.1 Fuels: solid fuel and rocket fuel burn in locomotives (added to the locomotive
+- [x] 2.4.1 Fuels: solid fuel and rocket fuel burn in locomotives (added to the locomotive
       fuel category, vanilla stats kept, still burnable where vanilla burns them); vanilla
       coal still can't fuel a locomotive. Limp mode and breakdowns treat them like coal
       fuel. Tests: each fuel's top speed and acceleration on a real train.

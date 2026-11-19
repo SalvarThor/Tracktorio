@@ -34,3 +34,14 @@ data:extend({
     fuel_top_speed_multiplier = config.LIMP_TOP_SPEED,
   },
 })
+
+-- Fuel progression (PLAN 2.4.1): the vanilla solid fuel and rocket fuel also burn in
+-- locomotives, with their vanilla stats. Only the solid and rocket fuel depots make them.
+for _, name in ipairs(config.LOCOMOTIVE_FUELS) do
+  local item = data.raw.item[name]
+  if item and name ~= "tt-coal-fuel" then
+    local cats = item.fuel_categories or { "chemical" }
+    cats[#cats + 1] = config.LOCOMOTIVE_FUEL_CATEGORY
+    item.fuel_categories = cats
+  end
+end

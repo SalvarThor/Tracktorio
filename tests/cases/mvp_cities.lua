@@ -58,7 +58,7 @@ return {
     end,
   },
   {
-    name = "mvp cities: locomotives accept only coal fuel; burner entities still take coal",
+    name = "mvp cities: locomotives accept only depot fuels (coal, solid, rocket); burner entities still take coal",
     fn = function()
       h.clear_area({ { 350, -20 }, { 400, 20 } })
       for x = 352, 380, 2 do
@@ -66,8 +66,10 @@ return {
       end
       local loco = h.create("locomotive", { 366, -10 }, { direction = defines.direction.east })
       local fuel = assert(loco.get_fuel_inventory())
-      assert_.truthy(fuel.can_insert({ name = "tt-coal-fuel", count = 1 }), "coal fuel rejected")
-      for _, banned in ipairs({ "coal", "wood", "solid-fuel", "rocket-fuel" }) do
+      for _, ok in ipairs({ "tt-coal-fuel", "solid-fuel", "rocket-fuel" }) do -- 2.4.1
+        assert_.truthy(fuel.can_insert({ name = ok, count = 1 }), ok .. " rejected")
+      end
+      for _, banned in ipairs({ "coal", "wood" }) do
         assert_.falsy(fuel.can_insert({ name = banned, count = 1 }), banned .. " accepted")
       end
       local drill = h.create("burner-mining-drill", { 360, 10 })

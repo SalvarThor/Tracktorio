@@ -8,6 +8,8 @@ M.FREE_CRAFT_TIME = 0.002
 
 -- The only fuel category locomotives burn. tt-coal-fuel (depot cities) is in it.
 M.LOCOMOTIVE_FUEL_CATEGORY = "tt-locomotive"
+-- Items in that category (2.4.1): coal fuel (depot), solid fuel and rocket fuel (fuel depots).
+M.LOCOMOTIVE_FUELS = { "tt-coal-fuel", "solid-fuel", "rocket-fuel" }
 
 -- Limp mode: hidden reserve fuel burned by fuel-empty locomotives (DECISIONS.md A3, 1.7).
 M.LIMP_FUEL = "tt-limp-fuel"
