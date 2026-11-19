@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: Phase 2.5 scope (user)
+- Decision: the first rocket launch wins; the plates goal box leaves new maps (older saves
+  keep it, but it no longer decides the win). Fine city split, one product per city
+  (steel, plastic, sulfur, sulfuric acid, advanced circuits, processing units, low density
+  structure, blue science, rocket silo). Blue science is added and the research complex
+  takes it. The rocket silo city works from the start.
+- Why: SPEC's thesis names the rocket launch as the win; one product per city makes every
+  link a shipping route (SPEC: split at shipping boundaries, 15-25 city types); blue
+  science opens more of the tech tree for the player's logistics; gating cities would
+  break the 2.2 rule that every city works from the start.
+- Rejected: keeping the plates goal as a milestone; a coarse split (chemical and
+  electronics super-cities); no blue science; a custom research to switch the silo on.
+
 ## 2026-11-19: playtest 2.4.6 follow-ups (mod 0.4.1)
 - The first depot is now named "Coal fuel depot" (entity name unchanged, so saves load),
   in line with the solid and rocket fuel depots (user). Existing map tags are renamed on

@@ -349,3 +349,54 @@ tier 1. Tiers x1/x2/x4; costs plates at tier 2, plates + circuits at tier 3.
       on load, mod 0.4.1); an unpowered city's window now shows what each input holds and
       what is missing; MW figures show up to two decimals (0.95, not 1.0). Open idea
       (user): drop the "city" naming at some point; it fits less the deeper the chain goes.
+
+### Phase 2.5: full chain to a rocket silo (proposed 2026-11-19)
+
+Decided with the user (DECISIONS.md, 2026-11-19):
+- Launching the first rocket wins. New maps have no plates goal box; in older saves it
+  stays but no longer decides the win.
+- Fine split, one product per city: steel, plastic, sulfur, sulfuric acid, advanced
+  circuits, processing units, low density structure, blue science, rocket silo (9 new,
+  22 city types in all). Sulfur gets its own city because blue science needs it as an
+  item and sulfuric acid is made from it.
+- Blue science is in: a blue science city, and the research complex accepts blue packs.
+- The rocket silo city works from the start, like every city.
+
+Proposed numbers (vanilla 2.0 recipes, with gears, cables, engines and pipes made inside;
+power = the equivalent vanilla buildings; tuning values):
+
+| City | In (per s) | Out (per s) | Power T1 |
+|---|---|---|---|
+| Steel | 5 iron | 1 steel | ~1.44 MW (8 electric furnaces) |
+| Plastic | 30 petroleum gas + 1.5 coal | 3 plastic | ~315 kW |
+| Sulfur | 15 petroleum gas + 15 water | 1 sulfur | ~105 kW |
+| Sulfuric acid | 0.5 sulfur + 0.1 iron + 10 water | 5 sulfuric acid | ~100 kW |
+| Advanced circuits | 2 green circuits + 2 plastic + 2 copper | 1 advanced circuit | ~1.35 MW |
+| Processing units | 4 green + 0.4 advanced circuits + 1 sulfuric acid | 0.2 processing units | ~400 kW |
+| Low density structure | 0.4 steel + 4 copper + 1 plastic | 0.2 LDS | ~600 kW |
+| Blue science | 0.2 steel + 0.8 iron + 0.3 advanced circuits + 0.1 sulfur | 0.2 packs | ~1 MW |
+| Rocket silo | 10 processing units + 10 LDS + 10 rocket fuel per part | 1 part / 3 s; 50 parts = 1 rocket | vanilla silo |
+
+A rocket needs 500 processing units, 500 LDS and 500 rocket fuel: about 42 minutes of
+each tier 1 chain end at 0.2/s. Tiers x1/x2/x4 as usual; upgrade costs plates, then
+circuits (and later advanced circuits) at tier 3.
+
+- [ ] 2.5.1 Steel city (electric from tier 1, like electric furnaces).
+- [ ] 2.5.2 Chemistry cities: plastic, sulfur, sulfuric acid (fluid inputs/outputs, pipe
+      positions in the window).
+- [ ] 2.5.3 Electronics cities: advanced circuits and processing units.
+- [ ] 2.5.4 Low density structure city.
+- [ ] 2.5.5 Blue science city; the research complex accepts blue packs (all tiers, existing
+      saves too). Gating tests for the blue part of the tree: what becomes reachable, and
+      any research triggers that block it.
+- [ ] 2.5.6 Rocket silo city. First check in 2.1 whether a vanilla rocket-silo prototype can
+      be a city (fixed recipe, protected, launches on its own with no space platforms,
+      raises on_rocket_launched). Fallback: an assembling-machine city that builds the
+      rocket from parts and a scripted launch. Window shows parts progress.
+- [ ] 2.5.7 Win condition: the first launch wins (victory screen, message). New maps get no
+      goal box; in older saves it stays, says it no longer decides the win, and the goal
+      panel shows rocket progress instead of plates.
+- [ ] 2.5.8 Map: spots for the 9 new cities on the test map (no new resources needed);
+      older saves get them; mod 0.5.0.
+- [ ] 2.5.9 `/playtest` round: chain overview, blue research, the silo and a launch
+      (helpers to skip ahead), numbers.
