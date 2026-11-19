@@ -27,6 +27,9 @@ local CASES = {
   -- 2.3.4
   { city = "tt-city-repair-packs", product = "repair-pack", per_min = 30, watts = 150e3,
     inputs = { ["iron-plate"] = 2, ["electronic-circuit"] = 1 } },
+  -- 2.5.1
+  { city = "tt-city-steel", product = "steel-plate", per_min = 60, watts = 1.44e6,
+    inputs = { ["iron-plate"] = 5 } },
 }
 
 local tests = {

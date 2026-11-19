@@ -107,6 +107,11 @@ local solid_fuel_recipe = { energy_required = 1,
 local rocket_fuel_recipe = { energy_required = 15,
   ingredients = { item("solid-fuel", 10), fluid("light-oil", 10) }, results = { item("rocket-fuel", 1) } }
 
+-- Steel (2.5.1): 5 iron -> 1 steel in 16 s (vanilla). Speed 16 = 8 electric furnaces
+-- (speed 2, 180 kW each): 1 steel/s from 5 iron/s, 1.44 MW. Electric from tier 1.
+local steel_recipe = { energy_required = 16,
+  ingredients = { item("iron-plate", 5) }, results = { item("steel-plate", 1) } }
+
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
@@ -183,6 +188,8 @@ M.list = {
       { crafting_speed = 8, power = "3.8MW", recipe = refinery_recipe, cost = with_circuits(2000, 1000) },
     },
   },
+  assembler_city("steel", { type = "furnace", name = "steel-furnace" },
+    { r = 0.6, g = 0.62, b = 0.65 }, 1440, steel_recipe, 16, with_circuits(2000, 1000)),
   fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
   fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {
