@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: Phase 2.4 scope (user)
+- Decision: solid fuel and rocket fuel are made by two new depot-type cities (solid fuel
+  depot, rocket fuel depot), each with a service port. A refinery city makes light oil and
+  petroleum gas from crude oil + water, cracking heavy oil inside. Fuels keep their vanilla
+  stats. Oil is gated by the vanilla Oil gathering research (pumpjack).
+- Why: keeps the rule that locomotive fuel comes only from depots, and adds service points
+  along the fuel chain. Two refinery outputs keep the station work manageable while gas is
+  ready for plastics later. Vanilla stats match player expectations.
+- Rejected: upgrading the coal depot into solid/rocket fuel (coal fuel would disappear);
+  plain fuel cities (would relax the depot rule); vanilla three-output refinery (more
+  station work for no gain yet); light-oil-only refinery (gas needed later anyway); bigger
+  fuel bonuses.
+
 ## 2026-11-19: playtest 2.3.5 follow-ups
 - Limp mode (fuel-empty and breakdown) is faster: top speed 25% of normal (was 10%),
   acceleration 60% (was 25%). Why: with wagons attached, a limping train barely moved

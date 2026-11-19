@@ -297,3 +297,47 @@ Proposed numbers (tuning values):
       top speed 10% -> 25% and acceleration 25% -> 60%, since a train with wagons barely
       moved (also applies to fuel-empty limp). Breakdown rate fine for testing, too fast
       for real play: retune later. Messages fine.
+
+### Phase 2.4: fuel progression (proposed 2026-11-19)
+
+Decided with the user (DECISIONS.md, 2026-11-19):
+- Better fuels come from two new depot-type cities, so locomotive fuel still comes only
+  from depots: a solid fuel depot and a rocket fuel depot. Each has a service port like the
+  coal depot.
+- A refinery city turns crude oil + water into light oil and petroleum gas; heavy oil is
+  cracked inside. Gas has no use yet (plastics/blue science later); a full gas output
+  stalls the refinery like any full output.
+- Vanilla fuel stats: coal fuel 10 MJ (no bonus), solid fuel 12 MJ (+20% acceleration,
+  +5% top speed), rocket fuel 100 MJ (+80% acceleration, +15% top speed).
+- Oil is gated by the vanilla Oil gathering research (red + green, 100 units), which
+  unlocks the free pumpjack. Every city works from the start, as before.
+
+Proposed numbers (tuning values; power = the equivalent vanilla buildings):
+
+| City | In (per s) | Out (per s) | Power T1 | Equivalent |
+|---|---|---|---|---|
+| Refinery city | 40 crude oil + 28 water | 26 light oil + 22 petroleum gas | ~0.95 MW | 2 refineries + cracking |
+| Solid fuel depot | 20 light oil | 2 solid fuel (24 MW of fuel) | 420 kW | 2 chemical plants |
+| Rocket fuel depot | 2 solid fuel + 2 light oil | 0.2 rocket fuel (20 MW of fuel) | 600 kW | 4 assemblers 2 |
+
+Recipes: refinery 100 crude + 70 water -> 65 light + 55 gas (vanilla advanced processing
+with the heavy oil cracked); solid fuel 10 light oil -> 1 (vanilla); rocket fuel 10 solid
+fuel + 10 light oil -> 1 (vanilla). One refinery city at tier 1 feeds both fuel depots at
+tier 1. Tiers x1/x2/x4; costs plates at tier 2, plates + circuits at tier 3.
+
+- [ ] 2.4.1 Fuels: solid fuel and rocket fuel burn in locomotives (added to the locomotive
+      fuel category, vanilla stats kept, still burnable where vanilla burns them); vanilla
+      coal still can't fuel a locomotive. Limp mode and breakdowns treat them like coal
+      fuel. Tests: each fuel's top speed and acceleration on a real train.
+- [ ] 2.4.2 Fluid cities: a city can have several fluid inputs and outputs on fixed pipe
+      positions. The window and description say which fluid goes where; a full fluid
+      output shows "output full" naming the fluid. Tests with infinity pipes.
+- [ ] 2.4.3 Refinery city: prototype, recipe, power, tiers, costs, locale, window, port,
+      pips. Graphics: it takes the oil refinery look, so the power city moves to another
+      placeholder look (all placeholders until Factorissimo art).
+- [ ] 2.4.4 Solid fuel depot and rocket fuel depot: depot-type cities (service port,
+      servicing, window section), tiers, costs, locale.
+- [ ] 2.4.5 Map: a crude oil field and spots for the three cities on the test map; older
+      saves get them. Research: Oil gathering is reachable and Oil processing's trigger
+      (mine crude oil) fires from a pumpjack. Mod 0.4.0.
+- [ ] 2.4.6 `/playtest` round: oil chain, fluid wagons, fuel feel on trains, numbers.
