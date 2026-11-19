@@ -246,3 +246,47 @@ product. Gears and cables stay inside the cities; circuits are shipped.
       - Distances are far too short for a real train network. The map stays small while
         the main mechanics are built; a full-size map comes for whole-mod testing.
       - Inserting is almost always the bottleneck. No inserter or city changes for now.
+
+### Phase 2.3: reliability, depot servicing, repair pack city (proposed 2026-11-19)
+
+Decided with the user (DECISIONS.md, 2026-11-19):
+- Reliability is the locomotive's health. It drains with driving; the vanilla health bar
+  shows it, and manual repair is the vanilla repair-pack tool.
+- Servicing: a locomotive stopped at any train stop near a depot city is repaired, using
+  repair packs from the depot's service port (a fixed 1x1 port that takes only repair packs).
+  Inserters can't put packs into the depot itself (only recipe ingredients go in).
+- Starting decay: about 10 minutes of driving until breakdowns get frequent.
+- One locomotive type for now; the decay rate is per locomotive prototype so tiers can come
+  later.
+
+Proposed numbers (tuning values):
+- Driving (speed above zero) drains 7.5% of max health per minute: 100% -> 25% in 10 min.
+  Decay never takes a locomotive below 10%, so wear alone never destroys one.
+- While moving, each second a locomotive may break down with chance
+  0.02 x (1 - health)^2: about 0 when new, ~1.1% per second at 25% (a breakdown within
+  about 1.5 minutes).
+- Broken: the locomotive burns the limp fuel even with real fuel inside (same slow top speed
+  as fuel-empty limp mode), so its whole train crawls. Cured at full health, by servicing or
+  by hand.
+- Servicing restores 100 HP per second and uses 1 repair pack per 300 HP (the vanilla
+  pack's durability): a full service from 25% takes ~8 s and 2.5 packs.
+- Service area: a train stop within 30 tiles of the depot city's edge.
+- Repair pack city: 1 circuit + 2 iron -> 1 repair pack (vanilla), tier 1 30 packs/min,
+  power as the equivalent assemblers. Tiers x1/x2/x4; costs plates, circuits at tier 3.
+
+- [ ] 2.3.1 Reliability: decay with driving (per-prototype rate, 10% floor), periodic sliced
+      polling like limp mode, `/tt-reliability <percent>` on the selected locomotive (and its
+      remote twin). Tests: decay while driving, none while stopped, the floor.
+- [ ] 2.3.2 Breakdowns: chance per second from health, broken locomotives limp until at full
+      health, manual repair cures. Alert and chat message with a map link when a train breaks
+      down. Tests: forced breakdown limps the whole train; repairing to full cures it; a
+      fuel-empty limp and a breakdown don't fight.
+- [ ] 2.3.3 Service port and servicing: fixed port beside every depot tier (placed,
+      protected, survives upgrades), stop-within-range detection, repair at the set rate,
+      pack use, no packs = no servicing. Depot window shows packs in the port and trains
+      serviced. Tests for each.
+- [ ] 2.3.4 Repair pack city: prototype, tiers, costs, locale, window, port, pips; a spot on
+      the test map. Existing saves get it (and depot service ports) on configuration change;
+      mod 0.3.0.
+- [ ] 2.3.5 `/playtest` round: decay and breakdown feel, servicing station design, pack
+      supply line, numbers.

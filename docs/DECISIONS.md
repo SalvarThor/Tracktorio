@@ -4,6 +4,20 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: Phase 2.3 scope (user)
+- Decision: reliability = locomotive health; it drains with driving, the vanilla health bar
+  shows it and the vanilla repair-pack tool is the manual repair. Servicing = a locomotive
+  stopped at any train stop near a depot city, using repair packs from a fixed service port
+  beside the depot. Starting decay: ~10 minutes of driving until breakdowns get frequent.
+  One locomotive type; per-prototype decay rate for later tiers.
+- Why: health reuses engine behaviour (bar, repair tool, no extra GUI). A separate port is
+  needed because inserters only insert a crafting machine's recipe ingredients, so the depot
+  itself can't take repair packs (user asked; explained). Fuel and servicing stay
+  independent.
+- Rejected: a separate scripted reliability % (custom GUI and repair action); a dedicated
+  service-stop entity (extra placement rule); repair packs in the fuel recipe (fuel stops
+  without packs, packs used without servicing); a tier 2 locomotive now.
+
 ## 2026-11-19: playtest 2.2.8 follow-ups: map stays small, no inserter changes (user)
 - Decision: keep the 960 x 600 test map while the main mechanics are built. A map sized for
   a real train network comes when the user tests the mod as a whole. City throughput,
