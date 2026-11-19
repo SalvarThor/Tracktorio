@@ -5,8 +5,9 @@
 --   * limp fuel burning and real fuel in the inventory -> drop it; the burner takes the real
 --     fuel on its next energy request
 --
--- storage.tt_limp = { locos = { { entity, unit }, ... }, index = { [unit] = i }, cursor = n }
+-- storage.tt_limp = { locos = { { entity, unit, seen }, ... }, index = { [unit] = i }, cursor = n }
 local config = require("shared.config")
+local reliability = require("scripts.reliability")
 
 local M = {}
 
@@ -87,6 +88,7 @@ function M.tick()
     local loco = s.locos[i].entity
     if loco.valid then
       M.check(loco)
+      reliability.update(s.locos[i])
       i = i + 1
     else
       untrack_at(i) -- the swapped-in entry is checked next

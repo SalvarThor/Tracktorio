@@ -13,6 +13,7 @@ local ports = require("scripts.ports")
 local upgrade = require("scripts.upgrade")
 local notify = require("scripts.notify")
 local tier_marks = require("scripts.tier_marks")
+local reliability = require("scripts.reliability")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -63,7 +64,12 @@ map.on_city_blocked(notify.city_blocked)
 remote.add_interface("tt-goal", goal.remote_interface())
 remote.add_interface("tt-limp", limp.remote_interface())
 remote.add_interface("tt-map", map.remote_interface())
-
+remote.add_interface("tt-reliability", {
+  get = function(loco) return reliability.fraction(loco) end,
+  set = function(loco, fraction) reliability.set(loco, fraction) end,
+  --- Tests: apply `ticks` of driving wear now.
+  wear = function(loco, ticks) reliability.wear(loco, ticks) end,
+})
 script.on_init(function()
   state.init()
   cities.init()

@@ -274,7 +274,7 @@ Proposed numbers (tuning values):
 - Repair pack city: 1 circuit + 2 iron -> 1 repair pack (vanilla), tier 1 30 packs/min,
   power as the equivalent assemblers. Tiers x1/x2/x4; costs plates, circuits at tier 3.
 
-- [ ] 2.3.1 Reliability: decay with driving (per-prototype rate, 10% floor), periodic sliced
+- [x] 2.3.1 Reliability: decay with driving (per-prototype rate, 10% floor), periodic sliced
       polling like limp mode, `/tt-reliability <percent>` on the selected locomotive (and its
       remote twin). Tests: decay while driving, none while stopped, the floor.
 - [ ] 2.3.2 Breakdowns: chance per second from health, broken locomotives limp until at full

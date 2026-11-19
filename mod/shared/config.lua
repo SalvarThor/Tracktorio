@@ -20,6 +20,12 @@ M.LIMP_ACCELERATION = 0.25
 M.LIMP_INTERVAL = 10
 M.LIMP_PASS_TICKS = 60
 
+-- Reliability (PLAN 2.3): a locomotive's health. Driving drains it; the poll above applies
+-- the wear for the time since the locomotive was last seen, if it is moving.
+-- Fraction of max health lost per minute of driving, per locomotive prototype (tiers later).
+M.RELIABILITY_DECAY_PER_MINUTE = { locomotive = 0.075 }
+M.RELIABILITY_FLOOR = 0.10 -- wear never takes a locomotive below this fraction
+
 -- City entity names (prototypes/cities.lua).
 M.CITY = {
   iron = "tt-city-iron-smelting",
