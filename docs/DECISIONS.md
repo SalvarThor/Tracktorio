@@ -4,6 +4,22 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: 2.4.1-2.4.5 fuel progression build notes (mod 0.4.0)
+- Solid fuel and rocket fuel keep the chemical fuel category and gain tt-locomotive, so
+  burner entities still take them. 2.1 surprise: at runtime
+  LuaItemPrototype.fuel_categories is an array of names, not a set.
+- The refinery city has its pipes fixed: crude oil and water in on the south side, light
+  oil and petroleum gas out on the north side, 2 tiles either side of the middle. The fuel
+  depots take light oil at the middle of the south side. The city window lists every
+  connection.
+- Looks (placeholders): refinery city = oil refinery, so the power city moved to the
+  centrifuge; solid fuel depot = chemical plant; rocket fuel depot = cryogenic plant.
+- Test map: oil field of 6 wells at (-400, -230), 150% yield each (90 crude oil/s with 6
+  pumpjacks); refinery city (-160, -250), solid fuel depot (280, -250), rocket fuel depot
+  (-400, 220). Older saves get them on load (checked on the 2.3.5 playtest save: 13
+  cities, 3 depots with service ports, nothing blocked).
+- Oil processing's research trigger (mine crude oil) fires from a pumpjack (test).
+
 ## 2026-11-19: Phase 2.4 scope (user)
 - Decision: solid fuel and rocket fuel are made by two new depot-type cities (solid fuel
   depot, rocket fuel depot), each with a service port. A refinery city makes light oil and

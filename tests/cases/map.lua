@@ -118,7 +118,9 @@ return {
         end
       end
       assert_.truthy(#new_cities >= 4, "expected the new cities outside the old bounds")
-      local east_iron = l.patches[#l.patches]
+      local east_iron
+      for _, p in ipairs(l.patches) do if p.name == "iron-ore" and p.x > 300 then east_iron = p end end
+      assert(east_iron, "no second iron patch in the layout")
       for _, e in pairs(surface.find_entities_filtered({ name = "iron-ore", position = { east_iron.x, east_iron.y }, radius = east_iron.radius + 1 })) do
         e.destroy()
       end

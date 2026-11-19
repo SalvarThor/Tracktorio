@@ -28,6 +28,10 @@ M.CITIES = {
   { name = "tt-city-green-science", x = -400, y = 0, label = "Green science city", tag_icon = "logistic-science-pack" },
   { name = "tt-city-research", x = -160, y = 230, label = "Research complex", tag_icon = "lab" },
   { name = "tt-city-repair-packs", x = 160, y = 230, label = "Repair pack city", tag_icon = "repair-pack" },
+  -- 2.4.5: the oil chain
+  { name = "tt-city-refinery", x = -160, y = -250, label = "Refinery city", tag_icon = "pumpjack" },
+  { name = "tt-city-solid-fuel-depot", x = 280, y = -250, label = "Solid fuel depot", tag_icon = "solid-fuel" },
+  { name = "tt-city-rocket-fuel-depot", x = -400, y = 220, label = "Rocket fuel depot", tag_icon = "rocket-fuel" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).
@@ -37,6 +41,10 @@ M.PATCHES = {
   { name = "coal", x = -40, y = -165, radius = 12, amount = 4000 },
   -- 2.2.6: circuits and science need more iron
   { name = "iron-ore", x = 420, y = 0, radius = 14, amount = 4000 },
+  -- 2.4.5: oil field. wells are single resource entities at these offsets; 450000 = 150%
+  -- yield (15 crude oil/s per pumpjack), 6 wells = 90/s, over two tier 1 refinery cities' worth.
+  { name = "crude-oil", x = -400, y = -230, radius = 8, amount = 450000,
+    wells = { { -6, -3 }, { 0, -3 }, { 6, -3 }, { -6, 3 }, { 0, 3 }, { 6, 3 } } },
 }
 
 -- Lake (deep water in the middle).
@@ -87,10 +95,18 @@ end
 local function place_patches(surface)
   for _, p in ipairs(M.PATCHES) do
     local present = surface.count_entities_filtered({ name = p.name, position = { p.x + 0.5, p.y + 0.5 }, radius = p.radius }) > 0
-    if not present then circle(p.x, p.y, p.radius, function(x, y, d)
-      local amount = math.floor(p.amount * (1 - 0.5 * d / p.radius))
-      surface.create_entity({ name = p.name, position = { x + 0.5, y + 0.5 }, amount = amount })
-    end) end
+    if present then
+      -- already there
+    elseif p.wells then
+      for _, w in ipairs(p.wells) do
+        surface.create_entity({ name = p.name, position = { p.x + w[1] + 0.5, p.y + w[2] + 0.5 }, amount = p.amount })
+      end
+    else
+      circle(p.x, p.y, p.radius, function(x, y, d)
+        local amount = math.floor(p.amount * (1 - 0.5 * d / p.radius))
+        surface.create_entity({ name = p.name, position = { x + 0.5, y + 0.5 }, amount = amount })
+      end)
+    end
   end
 end
 

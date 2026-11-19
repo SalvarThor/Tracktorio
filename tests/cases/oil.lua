@@ -144,6 +144,41 @@ return {
     end,
   },
   {
+    name = "oil: Oil gathering is red + green research; a pumpjack mining crude oil completes Oil processing's trigger",
+    fn = function(ctx)
+      local force = game.forces["player"]
+      local gathering, processing = force.technologies["oil-gathering"], force.technologies["oil-processing"]
+      local packs = {}
+      for _, i in ipairs(gathering.research_unit_ingredients) do packs[#packs + 1] = i.name end
+      table.sort(packs)
+      assert_.equals(table.concat(packs, ","), "automation-science-pack,logistic-science-pack")
+      assert_.truthy(gathering.enabled and processing.enabled, "oil techs disabled")
+      local was = gathering.researched
+      gathering.researched = true -- unlocks the (free) pumpjack
+      assert_.truthy(force.recipes["pumpjack"].enabled, "pumpjack not unlocked")
+      assert_.falsy(processing.researched, "oil processing already researched")
+      local x = X + 200
+      h.clear_area({ { x - 10, -10 }, { x + 14, 14 } })
+      h.surface().create_entity({ name = "crude-oil", position = { x + 0.5, 0.5 }, amount = 300000 })
+      h.create("pumpjack", { x + 0.5, 0.5 })
+      h.test_power({ x + 6.5, 0.5 }, 1e6)
+      ctx:wait_until(function() return processing.researched end, 60 * 10, function()
+        processing.researched = false
+        gathering.researched = was
+      end)
+    end,
+  },
+  {
+    name = "oil: the generated map has an oil field of 6 wells and the refinery and fuel depots",
+    fn = function()
+      local surface = remote.call("tt-map", "generate", "tt-map-oil")
+      assert_.equals(surface.count_entities_filtered({ name = "crude-oil" }), 6)
+      for _, name in ipairs({ REFINERY, "tt-city-solid-fuel-depot", "tt-city-rocket-fuel-depot" }) do
+        assert_.equals(surface.count_entities_filtered({ name = name }), 1, name)
+      end
+    end,
+  },
+  {
     name = "oil: an undrained gas output stalls it, and the status names petroleum gas",
     fn = function(ctx)
       local city = rig(X + 80)
