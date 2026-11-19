@@ -57,12 +57,13 @@ local power_recipe = {
 
 -- Intermediate cities (PLAN 2.2.2). Power = the vanilla assembling machine 2s (speed 0.75,
 -- 150 kW) that would make the same output; gears and cables are made inside the city.
-local function assembler_city(name, graphics, map_color, power_t1, recipe, speed_t1, t3_cost)
+local function assembler_city(name, graphics, map_color, power_t1, recipe, speed_t1, t3_cost, fluid_boxes)
   local function mw(f) return string.format("%gkW", power_t1 * f) end
   return {
     name = name,
     graphics = graphics,
     map_color = map_color,
+    fluid_boxes = fluid_boxes,
     tiers = {
       { crafting_speed = speed_t1, power = mw(1), recipe = recipe },
       { crafting_speed = speed_t1 * 2, power = mw(2), recipe = recipe, cost = both_plates(1000) },
@@ -111,6 +112,23 @@ local rocket_fuel_recipe = { energy_required = 15,
 -- (speed 2, 180 kW each): 1 steel/s from 5 iron/s, 1.44 MW. Electric from tier 1.
 local steel_recipe = { energy_required = 16,
   ingredients = { item("iron-plate", 5) }, results = { item("steel-plate", 1) } }
+
+-- Chemistry (2.5.2), vanilla recipes in chemical plants (210 kW each, speed 1).
+-- Plastic: 20 gas + 1 coal -> 2 in 1 s; speed 1.5 = 3 plastic/s, 315 kW.
+local plastic_recipe = { energy_required = 1,
+  ingredients = { fluid("petroleum-gas", 20), item("coal", 1) }, results = { item("plastic-bar", 2) } }
+-- Sulfur: 30 water + 30 gas -> 2 in 1 s; speed 0.5 = 1 sulfur/s, 105 kW.
+local sulfur_recipe = { energy_required = 1,
+  ingredients = { fluid("petroleum-gas", 30), fluid("water", 30) }, results = { item("sulfur", 2) } }
+-- Sulfuric acid: 5 sulfur + 1 iron + 100 water -> 50 in 1 s; speed 0.1 = 5 acid/s
+-- (0.1 chemical plant; power floored at 100 kW).
+local acid_recipe = { energy_required = 1,
+  ingredients = { item("sulfur", 5), item("iron-plate", 1), fluid("water", 100) },
+  results = { fluid("sulfuric-acid", 50) } }
+
+local S, N = defines.direction.south, defines.direction.north
+local function pipe_in(x, f) return { production_type = "input", position = { x, 4 }, direction = S, filter = f } end
+local function pipe_out(x, f) return { production_type = "output", position = { x, -4 }, direction = N, filter = f } end
 
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
@@ -190,6 +208,15 @@ M.list = {
   },
   assembler_city("steel", { type = "furnace", name = "steel-furnace" },
     { r = 0.6, g = 0.62, b = 0.65 }, 1440, steel_recipe, 16, with_circuits(2000, 1000)),
+  assembler_city("plastic", { type = "assembling-machine", name = "biochamber" },
+    { r = 0.85, g = 0.85, b = 0.85 }, 315, plastic_recipe, 1.5, with_circuits(2000, 1000),
+    { pipe_in(0, "petroleum-gas") }),
+  assembler_city("sulfur", { type = "assembling-machine", name = "chemical-plant" },
+    { r = 0.9, g = 0.85, b = 0.2 }, 105, sulfur_recipe, 0.5, with_circuits(2000, 1000),
+    { pipe_in(-2, "petroleum-gas"), pipe_in(2, "water") }),
+  assembler_city("sulfuric-acid", { type = "assembling-machine", name = "chemical-plant" },
+    { r = 0.7, g = 0.9, b = 0.3 }, 100, acid_recipe, 0.1, with_circuits(2000, 1000),
+    { pipe_in(0, "water"), pipe_out(0, "sulfuric-acid") }),
   fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
   fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {

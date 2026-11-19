@@ -382,7 +382,7 @@ each tier 1 chain end at 0.2/s. Tiers x1/x2/x4 as usual; upgrade costs plates, t
 circuits (and later advanced circuits) at tier 3.
 
 - [x] 2.5.1 Steel city (electric from tier 1, like electric furnaces).
-- [ ] 2.5.2 Chemistry cities: plastic, sulfur, sulfuric acid (fluid inputs/outputs, pipe
+- [x] 2.5.2 Chemistry cities: plastic, sulfur, sulfuric acid (fluid inputs/outputs, pipe
       positions in the window).
 - [ ] 2.5.3 Electronics cities: advanced circuits and processing units.
 - [ ] 2.5.4 Low density structure city.
