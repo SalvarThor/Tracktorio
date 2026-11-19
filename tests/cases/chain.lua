@@ -94,8 +94,8 @@ tests[#tests + 1] = {
       local done = axe.researched
       axe.researched = false
       pre.researched = was
-      assert_.truthy(made >= 50, "steel city made only " .. made .. " (" .. remote.call("tt-city", "info", city).status .. ")")
-      assert_.truthy(done, "made " .. made .. " steel; trigger progress " .. tostring(axe.saved_progress))
+      -- earlier tests may already have made some of the 50 steel, so only the result counts
+      assert_.truthy(done, "made " .. made .. " steel (" .. remote.call("tt-city", "info", city).status .. "); trigger not met")
     end)
   end,
 }
