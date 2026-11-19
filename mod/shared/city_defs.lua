@@ -130,6 +130,18 @@ local S, N = defines.direction.south, defines.direction.north
 local function pipe_in(x, f) return { production_type = "input", position = { x, 4 }, direction = S, filter = f } end
 local function pipe_out(x, f) return { production_type = "output", position = { x, -4 }, direction = N, filter = f } end
 
+-- Electronics (2.5.3), vanilla recipes in assemblers 2 (speed 0.75, 150 kW).
+-- Advanced circuit: 2 circuits + 2 plastic + 4 cables (2 copper) -> 1 in 6 s; speed 6 =
+-- 1/s = 8 assemblers + 1 for cables = 1.35 MW.
+local advanced_recipe = { energy_required = 6,
+  ingredients = { item("electronic-circuit", 2), item("plastic-bar", 2), item("copper-plate", 2) },
+  results = { item("advanced-circuit", 1) } }
+-- Processing unit: 20 circuits + 2 advanced circuits + 5 sulfuric acid -> 1 in 10 s;
+-- speed 2 = 0.2/s = 2.67 assemblers = 400 kW.
+local processing_recipe = { energy_required = 10,
+  ingredients = { item("electronic-circuit", 20), item("advanced-circuit", 2), fluid("sulfuric-acid", 5) },
+  results = { item("processing-unit", 1) } }
+
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
@@ -217,6 +229,11 @@ M.list = {
   assembler_city("sulfuric-acid", { type = "assembling-machine", name = "chemical-plant" },
     { r = 0.7, g = 0.9, b = 0.3 }, 100, acid_recipe, 0.1, with_circuits(2000, 1000),
     { pipe_in(0, "water"), pipe_out(0, "sulfuric-acid") }),
+  assembler_city("advanced-circuits", { type = "assembling-machine", name = "assembling-machine-3" },
+    { r = 0.85, g = 0.3, b = 0.3 }, 1350, advanced_recipe, 6, with_circuits(2000, 1000)),
+  assembler_city("processing-units", { type = "assembling-machine", name = "electromagnetic-plant" },
+    { r = 0.3, g = 0.4, b = 0.9 }, 400, processing_recipe, 2, with_circuits(2000, 1000),
+    { pipe_in(0, "sulfuric-acid") }),
   fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
   fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {

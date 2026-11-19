@@ -17,6 +17,14 @@ local CASES = {
     rates = { sulfur = 0.5, ["iron-plate"] = 0.1, water = 10, ["sulfuric-acid"] = 5 },
     items = { sulfur = 50, ["iron-plate"] = 10 }, supply = { [0] = "water" }, drain = { [0] = "sulfuric-acid" },
     product = "sulfuric-acid" },
+  -- 2.5.3 electronics
+  { city = "tt-city-advanced-circuits", watts = 1.35e6,
+    rates = { ["electronic-circuit"] = 2, ["plastic-bar"] = 2, ["copper-plate"] = 2, ["advanced-circuit"] = 1 },
+    items = { ["electronic-circuit"] = 20, ["plastic-bar"] = 20, ["copper-plate"] = 20 }, product = "advanced-circuit" },
+  { city = "tt-city-processing-units", watts = 400e3,
+    rates = { ["electronic-circuit"] = 4, ["advanced-circuit"] = 0.4, ["sulfuric-acid"] = 1, ["processing-unit"] = 0.2 },
+    items = { ["electronic-circuit"] = 40, ["advanced-circuit"] = 4 }, supply = { [0] = "sulfuric-acid" },
+    product = "processing-unit" },
 }
 
 --- Per-second amounts of every ingredient and product at the city's tier 1 speed.
