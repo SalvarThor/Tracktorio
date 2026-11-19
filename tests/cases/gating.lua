@@ -1,10 +1,22 @@
--- 2.2.4: research gating. The red/green part of the tech tree can be completed with the
--- research complex; trigger technologies the player can't meet yet are known and listed.
+-- 2.2.4 / 2.5.5: research gating. The part of the tech tree that needs only the packs the
+-- research complex takes (red, green, blue) can be completed; trigger technologies the
+-- player can't meet yet are known and listed.
 local assert_ = require("__train-tycoon-tests__/assert")
 
-local RED_GREEN = { ["automation-science-pack"] = true, ["logistic-science-pack"] = true }
--- Trigger techs inside the red/green zone that wait for later content (DECISIONS 2.2.4).
-local WAITING = { ["steel-axe"] = "a steel city", ["oil-processing"] = "crude oil on the map" }
+--- Packs the research complex takes (read from its prototype).
+local function complex_packs()
+  local out = {}
+  for _, p in ipairs(prototypes.entity["tt-city-research"].lab_inputs) do out[p] = true end
+  return out
+end
+local ZONE = complex_packs()
+-- Trigger techs the player can now meet in game (each proven by its own test):
+local MET = {
+  ["oil-processing"] = "a pumpjack on the oil field (oil test)",
+  ["steel-axe"] = "50 steel from a steel city (chain test)",
+}
+-- Trigger techs inside the zone that still wait for later content.
+local WAITING = {}
 
 --- Closure of technologies the research complex can reach from the current state.
 ---@param force LuaForce
@@ -19,11 +31,13 @@ local function reachable(force)
         local pre = true
         for p in pairs(t.prerequisites) do pre = pre and reach[p] end
         if pre then
-          if t.prototype.research_trigger then
+          if t.prototype.research_trigger and MET[n] then
+            reach[n] = true; changed = true
+          elseif t.prototype.research_trigger then
             triggers[n] = true
           else
             local ok = #t.research_unit_ingredients > 0
-            for _, i in ipairs(t.research_unit_ingredients) do ok = ok and RED_GREEN[i.name] end
+            for _, i in ipairs(t.research_unit_ingredients) do ok = ok and ZONE[i.name] end
             if ok then reach[n] = true; changed = true else packs[n] = true end
           end
         end
@@ -35,18 +49,20 @@ end
 
 return {
   {
-    name = "gating: the red/green tree is reachable and unlocks the free logistics upgrades",
+    name = "gating: the red/green/blue tree is reachable and unlocks the free logistics upgrades",
     fn = function()
       local force = game.forces["player"]
       local reach = reachable(force)
       for _, tech in ipairs({ "automation", "fast-inserter", "logistics-2", "circuit-network",
-        "steel-processing", "logistic-science-pack", "toolbelt", "lamp" }) do
+        "steel-processing", "logistic-science-pack", "toolbelt", "lamp",
+        -- blue (2.5.5)
+        "chemical-science-pack", "bulk-inserter", "electric-energy-distribution-2" }) do
         assert_.truthy(reach[tech], tech .. " is not reachable")
       end
     end,
   },
   {
-    name = "gating: only the known trigger technologies block the red/green zone",
+    name = "gating: only the known trigger technologies block the red/green/blue zone",
     fn = function()
       local _, triggers = reachable(game.forces["player"])
       for n in pairs(triggers) do

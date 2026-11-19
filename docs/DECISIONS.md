@@ -4,6 +4,14 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: 2.5.5 research triggers met by cities
+- Space Age's "craft-item" research triggers count crafting by machines: 50 steel from a
+  steel city completes Steel axe (test). Oil processing ("mine crude oil") completes from
+  a pumpjack (test, 2.4.5). Both former blockers are now met in game, and nothing else
+  blocks the red/green/blue part of the tree.
+- Test note: an assembling machine only accepts a few crafts' worth of input at once, so
+  long-running city tests must top up inputs and drain outputs as they go.
+
 ## 2026-11-19: Phase 2.5 scope (user)
 - Decision: the first rocket launch wins; the plates goal box leaves new maps (older saves
   keep it, but it no longer decides the win). Fine city split, one product per city

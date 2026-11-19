@@ -26,7 +26,7 @@ end
 
 return {
   {
-    name = "research: the complex is a lab taking red and green, 20/40/80 labs, 1.2/2.4/4.8 MW",
+    name = "research: the complex is a lab taking red, green and blue, 20/40/80 labs, 1.2/2.4/4.8 MW",
     fn = function()
       for tier, f in ipairs({ 1, 2, 4 }) do
         local name = tier == 1 and "tt-city-research" or ("tt-city-research-t" .. tier)
@@ -37,7 +37,7 @@ return {
         assert_.truthy(math.abs(w - 1.2e6 * f) < 1000, name .. " draws " .. w)
         local inputs = {}
         for _, i in ipairs(p.lab_inputs) do inputs[i] = true end
-        assert_.truthy(inputs[RED] and inputs[GREEN] and #p.lab_inputs == 2, name .. " inputs")
+        assert_.truthy(inputs[RED] and inputs[GREEN] and inputs["chemical-science-pack"] and #p.lab_inputs == 3, name .. " inputs")
       end
       assert_.falsy(prototypes.item["tt-city-research"], "the complex has an item")
     end,

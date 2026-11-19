@@ -29,6 +29,10 @@ local CASES = {
   { city = "tt-city-low-density-structure", watts = 600e3,
     rates = { ["steel-plate"] = 0.4, ["copper-plate"] = 4, ["plastic-bar"] = 1, ["low-density-structure"] = 0.2 },
     items = { ["steel-plate"] = 10, ["copper-plate"] = 100, ["plastic-bar"] = 20 }, product = "low-density-structure" },
+  -- 2.5.5
+  { city = "tt-city-blue-science", watts = 960e3,
+    rates = { ["steel-plate"] = 0.2, ["iron-plate"] = 0.8, ["advanced-circuit"] = 0.3, sulfur = 0.1, ["chemical-science-pack"] = 0.2 },
+    items = { ["steel-plate"] = 10, ["iron-plate"] = 40, ["advanced-circuit"] = 15, sulfur = 5 }, product = "chemical-science-pack" },
 }
 
 --- Per-second amounts of every ingredient and product at the city's tier 1 speed.
@@ -63,6 +67,37 @@ local tests = {
       end
     end,
   },
+}
+
+tests[#tests + 1] = {
+  -- Steel axe's research trigger is "craft 50 steel plates"; the steel city must count.
+  name = "chain: steel made by a steel city completes the Steel axe research trigger",
+  fn = function(ctx)
+    local force = game.forces["player"]
+    local axe, pre = force.technologies["steel-axe"], force.technologies["steel-processing"]
+    local was = pre.researched
+    pre.researched = true
+    assert_.falsy(axe.researched, "steel axe already researched")
+    local x = X - 40
+    h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
+    local city = h.place_city("tt-city-steel-t3", { x + 0.5, 0.5 })
+    city.insert({ name = "iron-plate", count = 400 })
+    h.test_power({ x + 8.5, 0.5 }, 8e6)
+    local out = assert(city.get_inventory(defines.inventory.crafter_output))
+    local t0 = game.tick
+    ctx:wait_until(function()
+      out.clear() -- keep the output from filling up
+      city.insert({ name = "iron-plate", count = 100 }) -- and the input topped up
+      return axe.researched or city.products_finished >= 70 or game.tick - t0 > 60 * 25
+    end, 60 * 30, function()
+      local made = city.products_finished
+      local done = axe.researched
+      axe.researched = false
+      pre.researched = was
+      assert_.truthy(made >= 50, "steel city made only " .. made .. " (" .. remote.call("tt-city", "info", city).status .. ")")
+      assert_.truthy(done, "made " .. made .. " steel; trigger progress " .. tostring(axe.saved_progress))
+    end)
+  end,
 }
 
 for i, c in ipairs(CASES) do

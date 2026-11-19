@@ -386,7 +386,7 @@ circuits (and later advanced circuits) at tier 3.
       positions in the window).
 - [x] 2.5.3 Electronics cities: advanced circuits and processing units.
 - [x] 2.5.4 Low density structure city.
-- [ ] 2.5.5 Blue science city; the research complex accepts blue packs (all tiers, existing
+- [x] 2.5.5 Blue science city; the research complex accepts blue packs (all tiers, existing
       saves too). Gating tests for the blue part of the tree: what becomes reachable, and
       any research triggers that block it.
 - [ ] 2.5.6 Rocket silo city. First check in 2.1 whether a vanilla rocket-silo prototype can

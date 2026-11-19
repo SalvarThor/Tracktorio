@@ -148,6 +148,13 @@ local lds_recipe = { energy_required = 15,
   ingredients = { item("steel-plate", 2), item("copper-plate", 20), item("plastic-bar", 5) },
   results = { item("low-density-structure", 1) } }
 
+-- Blue science (2.5.5): 2 engines (2 steel + 2 gears + 4 pipes = 2 steel + 8 iron) +
+-- 3 advanced circuits + 1 sulfur -> 2 packs in 24 s; speed 2.4 = 0.2 packs/s = 3.2
+-- assemblers 2 + 2.67 for engines + ~0.5 for gears and pipes = ~0.96 MW.
+local blue_recipe = { energy_required = 24,
+  ingredients = { item("steel-plate", 2), item("iron-plate", 8), item("advanced-circuit", 3), item("sulfur", 1) },
+  results = { item("chemical-science-pack", 2) } }
+
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
@@ -242,6 +249,8 @@ M.list = {
     { pipe_in(0, "sulfuric-acid") }),
   assembler_city("low-density-structure", { type = "assembling-machine", name = "foundry" },
     { r = 0.75, g = 0.6, b = 0.45 }, 600, lds_recipe, 3, with_circuits(2000, 1000)),
+  assembler_city("blue-science", { type = "assembling-machine", name = "assembling-machine-2" },
+    { r = 0.3, g = 0.55, b = 0.95 }, 960, blue_recipe, 2.4, with_circuits(2000, 1000)),
   fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
   fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {
@@ -251,7 +260,7 @@ M.list = {
     kind = "lab",
     graphics = { type = "lab", name = "lab" },
     map_color = { r = 0.4, g = 0.6, b = 0.95 },
-    inputs = { "automation-science-pack", "logistic-science-pack" },
+    inputs = { "automation-science-pack", "logistic-science-pack", "chemical-science-pack" }, -- blue: 2.5.5
     tiers = {
       { researching_speed = 20, power = "1200kW" },
       { researching_speed = 40, power = "2400kW", cost = with_circuits(1000, 500) },
