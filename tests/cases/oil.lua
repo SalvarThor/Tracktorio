@@ -179,6 +179,31 @@ return {
     end,
   },
   {
+    -- playtest 2.4.6: an unpowered refinery's window said nothing about its inputs
+    name = "oil: without power the window still shows what is inside and what is missing",
+    fn = function(ctx)
+      local x = X + 240
+      h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
+      local city = h.place_city(REFINERY, { x + 0.5, 0.5 })
+      pipe({ x - 1.5, 5.5 }, "crude-oil", true) -- crude oil, no water, no power
+      ctx:wait(120, function()
+        local i = info(city)
+        assert_.equals(i.status, "no_power")
+        assert_.truthy(contains(i.also_missing, "water"), "also_missing " .. serpent.line(i.also_missing))
+        assert_.falsy(contains(i.also_missing, "crude-oil"), "crude oil is there")
+        local crude
+        for _, ing in ipairs(i.recipe.ingredients) do if ing.name == "crude-oil" then crude = ing end end
+        assert_.truthy(crude and crude.have > 0, "crude oil amount not shown")
+        local p = assert(game.players[1])
+        remote.call("tt-city", "open_gui", p.index, city)
+        local line = assert(p.gui.screen["tt_city_frame"])["body"]["also_missing"]
+        assert_.truthy(line, "no 'also missing' line")
+        assert_.equals(line.caption[1], "tt-gui.city-also-missing")
+        p.opened = nil
+      end)
+    end,
+  },
+  {
     name = "oil: an undrained gas output stalls it, and the status names petroleum gas",
     fn = function(ctx)
       local city = rig(X + 80)

@@ -341,4 +341,10 @@ tier 1. Tiers x1/x2/x4; costs plates at tier 2, plates + circuits at tier 3.
 - [x] 2.4.5 Map: a crude oil field and spots for the three cities on the test map; older
       saves get them. Research: Oil gathering is reachable and Oil processing's trigger
       (mine crude oil) fires from a pumpjack. Mod 0.4.0.
-- [ ] 2.4.6 `/playtest` round: oil chain, fluid wagons, fuel feel on trains, numbers.
+- [x] 2.4.6 `/playtest` round: oil chain, fluid wagons, fuel feel on trains, numbers.
+      Result (2026-11-19): all 10 steps passed; fuel differences noticeable (solid over
+      coal, rocket over solid). Fixed: pipe positions now read "bottom left / top right"
+      instead of tile counts; the coal depot is now "Coal fuel depot" (old map tags renamed
+      on load, mod 0.4.1); an unpowered city's window now shows what each input holds and
+      what is missing; MW figures show up to two decimals (0.95, not 1.0). Open idea
+      (user): drop the "city" naming at some point; it fits less the deeper the chain goes.

@@ -161,9 +161,12 @@ function M.info(entity)
     ingredients = {},
     products = {},
   }
+  local input_inv = entity.get_inventory(defines.inventory.crafter_input)
   for _, ing in ipairs(recipe.ingredients) do
+    -- have: what is in the city now (playtest 2.4.6: the window showed nothing before power)
+    local have = ing.type == "fluid" and input_fluid(entity, ing.name) or (input_inv and input_inv.get_item_count(ing.name) or 0)
     out.recipe.ingredients[#out.recipe.ingredients + 1] = {
-      type = ing.type, name = ing.name, amount = ing.amount, per_min_max = ing.amount * crafts_per_min_max }
+      type = ing.type, name = ing.name, amount = ing.amount, per_min_max = ing.amount * crafts_per_min_max, have = have }
   end
 
   -- measured crafts per minute over the sample window
@@ -187,8 +190,10 @@ function M.info(entity)
     out.status = "running"
   elseif status == defines.entity_status.low_power then
     out.status = "low_power"
+    out.also_missing = missing_inputs(entity, recipe)
   elseif status == defines.entity_status.no_power then
     out.status = "no_power"
+    out.also_missing = missing_inputs(entity, recipe)
   elseif status == defines.entity_status.full_output then
     out.status = "output_full"
     out.full = full_products(entity, recipe)

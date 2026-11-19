@@ -67,6 +67,16 @@ local function add_description(body, entity)
   body.add({ type = "line", direction = "horizontal" })
 end
 
+--- Rich-text icons for item or fluid names.
+---@param names string[]?
+local function icon_list(names)
+  local out = {}
+  for _, n in ipairs(names or {}) do
+    out[#out + 1] = (prototypes.item[n] and "[item=" or "[fluid=") .. n .. "]"
+  end
+  return table.concat(out, " ")
+end
+
 --- Status line (+ optional hint line) for a crafting city.
 ---@param body LuaGuiElement
 ---@param entity LuaEntity
@@ -91,16 +101,15 @@ local function add_status(body, entity, info)
     status = #names > 0 and { "tt-gui.city-status-output-full-named", table.concat(names, " ") } or { "tt-gui.city-status-output-full" }
     hint = fluid and { "tt-gui.city-hint-output-full-fluid" } or { "tt-gui.city-hint-output-full" }
   elseif info.status == "starved" then
-    local names = {}
-    for _, n in ipairs(info.missing or {}) do
-      names[#names + 1] = (prototypes.item[n] and "[item=" or "[fluid=") .. n .. "]"
-    end
-    status = { "tt-gui.city-status-starved", table.concat(names, " ") }
+    status = { "tt-gui.city-status-starved", icon_list(info.missing) }
   else
     status = { "tt-gui.city-status-other", info.status_detail or "?" }
   end
   add_text(body, status, true, "status")
   if hint then add_text(body, hint, false, "hint") end
+  if info.also_missing and #info.also_missing > 0 then
+    add_text(body, { "tt-gui.city-also-missing", icon_list(info.also_missing) }, false, "also_missing")
+  end
 end
 
 --- Tier, next tier and the construction materials with progress bars.
@@ -136,14 +145,11 @@ local function add_pipes(body, connections)
   if not connections or #connections == 0 then return end
   body.add({ type = "label", caption = { "tt-gui.city-pipes" }, style = "caption_label" })
   for i, c in ipairs(connections) do
-    local where
-    local n = math.abs(c.offset)
-    if n < 0.01 then where = { "tt-gui.city-pipe-middle" }
-    elseif c.side == "north" or c.side == "south" then where = { c.offset > 0 and "tt-gui.city-pipe-east" or "tt-gui.city-pipe-west", fmt(n) }
-    else where = { c.offset > 0 and "tt-gui.city-pipe-south" or "tt-gui.city-pipe-north", fmt(n) } end
+    -- "bottom left", "top right", "left side, middle"... (playtest 2.4.6: no tile counts)
+    local along = math.abs(c.offset) < 0.01 and "mid" or (c.offset < 0 and "a" or "b")
     add_text(body, { "tt-gui.city-pipe-line", "[fluid=" .. c.fluid .. "]",
       { c.kind == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" },
-      { "tt-gui.city-pipe-side-" .. c.side }, where }, false, "pipe-" .. i)
+      { "tt-gui.city-pipe-pos-" .. c.side .. "-" .. along } }, false, "pipe-" .. i)
   end
 end
 
@@ -205,7 +211,7 @@ local function fill_city(body, entity)
   add_status(body, entity, info)
   body.add({ type = "label", caption = { "tt-gui.city-inputs" }, style = "caption_label" })
   for _, ing in ipairs(info.recipe.ingredients) do
-    add_line(body, ing, { "tt-gui.city-input-line", fmt(ing.amount), fmt(ing.per_min_max) })
+    add_line(body, ing, { "tt-gui.city-input-line", fmt(ing.amount), fmt(ing.per_min_max), fmt(ing.have or 0) })
   end
   body.add({ type = "label", caption = { "tt-gui.city-outputs" }, style = "caption_label" })
   for _, p in ipairs(info.recipe.products) do

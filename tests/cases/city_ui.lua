@@ -64,7 +64,7 @@ return {
     end,
   },
   {
-    name = "city ui: the window says where each fluid connects (power city: water in, south side, middle)",
+    name = "city ui: the window says where each fluid connects (power city: water in, bottom middle)",
     fn = function()
       h.clear_area({ { 1310, -12 }, { 1330, 12 } })
       local city = h.place_city("tt-city-power", { 1320.5, 0.5 })
@@ -79,7 +79,7 @@ return {
       local line = assert(p.gui.screen["tt_city_frame"])["body"]["pipe-1"]
       assert_.truthy(line, "no pipe line in the window")
       assert_.equals(line.caption[1], "tt-gui.city-pipe-line")
-      assert_.equals(line.caption[5][1], "tt-gui.city-pipe-middle")
+      assert_.equals(line.caption[4][1], "tt-gui.city-pipe-pos-south-mid") -- "bottom middle" (playtest 2.4.6)
       p.opened = nil
     end,
   },

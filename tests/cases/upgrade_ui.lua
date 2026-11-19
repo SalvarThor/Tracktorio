@@ -119,7 +119,7 @@ return {
         local now = assert(remote.call("tt-city", "upgrade_now", city), "upgrade_now returned nothing")
         local tags = force.find_chart_tags(surface, { { now.position.x - 1, now.position.y - 1 }, { now.position.x + 1, now.position.y + 1 } })
         assert_.equals(#tags, 1, "tag count at the depot")
-        assert_.equals(assert(tags[1]).text, "Depot city (tier 2)")
+        assert_.equals(assert(tags[1]).text, "Coal fuel depot (tier 2)")
       end)
     end,
   },

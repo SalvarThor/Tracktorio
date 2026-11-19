@@ -10,7 +10,11 @@ function M.init()
   storage.tt_alerts = storage.tt_alerts or {} -- { { player_index, entity, expires? }, ... } (no expiry: removed by code)
 end
 
-local function mw(watts) return string.format("%.1f", watts / 1e6) end
+--- Megawatts with up to two decimals and no trailing zeros ("0.95", "1.9", "21.6").
+local function mw(watts)
+  local s = string.format("%.2f", watts / 1e6):gsub("0+$", ""):gsub("%.$", "")
+  return s
+end
 
 ---@param entity LuaEntity
 local function gps(entity)

@@ -4,6 +4,16 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: playtest 2.4.6 follow-ups (mod 0.4.1)
+- The first depot is now named "Coal fuel depot" (entity name unchanged, so saves load),
+  in line with the solid and rocket fuel depots (user). Existing map tags are renamed on
+  load. The user expects to drop the "city" naming later; not scheduled.
+- Pipe connections are described by position on the building (bottom left, top right,
+  left side middle...), not by tile offsets from the middle (user).
+- A city window shows how much of each input the city holds, and when power is the
+  problem it also names missing inputs, so a fluid city tells you what it lacks before
+  it is powered (user: the refinery window said nothing until powered).
+
 ## 2026-11-19: 2.4.1-2.4.5 fuel progression build notes (mod 0.4.0)
 - Solid fuel and rocket fuel keep the chemical fuel category and gain tt-locomotive, so
   burner entities still take them. 2.1 surprise: at runtime

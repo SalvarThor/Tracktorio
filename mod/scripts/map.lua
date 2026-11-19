@@ -17,7 +17,7 @@ M.SPAWN = { x = 0, y = 4 }
 -- City centres (9x9 cities sit on tile centres).
 M.CITIES = {
   -- label/tag_icon: the map tag (tag text is a plain string, not localised)
-  { name = config.CITY.depot, x = 0, y = -24, label = "Depot city", tag_icon = "tt-coal-fuel" }, -- near the start
+  { name = config.CITY.depot, x = 0, y = -24, label = "Coal fuel depot", tag_icon = "tt-coal-fuel" }, -- near the start
   { name = config.CITY.power, x = -64, y = 40, label = "Power city", tag_icon = "small-electric-pole" },
   { name = config.CITY.iron, x = 160, y = -96, label = "Iron smelting city", tag_icon = "iron-plate" },
   { name = config.CITY.copper, x = 160, y = 96, label = "Copper smelting city", tag_icon = "copper-plate" },
@@ -193,6 +193,20 @@ function M.retag(city)
   end
 end
 
+--- Bring existing map tags in line with the current labels (2.4.6 renamed "Depot city" to
+--- "Coal fuel depot"), keeping a tier suffix.
+---@param surface LuaSurface
+local function relabel(surface)
+  local force = game.forces["player"]
+  for _, c in ipairs(M.CITIES) do
+    local pos = { x = c.x + 0.5, y = c.y + 0.5 }
+    for _, tag in ipairs(force.find_chart_tags(surface, { { pos.x - 1, pos.y - 1 }, { pos.x + 1, pos.y + 1 } })) do
+      local suffix = string.match(tag.text, " %(tier %d+%)$") or ""
+      if tag.text ~= c.label .. suffix then tag.text = c.label .. suffix end
+    end
+  end
+end
+
 --- Create (if needed) and populate the map surface. Returns the surface.
 ---@param name string? surface name (default M.SURFACE)
 function M.generate(name)
@@ -235,6 +249,7 @@ function M.extend(surface)
   place_cities(surface)
   game.forces["player"].chart(surface, area)
   tag_cities(surface)
+  relabel(surface)
 end
 
 --- Retry blocked city spots (called every GOAL_TICK_INTERVAL); cheap when nothing waits.

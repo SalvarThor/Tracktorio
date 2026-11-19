@@ -177,4 +177,27 @@ return {
       assert_.equals(surface.count_entities_filtered({ type = "assembling-machine" }), before)
     end,
   },
+  {
+    -- playtest 2.4.6: "Depot city" became "Coal fuel depot"; older saves' tags follow
+    name = "map: extending an older map renames old city tags and keeps the tier",
+    fn = function(ctx)
+      local name = "tt-map-relabel"
+      local surface = remote.call("tt-map", "generate", name)
+      local depot
+      for _, c in ipairs(layout().cities) do if c.name == "tt-city-depot" then depot = c end end
+      assert(depot, "no depot in the layout")
+      assert_.equals(depot.label, "Coal fuel depot")
+      local force = game.forces["player"]
+      local area = { { depot.x - 0.5, depot.y - 0.5 }, { depot.x + 1.5, depot.y + 1.5 } }
+      ctx:wait_until(function()
+        remote.call("tt-map", "tick_tags")
+        return #force.find_chart_tags(surface, area) > 0
+      end, 600, function()
+        local tag = force.find_chart_tags(surface, area)[1]
+        tag.text = "Depot city (tier 2)"
+        remote.call("tt-map", "extend", name)
+        assert_.equals(force.find_chart_tags(surface, area)[1].text, "Coal fuel depot (tier 2)")
+      end)
+    end,
+  },
 }
