@@ -389,7 +389,7 @@ circuits (and later advanced circuits) at tier 3.
 - [x] 2.5.5 Blue science city; the research complex accepts blue packs (all tiers, existing
       saves too). Gating tests for the blue part of the tree: what becomes reachable, and
       any research triggers that block it.
-- [ ] 2.5.6 Rocket silo city. First check in 2.1 whether a vanilla rocket-silo prototype can
+- [x] 2.5.6 Rocket silo city. First check in 2.1 whether a vanilla rocket-silo prototype can
       be a city (fixed recipe, protected, launches on its own with no space platforms,
       raises on_rocket_launched). Fallback: an assembling-machine city that builds the
       rocket from parts and a scripted launch. Window shows parts progress.

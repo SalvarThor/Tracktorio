@@ -5,7 +5,12 @@ local defs = require("shared.city_defs")
 for _, def in ipairs(defs.list) do
   for tier, t in ipairs(def.tiers) do
     local suffix = tier == 1 and def.name or (def.name .. "-t" .. tier)
-    local protos = def.kind == "lab" and blackbox.make_lab({
+    local protos = def.kind == "silo" and blackbox.make_silo({
+      name = suffix,
+      parts = def.parts,
+      recipe = t.recipe,
+      map_color = def.map_color,
+    }) or def.kind == "lab" and blackbox.make_lab({
       name = suffix,
       graphics = def.graphics,
       inputs = def.inputs,
@@ -23,7 +28,7 @@ for _, def in ipairs(defs.list) do
     })
     -- Tooltip = description + click hint; the city window shows the description alone.
     for _, p in ipairs(protos) do
-      if p.type == "assembling-machine" or p.type == "lab" then
+      if p.type == "assembling-machine" or p.type == "lab" or p.type == "rocket-silo" then
         p.localised_description = { "tt-gui.click-hint", { "tt-city-description." .. defs.entity_name(def.name, tier) } }
       end
     end

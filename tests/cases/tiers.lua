@@ -24,9 +24,13 @@ end
 
 return {
   {
-    name = "tiers: every city has tiers 1-3 at x1, x2, x4 of tier 1's output",
+    name = "tiers: every city has tiers 1-3 at x1, x2, x4 of tier 1's output (the rocket silo has one)",
     fn = function()
       for _, def in ipairs(defs.list) do
+        if def.kind == "silo" then
+          assert_.equals(#def.tiers, 1, "the rocket silo has one tier (2.5.6)")
+          goto continue
+        end
         local base = max_per_min(defs.entity_name(def.name, 1))
         for tier, factor in ipairs({ 1, 2, 4 }) do
           local name = defs.entity_name(def.name, tier)
@@ -34,6 +38,7 @@ return {
           local got = max_per_min(name)
           assert_.truthy(math.abs(got - base * factor) < 0.01, name .. " makes " .. got .. "/min")
         end
+        ::continue::
       end
     end,
   },

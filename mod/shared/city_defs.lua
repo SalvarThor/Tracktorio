@@ -254,6 +254,19 @@ M.list = {
   fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
   fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {
+    -- Rocket silo (PLAN 2.5.6): the vanilla silo with its own rocket part recipe at the
+    -- base-game amounts (user): 10 processing units + 10 low density structures + 10
+    -- rocket fuel per part, 3 s; 50 parts per rocket = 500 of each. (Space Age's part is
+    -- 1 + 1 + 1.) One tier: an upgrade would replace the entity and lose the parts built.
+    name = "rocket-silo",
+    kind = "silo",
+    parts = 50,
+    map_color = { r = 0.95, g = 0.95, b = 0.95 },
+    tiers = { { power = "250kW", recipe = { energy_required = 3,
+      ingredients = { item("processing-unit", 10), item("low-density-structure", 10), item("rocket-fuel", 10) },
+      results = { item("rocket-part", 1) } } } },
+  },
+  {
     -- Research complex (PLAN 2.2.3): a lab prototype; the engine runs research. Tier 1 =
     -- 20 labs (speed 1, 60 kW each). Its "product" is research, so any items may pay.
     name = "research",

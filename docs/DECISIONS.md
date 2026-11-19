@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: 2.5.6 rocket silo city
+- The silo city is a copy of the vanilla rocket silo (it is 9x9 like every city),
+  protected, with launches to space platforms off. When a rocket is ready the script calls
+  LuaEntity.launch_rocket() (exists in 2.1); on_rocket_launched fires and is counted.
+- 2.1 surprise: Space Age changes the rocket part to 1 processing unit + 1 low density
+  structure + 1 rocket fuel (50 of each per rocket). User decision: the silo city has its
+  own rocket part recipe at the base-game amounts, 10 + 10 + 10 per part, 500 of each per
+  rocket. The vanilla recipe stays untouched. Rejected: Space Age's 50 each; a middle
+  amount.
+- Space Age edits the vanilla silo in data-updates, after our data stage, so the copy sets
+  every field that matters itself (parts required, recipe, no platforms, no heating).
+- One tier: an upgrade replaces the entity and would lose the rocket parts already built.
+
 ## 2026-11-19: 2.5.5 research triggers met by cities
 - Space Age's "craft-item" research triggers count crafting by machines: 50 steel from a
   steel city completes Steel axe (test). Oil processing ("mine crude oil") completes from

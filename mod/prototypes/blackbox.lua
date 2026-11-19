@@ -193,4 +193,56 @@ function M.make_lab(def)
   } }
 end
 
+--- Build the rocket silo city (PLAN 2.5.6): the vanilla rocket silo, protected, with the
+--- vanilla rocket part recipe. Its rockets launch by script (scripts/silo.lua), never to a
+--- space platform. Space Age changes the vanilla silo in data-updates (after this), so the
+--- fields that matter are set here explicitly.
+---   def: name, parts (rocket parts per rocket), recipe ({ energy_required, ingredients,
+---        results }: the city's own rocket part recipe), map_color
+---@param def table
+---@return table[]
+function M.make_silo(def)
+  local name = M.PREFIX .. def.name
+  local silo = table.deepcopy(data.raw["rocket-silo"]["rocket-silo"])
+  silo.name = name
+  silo.flags = {
+    "placeable-neutral", "not-rotatable", "not-blueprintable", "not-deconstructable",
+    "not-upgradable", "no-copy-paste", "not-flammable", "not-repairable",
+    "not-in-kill-statistics", "not-in-made-in",
+  }
+  silo.minable = nil
+  silo.placeable_by = nil
+  silo.next_upgrade = nil
+  silo.max_health = 10000
+  silo.map_color = def.map_color
+  silo.module_slots = 0
+  silo.allowed_effects = {}
+  -- Own rocket part recipe (user, 2.5.6: base-game amounts, not Space Age's 1 + 1 + 1).
+  silo.crafting_categories = { name }
+  silo.fixed_recipe = name
+  silo.rocket_parts_required = def.parts
+  silo.launch_to_space_platforms = false
+  silo.surface_conditions = nil
+  silo.heating_energy = nil
+  silo.logistic_trash_inventory_size = 0
+  local category = { type = "recipe-category", name = name }
+  local recipe = {
+    type = "recipe",
+    name = name,
+    icon = data.raw.item["rocket-part"].icon,
+    categories = { name },
+    enabled = false,
+    hide_from_player_crafting = true,
+    energy_required = def.recipe.energy_required,
+    ingredients = def.recipe.ingredients,
+    results = def.recipe.results,
+    allow_productivity = false,
+    allow_quality = false,
+    auto_recycle = false,
+    allow_decomposition = false,
+    allow_as_intermediate = false,
+  }
+  return { category, recipe, silo }
+end
+
 return M

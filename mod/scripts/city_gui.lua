@@ -218,6 +218,14 @@ local function fill_city(body, entity)
     add_line(body, p, { "tt-gui.city-output-line", fmt(p.amount), fmt(p.per_min), fmt(p.per_min_max) })
   end
   add_text(body, { "tt-gui.city-cycle", fmt(info.recipe.energy) })
+  if info.silo then
+    body.add({ type = "line", direction = "horizontal" })
+    add_text(body, { "tt-gui.silo-parts", tostring(info.silo.parts), tostring(info.silo.required) }, true, "silo")
+    local bar = body.add({ type = "progressbar", value = info.silo.required > 0 and info.silo.parts / info.silo.required or 0 })
+    bar.style.horizontally_stretchable = true
+    add_text(body, { "tt-gui.silo-how", tostring(info.silo.required) })
+    add_text(body, { "tt-gui.silo-launched", tostring(info.silo.launched) })
+  end
   add_pipes(body, info.connections)
   add_service(body, entity)
   add_tiers(body, entity)
@@ -275,7 +283,7 @@ end
 function M.has_window(entity)
   if not (entity and entity.valid) then return false end
   if entity.name == config.PORT or entity.name == config.SERVICE_PORT then return true end
-  return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.type == "lab"
+  return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.type == "lab" or entity.type == "rocket-silo"
     or entity.name == config.CITY.goal)
 end
 ---@param player LuaPlayer

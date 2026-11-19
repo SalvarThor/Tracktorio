@@ -15,12 +15,14 @@ local notify = require("scripts.notify")
 local tier_marks = require("scripts.tier_marks")
 local reliability = require("scripts.reliability")
 local service = require("scripts.service")
+local silo = require("scripts.silo")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
 cities.register_events()
 city_gui.register_events()
 limp.register_events()
+silo.register_events()
 
 local migrate -- defined below; used by the tt-city.migrate test hook
 local require_next_tier = require("shared.city_defs").next_tier
@@ -40,6 +42,8 @@ city_remote.recent_messages = function() return notify.recent() end
 city_remote.tier_marks = function(entity) return tier_marks.status(entity) end
 city_remote.service_status = function(entity) return service.status(entity) end
 city_remote.service_tick = function(seconds) service.tick(seconds) end
+city_remote.silo_status = function(entity) return silo.status(entity) end
+city_remote.silo_tick = function() silo.tick() end
 city_remote.alerts_pending = function() return #(storage.tt_alerts or {}) end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.
@@ -90,6 +94,7 @@ script.on_init(function()
   city_gui.init()
   notify.init()
   reliability.init()
+  silo.init()
   limp.scan()
   research.init()
   goal_gui.rebuild_all()
@@ -102,6 +107,7 @@ migrate = function()
   city_gui.init()
   notify.init()
   reliability.init()
+  silo.init()
   state.migrate({ ensure_ports = ports.ensure_all, legacy_windows = city_gui.migrate_legacy,
     ensure_tier_marks = tier_marks.ensure_all, refresh_costs = ports.refresh_costs })
   research.init() -- start technologies added later (e.g. 2.2.3) reach existing saves
@@ -138,6 +144,7 @@ script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   goal.tick()
   ports.tick()
   service.tick()
+  silo.tick()
   goal_gui.update_all()
   city_info.sample()
   city_gui.update_all()

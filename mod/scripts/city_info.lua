@@ -3,6 +3,7 @@
 local config = require("shared.config")
 local cities = require("scripts.cities")
 local city_defs = require("shared.city_defs")
+local silo = require("scripts.silo")
 
 local M = {}
 
@@ -12,7 +13,7 @@ local M = {}
 function M.sample()
   for _, record in pairs(storage.tt_cities) do
     local e = record.entity
-    if e.valid and e.type == "assembling-machine" then
+    if e.valid and (e.type == "assembling-machine" or e.type == "rocket-silo") then
       local s = record.samples or {}
       record.samples = s
       s[#s + 1] = { game.tick, e.products_finished }
@@ -151,6 +152,7 @@ function M.info(entity)
   local record = storage.tt_cities[entity.unit_number] or {}
   local recipe = recipe_of(entity)
   local out = { name = entity.name, unit_number = entity.unit_number, connections = M.connections(entity.name) }
+  if entity.type == "rocket-silo" then out.silo = silo.status(entity) end
   if not recipe then out.status = "other"; return out end
 
   local speed = entity.crafting_speed
