@@ -93,6 +93,57 @@ return {
     end,
   },
   {
+    name = "oil: fuel depots: 2 solid fuel/s from 20 light oil (0.42 MW); 0.2 rocket fuel/s from 2 solid + 2 light (0.6 MW)",
+    fn = function()
+      local function rates(name)
+        local p = prototypes.entity[name]
+        local r = p.fixed_recipe
+        local per_s = p.get_crafting_speed() / r.energy
+        local out = {}
+        for _, i in ipairs(r.ingredients) do out[i.name] = i.amount * per_s end
+        for _, o in ipairs(r.products) do out[o.name] = o.amount * per_s end
+        return out, p.get_max_energy_usage() * 60
+      end
+      local s, sw = rates("tt-city-solid-fuel-depot")
+      assert_.equals(s["light-oil"], 20); assert_.equals(s["solid-fuel"], 2)
+      assert_.truthy(math.abs(sw - 420e3) < 1000, "solid power " .. sw)
+      local r, rw = rates("tt-city-rocket-fuel-depot")
+      assert_.truthy(math.abs(r["rocket-fuel"] - 0.2) < 1e-9, "rocket " .. r["rocket-fuel"])
+      assert_.truthy(math.abs(r["solid-fuel"] - 2) < 1e-9 and math.abs(r["light-oil"] - 2) < 1e-9, serpent.line(r))
+      assert_.truthy(math.abs(rw - 600e3) < 1000, "rocket power " .. rw)
+    end,
+  },
+  {
+    name = "oil: a solid fuel depot makes solid fuel from piped light oil and has a service port",
+    fn = function(ctx)
+      local x = X + 120
+      h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
+      local city = h.place_city("tt-city-solid-fuel-depot", { x + 0.5, 0.5 })
+      assert_.truthy(assert(remote.call("tt-city", "service_status", city)).port, "no service port")
+      pipe({ x + 0.5, 5.5 }, "light-oil", true)
+      h.test_power({ x + 8.5, 0.5 }, 2e6)
+      ctx:wait_until(function() return city.products_finished >= 5 end, 60 * 20, function()
+        local inv = assert(city.get_inventory(defines.inventory.crafter_output))
+        assert_.truthy(inv.get_item_count("solid-fuel") >= 5, "no solid fuel")
+      end)
+    end,
+  },
+  {
+    name = "oil: a rocket fuel depot makes rocket fuel from solid fuel + piped light oil and has a service port",
+    fn = function(ctx)
+      local x = X + 160
+      h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
+      local city = h.place_city("tt-city-rocket-fuel-depot", { x + 0.5, 0.5 })
+      assert_.truthy(assert(remote.call("tt-city", "service_status", city)).port, "no service port")
+      city.insert({ name = "solid-fuel", count = 50 })
+      pipe({ x + 0.5, 5.5 }, "light-oil", true)
+      h.test_power({ x + 8.5, 0.5 }, 2e6)
+      ctx:wait_until(function() return city.products_finished >= 1 end, 60 * 15, function()
+        assert_.equals(assert(city.get_inventory(defines.inventory.crafter_output)).get_item_count("rocket-fuel"), 1)
+      end)
+    end,
+  },
+  {
     name = "oil: an undrained gas output stalls it, and the status names petroleum gas",
     fn = function(ctx)
       local city = rig(X + 80)

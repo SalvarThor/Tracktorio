@@ -98,6 +98,35 @@ local refinery_recipe = { energy_required = 5,
   ingredients = { fluid("crude-oil", 100), fluid("water", 70) },
   results = { fluid("light-oil", 65), fluid("petroleum-gas", 55) } }
 
+-- Fuel depots (2.4.4): vanilla recipes. Solid fuel from light oil: 10 -> 1 in 1 s; speed 2
+-- = 2 chemical plants (210 kW each): 2 solid fuel/s from 20 light oil/s. Rocket fuel: 10
+-- solid fuel + 10 light oil -> 1 in 15 s; speed 3 = 4 assemblers 2 (150 kW each):
+-- 0.2 rocket fuel/s from 2 solid fuel/s + 2 light oil/s.
+local solid_fuel_recipe = { energy_required = 1,
+  ingredients = { fluid("light-oil", 10) }, results = { item("solid-fuel", 1) } }
+local rocket_fuel_recipe = { energy_required = 15,
+  ingredients = { item("solid-fuel", 10), fluid("light-oil", 10) }, results = { item("rocket-fuel", 1) } }
+
+--- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
+--- middle of the south side.
+local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
+  local function kw(f) return string.format("%gkW", power_t1 * f) end
+  return {
+    name = name,
+    service = true,
+    graphics = { type = "assembling-machine", name = graphics },
+    map_color = map_color,
+    fluid_boxes = {
+      { production_type = "input", position = { 0, 4 }, direction = defines.direction.south, filter = "light-oil" },
+    },
+    tiers = {
+      { crafting_speed = speed_t1, power = kw(1), recipe = recipe },
+      { crafting_speed = speed_t1 * 2, power = kw(2), recipe = recipe, cost = both_plates(1000) },
+      { crafting_speed = speed_t1 * 4, power = kw(4), recipe = recipe, cost = with_circuits(2000, 1000) },
+    },
+  }
+end
+
 M.list = {
   smelting("iron-smelting", "iron-ore", "iron-plate", "copper-plate", { r = 0.55, g = 0.6, b = 0.7 }),
   smelting("copper-smelting", "copper-ore", "copper-plate", "iron-plate", { r = 0.8, g = 0.45, b = 0.25 }),
@@ -154,6 +183,8 @@ M.list = {
       { crafting_speed = 8, power = "3.8MW", recipe = refinery_recipe, cost = with_circuits(2000, 1000) },
     },
   },
+  fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
+  fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {
     -- Research complex (PLAN 2.2.3): a lab prototype; the engine runs research. Tier 1 =
     -- 20 labs (speed 1, 60 kW each). Its "product" is research, so any items may pay.
