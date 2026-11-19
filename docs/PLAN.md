@@ -333,9 +333,9 @@ tier 1. Tiers x1/x2/x4; costs plates at tier 2, plates + circuits at tier 3.
       positions. The window and description say which fluid goes where; a full fluid
       output shows "output full" naming the fluid. Tests with infinity pipes (the multi-fluid
       ones run on the refinery city, 2.4.3).
-- [ ] 2.4.3 Refinery city: prototype, recipe, power, tiers, costs, locale, window, port,
-      pips. Graphics: it takes the oil refinery look, so the power city moves to another
-      placeholder look (all placeholders until Factorissimo art).
+- [x] 2.4.3 Refinery city: prototype, recipe, power, tiers, costs, locale, window, port,
+      pips. Graphics: it takes the oil refinery look, so the power city moves to the centrifuge
+      look (all placeholders until Factorissimo art).
 - [ ] 2.4.4 Solid fuel depot and rocket fuel depot: depot-type cities (service port,
       servicing, window section), tiers, costs, locale.
 - [ ] 2.4.5 Map: a crude oil field and spots for the three cities on the test map; older

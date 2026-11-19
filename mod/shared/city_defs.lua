@@ -89,6 +89,15 @@ local green_recipe = { energy_required = 2,
 local repair_recipe = { energy_required = 1,
   ingredients = { item("iron-plate", 4), item("electronic-circuit", 2) }, results = { item("repair-pack", 1) } }
 
+-- Refinery (2.4.3): vanilla advanced oil processing (100 crude + 50 water -> 25 heavy +
+-- 45 light + 55 gas, 5 s) with the heavy oil cracked inside (25 heavy + ~19 water -> ~19
+-- light), rounded. Speed 2 = 2 refineries: 40 crude/s -> 26 light/s + 22 gas/s,
+-- 2 x 420 kW + 0.5 chemical plant (cracking) = ~0.95 MW.
+local function fluid(name, amount) return { type = "fluid", name = name, amount = amount } end
+local refinery_recipe = { energy_required = 5,
+  ingredients = { fluid("crude-oil", 100), fluid("water", 70) },
+  results = { fluid("light-oil", 65), fluid("petroleum-gas", 55) } }
+
 M.list = {
   smelting("iron-smelting", "iron-ore", "iron-plate", "copper-plate", { r = 0.55, g = 0.6, b = 0.7 }),
   smelting("copper-smelting", "copper-ore", "copper-plate", "iron-plate", { r = 0.8, g = 0.45, b = 0.25 }),
@@ -108,7 +117,7 @@ M.list = {
     -- Coal + water -> steam into a hidden generator. 150 steam per craft; the generator burns
     -- `generator_usage` steam per tick: 3 = 180/s = 5.4 MW, 6 = 10.8 MW, 12 = 21.6 MW.
     name = "power",
-    graphics = { type = "assembling-machine", name = "oil-refinery" },
+    graphics = { type = "assembling-machine", name = "centrifuge" }, -- 2.4.3: the refinery city took the oil refinery look
     map_color = { r = 0.9, g = 0.85, b = 0.3 },
     fluid_boxes = {
       { production_type = "input", position = { 0, 4 }, direction = defines.direction.south, filter = "water" },
@@ -128,6 +137,23 @@ M.list = {
     { r = 0.35, g = 0.85, b = 0.35 }, 1500, green_recipe, 1, with_circuits(2000, 1000)),
   assembler_city("repair-packs", { type = "assembling-machine", name = "foundry" },
     { r = 0.75, g = 0.55, b = 0.85 }, 150, repair_recipe, 0.5, with_circuits(2000, 1000)),
+  {
+    -- Inputs on the south side, outputs on the north side, 2 tiles either side of the middle.
+    name = "refinery",
+    graphics = { type = "assembling-machine", name = "oil-refinery" },
+    map_color = { r = 0.45, g = 0.35, b = 0.25 },
+    fluid_boxes = {
+      { production_type = "input", position = { -2, 4 }, direction = defines.direction.south, filter = "crude-oil" },
+      { production_type = "input", position = { 2, 4 }, direction = defines.direction.south, filter = "water" },
+      { production_type = "output", position = { -2, -4 }, direction = defines.direction.north, filter = "light-oil" },
+      { production_type = "output", position = { 2, -4 }, direction = defines.direction.north, filter = "petroleum-gas" },
+    },
+    tiers = {
+      { crafting_speed = 2, power = "950kW", recipe = refinery_recipe },
+      { crafting_speed = 4, power = "1.9MW", recipe = refinery_recipe, cost = both_plates(1000) },
+      { crafting_speed = 8, power = "3.8MW", recipe = refinery_recipe, cost = with_circuits(2000, 1000) },
+    },
+  },
   {
     -- Research complex (PLAN 2.2.3): a lab prototype; the engine runs research. Tier 1 =
     -- 20 labs (speed 1, 60 kW each). Its "product" is research, so any items may pay.

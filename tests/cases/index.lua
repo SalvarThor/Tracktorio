@@ -25,6 +25,7 @@ return {
     "__train-tycoon-tests__/cases/reliability",
     "__train-tycoon-tests__/cases/service",
     "__train-tycoon-tests__/cases/fuels",
+    "__train-tycoon-tests__/cases/oil",
     "__train-tycoon-tests__/cases/map",
     "__train-tycoon-tests__/cases/e2e",
     -- keep last: winning finishes the game
