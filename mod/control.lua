@@ -44,6 +44,10 @@ city_remote.service_status = function(entity) return service.status(entity) end
 city_remote.service_tick = function(seconds) service.tick(seconds) end
 city_remote.silo_status = function(entity) return silo.status(entity) end
 city_remote.silo_tick = function() silo.tick() end
+city_remote.silo_fill = function(entity, parts)
+  assert(silo.is_silo(entity), "not a rocket silo city")
+  entity.rocket_parts = math.max(0, math.min(entity.prototype.rocket_parts_required - 1, math.floor(parts)))
+end
 city_remote.alerts_pending = function() return #(storage.tt_alerts or {}) end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.

@@ -33,6 +33,12 @@ return {
       assert_.equals(line.caption[1], "tt-gui.silo-parts")
       pl.opened = nil
       assert_.falsy(remote.call("tt-city", "upgrade_status", city).next, "the silo has no next tier")
+      -- playtest helper /tt-silo-fill and its remote twin (stops one part short of a rocket)
+      assert_.truthy(commands.commands["tt-silo-fill"], "no /tt-silo-fill")
+      remote.call("tt-city", "silo_fill", city, 30)
+      assert_.equals(city.rocket_parts, 30)
+      remote.call("tt-city", "silo_fill", city, 500)
+      assert_.equals(city.rocket_parts, 49)
     end,
   },
   {

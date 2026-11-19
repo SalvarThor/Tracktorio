@@ -103,7 +103,25 @@ local function cmd_reliability(cmd)
   player.print(string.format("tt-reliability: %.0f%%", 100 * remote.call("tt-reliability", "get", target)))
 end
 
+--- /tt-silo-fill <parts>   set the rocket parts of the rocket silo city under the cursor
+--- (playtest helper; admins only; remote twin: tt-city.silo_fill(entity, parts))
+---@param cmd CustomCommandData
+local function cmd_silo_fill(cmd)
+  local player = cmd.player_index and game.get_player(cmd.player_index)
+  if not player then return end
+  if not player.admin then player.print("tt-silo-fill: admins only"); return end
+  local parts = tonumber(cmd.parameter or "")
+  local target = player.selected
+  if not (parts and target and target.type == "rocket-silo") then
+    player.print("tt-silo-fill: hover over the rocket silo and type /tt-silo-fill <parts>")
+    return
+  end
+  local ok, err = pcall(remote.call, "tt-city", "silo_fill", target, parts)
+  player.print(ok and ("tt-silo-fill: " .. parts .. " parts") or ("tt-silo-fill: " .. tostring(err)))
+end
+
 function M.register()
+  commands.add_command("tt-silo-fill", "Set the rocket parts of the rocket silo under the cursor: /tt-silo-fill <parts> (playtest helper).", cmd_silo_fill)
   commands.add_command("tt-reliability", "Show or set the reliability of the locomotive under the cursor: /tt-reliability [percent] (playtest helper).", cmd_reliability)
   commands.add_command("tt-port-fill", "Set the upgrade progress of the city under the cursor: /tt-port-fill <percent> (playtest helper).", cmd_port_fill)
   commands.add_command("tt-dump", "Write a JSON snapshot of Train Tycoon's storage to script-output/tt-dump.json.", cmd_dump)
