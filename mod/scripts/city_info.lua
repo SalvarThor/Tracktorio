@@ -2,6 +2,7 @@
 -- output full). Used by the city GUI and exposed for tests through tt-city.info.
 local config = require("shared.config")
 local cities = require("scripts.cities")
+local city_defs = require("shared.city_defs")
 
 local M = {}
 
@@ -97,13 +98,59 @@ local function lab_info(entity)
   return out
 end
 
+local SIDES = {
+  [defines.direction.north] = "north", [defines.direction.east] = "east",
+  [defines.direction.south] = "south", [defines.direction.west] = "west",
+}
+
+--- Where the player connects pipes (2.4.2): one entry per visible fluid box of the city's
+--- definition, { kind = "input"|"output", fluid, side, offset }. offset is tiles along the
+--- edge from its middle: + is east on the north/south sides, south on the east/west sides.
+---@param entity_name string
+function M.connections(entity_name)
+  local info = city_defs.by_entity[entity_name]
+  local out = {}
+  for _, f in ipairs(info and info.def.fluid_boxes or {}) do
+    if not f.linked_id then
+      local side = SIDES[f.direction]
+      local offset = (side == "north" or side == "south") and f.position[1] or f.position[2]
+      out[#out + 1] = { kind = f.production_type, fluid = f.filter, side = side, offset = offset }
+    end
+  end
+  return out
+end
+
+--- Products holding up a city whose output is full: fluids with no room for one more
+--- cycle, items with at least one cycle waiting. Falls back to every product.
+---@param entity LuaEntity
+---@param recipe LuaRecipePrototype
+local function full_products(entity, recipe)
+  local info = city_defs.by_entity[entity.name]
+  local volume = {}
+  for _, f in ipairs(info and info.def.fluid_boxes or {}) do
+    if f.production_type == "output" and f.filter then volume[f.filter] = f.volume or 1000 end
+  end
+  local inv = entity.get_inventory(defines.inventory.crafter_output)
+  local full, all = {}, {}
+  for _, p in ipairs(recipe.products) do
+    local amount = p.amount or p.amount_max or 1
+    all[#all + 1] = p.name
+    if p.type == "fluid" then
+      if volume[p.name] and entity.get_fluid_count(p.name) + amount > volume[p.name] then full[#full + 1] = p.name end
+    elseif inv and inv.get_item_count(p.name) >= amount then
+      full[#full + 1] = p.name
+    end
+  end
+  return #full > 0 and full or all
+end
+
 --- Snapshot of a city for the UI.
 ---@param entity LuaEntity
 function M.info(entity)
   if entity.type == "lab" then return lab_info(entity) end
   local record = storage.tt_cities[entity.unit_number] or {}
   local recipe = recipe_of(entity)
-  local out = { name = entity.name, unit_number = entity.unit_number }
+  local out = { name = entity.name, unit_number = entity.unit_number, connections = M.connections(entity.name) }
   if not recipe then out.status = "other"; return out end
 
   local speed = entity.crafting_speed
@@ -144,6 +191,7 @@ function M.info(entity)
     out.status = "no_power"
   elseif status == defines.entity_status.full_output then
     out.status = "output_full"
+    out.full = full_products(entity, recipe)
   elseif status and STARVED[status] then
     out.status = "starved"
     out.missing = missing_inputs(entity, recipe)

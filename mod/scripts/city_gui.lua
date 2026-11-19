@@ -82,7 +82,14 @@ local function add_status(body, entity, info)
   elseif info.status == "output_full" and city_defs.is_power(entity.name) then
     status, hint = { "tt-gui.city-status-power-idle" }, { "tt-gui.city-hint-power-idle" }
   elseif info.status == "output_full" then
-    status, hint = { "tt-gui.city-status-output-full" }, { "tt-gui.city-hint-output-full" }
+    local names, fluid = {}, false
+    for _, n in ipairs(info.full or {}) do
+      local is_fluid = prototypes.fluid[n] ~= nil
+      fluid = fluid or is_fluid
+      names[#names + 1] = (is_fluid and "[fluid=" or "[item=") .. n .. "]"
+    end
+    status = #names > 0 and { "tt-gui.city-status-output-full-named", table.concat(names, " ") } or { "tt-gui.city-status-output-full" }
+    hint = fluid and { "tt-gui.city-hint-output-full-fluid" } or { "tt-gui.city-hint-output-full" }
   elseif info.status == "starved" then
     local names = {}
     for _, n in ipairs(info.missing or {}) do
@@ -120,6 +127,24 @@ local function add_tiers(body, city)
     bar.style.horizontally_stretchable = true
   end
   add_text(body, { "tt-gui.tier-where" })
+end
+
+--- Where each fluid connects (2.4.2).
+---@param body LuaGuiElement
+---@param connections table[]?
+local function add_pipes(body, connections)
+  if not connections or #connections == 0 then return end
+  body.add({ type = "label", caption = { "tt-gui.city-pipes" }, style = "caption_label" })
+  for i, c in ipairs(connections) do
+    local where
+    local n = math.abs(c.offset)
+    if n < 0.01 then where = { "tt-gui.city-pipe-middle" }
+    elseif c.side == "north" or c.side == "south" then where = { c.offset > 0 and "tt-gui.city-pipe-east" or "tt-gui.city-pipe-west", fmt(n) }
+    else where = { c.offset > 0 and "tt-gui.city-pipe-south" or "tt-gui.city-pipe-north", fmt(n) } end
+    add_text(body, { "tt-gui.city-pipe-line", "[fluid=" .. c.fluid .. "]",
+      { c.kind == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" },
+      { "tt-gui.city-pipe-side-" .. c.side }, where }, false, "pipe-" .. i)
+  end
 end
 
 --- A depot's servicing: packs in the service port and locomotives serviced (2.3.3).
@@ -187,6 +212,7 @@ local function fill_city(body, entity)
     add_line(body, p, { "tt-gui.city-output-line", fmt(p.amount), fmt(p.per_min), fmt(p.per_min_max) })
   end
   add_text(body, { "tt-gui.city-cycle", fmt(info.recipe.energy) })
+  add_pipes(body, info.connections)
   add_service(body, entity)
   add_tiers(body, entity)
 end

@@ -329,9 +329,10 @@ tier 1. Tiers x1/x2/x4; costs plates at tier 2, plates + circuits at tier 3.
       fuel category, vanilla stats kept, still burnable where vanilla burns them); vanilla
       coal still can't fuel a locomotive. Limp mode and breakdowns treat them like coal
       fuel. Tests: each fuel's top speed and acceleration on a real train.
-- [ ] 2.4.2 Fluid cities: a city can have several fluid inputs and outputs on fixed pipe
+- [x] 2.4.2 Fluid cities: a city can have several fluid inputs and outputs on fixed pipe
       positions. The window and description say which fluid goes where; a full fluid
-      output shows "output full" naming the fluid. Tests with infinity pipes.
+      output shows "output full" naming the fluid. Tests with infinity pipes (the multi-fluid
+      ones run on the refinery city, 2.4.3).
 - [ ] 2.4.3 Refinery city: prototype, recipe, power, tiers, costs, locale, window, port,
       pips. Graphics: it takes the oil refinery look, so the power city moves to another
       placeholder look (all placeholders until Factorissimo art).

@@ -57,7 +57,30 @@ return {
       local city = h.city_rig(IRON, 1120, {}, false)
       city.insert({ name = "iron-ore", count = 200 })
       city.insert({ name = "coal", count = 20 })
-      ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function() end)
+      ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function()
+        -- 2.4.2: the status names what is full
+        assert_.truthy(contains(info(city).full, "iron-plate"), "full " .. serpent.line(info(city).full))
+      end)
+    end,
+  },
+  {
+    name = "city ui: the window says where each fluid connects (power city: water in, south side, middle)",
+    fn = function()
+      h.clear_area({ { 1310, -12 }, { 1330, 12 } })
+      local city = h.place_city("tt-city-power", { 1320.5, 0.5 })
+      local c = info(city).connections
+      assert_.equals(#c, 1, "connections " .. serpent.line(c))
+      assert_.equals(c[1].kind, "input")
+      assert_.equals(c[1].fluid, "water")
+      assert_.equals(c[1].side, "south")
+      assert_.equals(c[1].offset, 0)
+      local p = assert(game.players[1])
+      remote.call("tt-city", "open_gui", p.index, city)
+      local line = assert(p.gui.screen["tt_city_frame"])["body"]["pipe-1"]
+      assert_.truthy(line, "no pipe line in the window")
+      assert_.equals(line.caption[1], "tt-gui.city-pipe-line")
+      assert_.equals(line.caption[5][1], "tt-gui.city-pipe-middle")
+      p.opened = nil
     end,
   },
   {
