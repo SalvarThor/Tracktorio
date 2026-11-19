@@ -18,6 +18,16 @@ local function line(y, len, fuel)
 end
 
 local function get(loco) return remote.call("tt-reliability", "get", loco) end
+local function limping(loco) return remote.call("tt-limp", "is_limping", loco) end
+local function broken(loco) return remote.call("tt-reliability", "is_broken", loco) end
+local LIMP_MAX = 1.2 * 0.10
+
+local function mentions(ls, key)
+  if type(ls) ~= "table" then return false end
+  if ls[1] == key then return true end
+  for _, v in pairs(ls) do if mentions(v, key) then return true end end
+  return false
+end
 
 return {
   {
@@ -62,6 +72,86 @@ return {
       local loco = line(-40, 40, true)
       remote.call("tt-reliability", "set", loco, 0.5)
       assert_.truthy(math.abs(loco.health - 0.5 * loco.max_health) < 1e-6, "health " .. loco.health)
+    end,
+  },
+  {
+    name = "breakdown: chance is zero when new and ~1.1% per second at 25%",
+    fn = function()
+      assert_.equals(remote.call("tt-reliability", "chance", 1, 60), 0)
+      local c = remote.call("tt-reliability", "chance", 0.25, 60)
+      assert_.truthy(math.abs(c - 0.01125) < 1e-6, "chance " .. c)
+      local half = remote.call("tt-reliability", "chance", 0.5, 60)
+      assert_.truthy(half < c and half > 0, "50% chance " .. half)
+    end,
+  },
+  {
+    name = "breakdown: one broken locomotive makes its whole fuelled train limp, with a message",
+    fn = function()
+      local front = line(0, 60, true)
+      local back = h.create("locomotive", { X + 13, 0 }, { direction = E, raise_built = true })
+      assert(back.get_fuel_inventory()).insert({ name = "tt-coal-fuel", count = 20 })
+      local train = assert(front.train)
+      assert_.equals(#train.carriages, 2, "locomotives not coupled")
+      local since = game.tick
+      remote.call("tt-reliability", "break_down", back)
+      remote.call("tt-limp", "check_all")
+      assert_.truthy(limping(front) and limping(back), "both locomotives should limp")
+      assert_.truthy(math.abs(train.max_forward_speed - LIMP_MAX) < 0.001, "max speed " .. train.max_forward_speed)
+      local found = false
+      for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
+        if m.tick >= since and mentions(m.message, "tt-notify.breakdown") then found = true end
+      end
+      assert_.truthy(found, "no breakdown message")
+    end,
+  },
+  {
+    name = "breakdown: repairing to full health cures it and the train runs at full speed",
+    fn = function(ctx)
+      local loco = line(20, 60, true)
+      remote.call("tt-reliability", "set", loco, 0.5)
+      remote.call("tt-reliability", "break_down", loco)
+      remote.call("tt-limp", "check_all")
+      assert_.truthy(limping(loco), "not limping")
+      local alerts = remote.call("tt-city", "alerts_pending")
+      assert_.truthy(alerts > 0, "no breakdown alert")
+      loco.health = loco.max_health -- what a repair pack does
+      ctx:wait(130, function()
+        assert_.falsy(broken(loco), "still broken")
+        assert_.truthy(remote.call("tt-city", "alerts_pending") < alerts, "breakdown alert not cleared")
+        assert_.falsy(limping(loco), "still limping")
+        assert_.truthy(assert(loco.train).max_forward_speed > 1.1, "max speed " .. assert(loco.train).max_forward_speed)
+      end)
+    end,
+  },
+  {
+    name = "breakdown: a part repair is not enough",
+    fn = function(ctx)
+      local loco = line(40, 60, true)
+      remote.call("tt-reliability", "set", loco, 0.3)
+      remote.call("tt-reliability", "break_down", loco)
+      remote.call("tt-reliability", "set", loco, 0.9)
+      ctx:wait(130, function()
+        assert_.truthy(broken(loco) and limping(loco), "cured below full health")
+      end)
+    end,
+  },
+  {
+    name = "breakdown: fuel-empty limp and a breakdown don't fight",
+    fn = function(ctx)
+      local loco = line(60, 60, false)
+      remote.call("tt-reliability", "set", loco, 0.5)
+      remote.call("tt-reliability", "break_down", loco)
+      remote.call("tt-limp", "check_all")
+      assert_.truthy(limping(loco), "not limping")
+      -- refuelling alone does not cure a breakdown
+      assert(loco.get_fuel_inventory()).insert({ name = "tt-coal-fuel", count = 5 })
+      ctx:wait(70, function()
+        assert_.truthy(limping(loco), "refuelling ended a breakdown")
+        loco.health = loco.max_health
+        ctx:wait(130, function()
+          assert_.falsy(limping(loco), "repaired and fuelled, still limping")
+        end)
+      end)
     end,
   },
 }

@@ -25,6 +25,8 @@ M.LIMP_PASS_TICKS = 60
 -- Fraction of max health lost per minute of driving, per locomotive prototype (tiers later).
 M.RELIABILITY_DECAY_PER_MINUTE = { locomotive = 0.075 }
 M.RELIABILITY_FLOOR = 0.10 -- wear never takes a locomotive below this fraction
+-- While moving, chance per second of a breakdown = BREAKDOWN_CHANCE x (1 - health)^2.
+M.BREAKDOWN_CHANCE = 0.02
 
 -- City entity names (prototypes/cities.lua).
 M.CITY = {

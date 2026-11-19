@@ -277,7 +277,7 @@ Proposed numbers (tuning values):
 - [x] 2.3.1 Reliability: decay with driving (per-prototype rate, 10% floor), periodic sliced
       polling like limp mode, `/tt-reliability <percent>` on the selected locomotive (and its
       remote twin). Tests: decay while driving, none while stopped, the floor.
-- [ ] 2.3.2 Breakdowns: chance per second from health, broken locomotives limp until at full
+- [x] 2.3.2 Breakdowns: chance per second from health, broken locomotives limp until at full
       health, manual repair cures. Alert and chat message with a map link when a train breaks
       down. Tests: forced breakdown limps the whole train; repairing to full cures it; a
       fuel-empty limp and a breakdown don't fight.

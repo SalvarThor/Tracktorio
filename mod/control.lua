@@ -61,6 +61,8 @@ upgrade.on_upgraded(function(_, city) map.retag(city) end)
 ports.on_heads_up(notify.heads_up)
 ports.on_blocked(notify.port_blocked)
 map.on_city_blocked(notify.city_blocked)
+reliability.on_breakdown(notify.breakdown)
+reliability.on_cured(notify.repaired)
 remote.add_interface("tt-goal", goal.remote_interface())
 remote.add_interface("tt-limp", limp.remote_interface())
 remote.add_interface("tt-map", map.remote_interface())
@@ -69,6 +71,10 @@ remote.add_interface("tt-reliability", {
   set = function(loco, fraction) reliability.set(loco, fraction) end,
   --- Tests: apply `ticks` of driving wear now.
   wear = function(loco, ticks) reliability.wear(loco, ticks) end,
+  chance = function(fraction, ticks) return reliability.chance(fraction, ticks) end,
+  is_broken = function(loco) return reliability.is_broken(loco) end,
+  --- Tests: break a locomotive down now.
+  break_down = function(loco) reliability.break_down(loco) end,
 })
 script.on_init(function()
   state.init()
@@ -76,6 +82,7 @@ script.on_init(function()
   goal.init()
   city_gui.init()
   notify.init()
+  reliability.init()
   limp.scan()
   research.init()
   goal_gui.rebuild_all()
@@ -87,6 +94,7 @@ migrate = function()
   goal.init()
   city_gui.init()
   notify.init()
+  reliability.init()
   state.migrate({ ensure_ports = ports.ensure_all, legacy_windows = city_gui.migrate_legacy,
     ensure_tier_marks = tier_marks.ensure_all, refresh_costs = ports.refresh_costs })
   research.init() -- start technologies added later (e.g. 2.2.3) reach existing saves
