@@ -20,7 +20,7 @@ end
 local function get(loco) return remote.call("tt-reliability", "get", loco) end
 local function limping(loco) return remote.call("tt-limp", "is_limping", loco) end
 local function broken(loco) return remote.call("tt-reliability", "is_broken", loco) end
-local LIMP_MAX = 1.2 * 0.10
+local LIMP_MAX = 1.2 * require("__train-tycoon__/shared/config").LIMP_TOP_SPEED
 
 local function mentions(ls, key)
   if type(ls) ~= "table" then return false end

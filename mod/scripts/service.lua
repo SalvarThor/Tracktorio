@@ -98,13 +98,21 @@ end
 local function stopped_locomotives(city)
   local box, r = city.bounding_box, config.SERVICE_RANGE
   local area = { { box.left_top.x - r, box.left_top.y - r }, { box.right_bottom.x + r, box.right_bottom.y + r } }
-  local out = {}
+  local out, seen = {}, {}
+  ---@param train LuaTrain?
+  local function add(train)
+    if not train or seen[train.id] then return end
+    seen[train.id] = true
+    for _, group in pairs(train.locomotives) do
+      for _, loco in pairs(group) do out[#out + 1] = loco end
+    end
+  end
   for _, stop in pairs(city.surface.find_entities_filtered({ type = "train-stop", area = area })) do
-    local train = stop.get_stopped_train()
-    if train then
-      for _, group in pairs(train.locomotives) do
-        for _, loco in pairs(group) do out[#out + 1] = loco end
-      end
+    add(stop.get_stopped_train())
+    -- manually driven trains are never "stopped at" a stop: any standing train close by counts
+    for _, loco in pairs(city.surface.find_entities_filtered({ type = "locomotive", position = stop.position, radius = config.SERVICE_STOP_RADIUS })) do
+      local train = loco.train
+      if train and train.speed == 0 then add(train) end
     end
   end
   return out

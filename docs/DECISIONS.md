@@ -4,6 +4,15 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: playtest 2.3.5 follow-ups
+- Limp mode (fuel-empty and breakdown) is faster: top speed 25% of normal (was 10%),
+  acceleration 60% (was 25%). Why: with wagons attached, a limping train barely moved
+  (user). Tuning values.
+- Servicing also counts a standing train with a locomotive within 10 tiles of a train stop
+  in range, not only trains the engine reports as stopped at it. Why: a manually driven
+  train is never "stopped at" a stop, so stopping by hand never serviced it (user).
+- Breakdown rate stays for testing; the user wants it slower for real play later.
+
 ## 2026-11-19: 2.3.1-2.3.4 reliability build notes (mod 0.3.0)
 - Wear and breakdowns run in the existing limp-mode poll (each locomotive about once a
   second); no new on_tick work. A breakdown puts every locomotive of the train on the limp

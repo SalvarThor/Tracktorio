@@ -13,8 +13,8 @@ M.LOCOMOTIVE_FUEL_CATEGORY = "tt-locomotive"
 M.LIMP_FUEL = "tt-limp-fuel"
 M.LIMP_FUEL_VALUE = "100GJ"         -- effectively never runs out; re-applied if it does
 M.LIMP_FUEL_JOULES = 100e9
-M.LIMP_TOP_SPEED = 0.10             -- x locomotive max speed (1.2 -> 0.12 tiles/tick, ~26 km/h)
-M.LIMP_ACCELERATION = 0.25
+M.LIMP_TOP_SPEED = 0.25             -- x locomotive max speed (1.2 -> 0.3 tiles/tick, ~65 km/h); 0.10 crawled with wagons (playtest 2.3.5)
+M.LIMP_ACCELERATION = 0.6
 -- Every LIMP_INTERVAL ticks a slice of locomotives is checked so each one is seen about
 -- once per LIMP_PASS_TICKS.
 M.LIMP_INTERVAL = 10
@@ -56,6 +56,9 @@ M.SERVICE_PORT = "tt-service-port"
 M.SERVICE_SLOTS = 4
 M.SERVICE_ITEM = "repair-pack"
 M.SERVICE_RANGE = 30
+-- A train standing still with a locomotive this close to a stop in range is serviced too,
+-- so manually driven trains count (automatic ones are found via get_stopped_train).
+M.SERVICE_STOP_RADIUS = 10
 M.SERVICE_HP_PER_SECOND = 100
 M.SERVICE_HP_PER_PACK = 300 -- the vanilla repair pack's durability
 -- How often the goal box is emptied and counted, and the rate window (for the UI).

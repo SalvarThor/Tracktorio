@@ -172,4 +172,25 @@ return {
       assert_.equals(surface.count_entities_filtered({ name = "tt-city-repair-packs" }), 1)
     end,
   },
+  {
+    -- playtest 2.3.5: stopping by hand at the stop never serviced the train
+    name = "service: a manually driven train standing at a stop near a depot is repaired",
+    fn = function(ctx)
+      local y = 420
+      h.clear_area({ { X - 4, y - 6 }, { X + 124, y + 20 } })
+      for x = X, X + 120, 2 do h.create("straight-rail", { x, y }, { direction = E }) end
+      local city = h.place_city(DEPOT, { X + 60.5, y + 10.5 })
+      local st = h.create("train-stop", { X + 80, y + 2 }, { direction = E })
+      st.backer_name = "tt-service-manual"
+      local loco = h.create("locomotive", { X + 77, y }, { direction = E, raise_built = true })
+      assert(loco.get_fuel_inventory()).insert({ name = "tt-coal-fuel", count = 5 })
+      assert(loco.train).manual_mode = true
+      assert(assert(status(city)).port).insert({ name = "repair-pack", count = 10 })
+      remote.call("tt-reliability", "set", loco, 0.25)
+      local start = loco.health
+      ctx:wait(130, function()
+        assert_.truthy(loco.health > start + 100, "not repaired: " .. (loco.health - start))
+      end)
+    end,
+  },
 }

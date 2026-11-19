@@ -289,5 +289,11 @@ Proposed numbers (tuning values):
 - [x] 2.3.4 Repair pack city: prototype, tiers, costs, locale, window, port, pips; a spot on
       the test map. Existing saves get it (and depot service ports) on configuration change;
       mod 0.3.0.
-- [ ] 2.3.5 `/playtest` round: decay and breakdown feel, servicing station design, pack
+- [x] 2.3.5 `/playtest` round: decay and breakdown feel, servicing station design, pack
       supply line, numbers.
+      Result (2026-11-19): steps 1-7 passed, 8 (no packs) not fully tested. Fixed: a train
+      stopped by hand at the stop was never serviced (now any standing train with a
+      locomotive within 10 tiles of a stop in range counts; test added). Changed: limp
+      top speed 10% -> 25% and acceleration 25% -> 60%, since a train with wagons barely
+      moved (also applies to fuel-empty limp). Breakdown rate fine for testing, too fast
+      for real play: retune later. Messages fine.
