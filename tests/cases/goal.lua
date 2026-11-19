@@ -53,7 +53,8 @@ return {
         local frame = p.gui.left["tt_goal_frame"]
         assert_.truthy(frame, "no goal frame")
         ---@cast frame LuaGuiElement
-        assert_.truthy(frame["iron"] and frame["copper"], "missing rows")
+        assert_.truthy(frame["rocket"], "no rocket progress row (2.5.7)")
+        assert_.equals(frame.caption[1], "tt-gui.goal-rocket-title")
       end)
     end,
   },
@@ -79,20 +80,19 @@ return {
     end,
   },
   {
-    name = "goal: reaching both targets wins, one alone does not",
+    -- 2.5.7: the rocket launch wins (silo tests); plates are only counted
+    name = "goal: meeting the plate targets no longer wins",
     fn = function(ctx)
       local s = status()
       remote.call("tt-goal", "set_targets", s.delivered.iron + 10, s.delivered.copper + 10)
       local box = h.city_rig(GOAL, 920, {}, false)
       local inv = assert(box.get_inventory(defines.inventory.chest))
       inv.insert({ name = "iron-plate", count = 10 })
-      remote.call("tt-goal", "tick")
-      assert_.falsy(status().won, "won on iron alone")
       inv.insert({ name = "copper-plate", count = 10 })
       remote.call("tt-goal", "tick")
-      assert_.truthy(status().won, "not won with both targets met")
+      assert_.falsy(status().won, "plates won the game")
       ctx:wait(2, function()
-        assert_.truthy(game.finished or game.finished_but_continuing, "game not marked finished")
+        assert_.falsy(game.finished or game.finished_but_continuing, "game marked finished")
       end)
     end,
   },

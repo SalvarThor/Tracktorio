@@ -36,7 +36,8 @@ return {
     end,
   },
   {
-    name = "silo: a finished rocket launches by itself and is counted",
+    -- keep last in the run: the launch wins and finishes the game (2.5.7)
+    name = "silo: a finished rocket launches by itself, is counted and wins the game",
     fn = function(ctx)
       h.clear_area({ { X + 20, -12 }, { X + 44, 14 } })
       local city = h.place_city(SILO, { X + 30.5, 0.5 })
@@ -49,6 +50,12 @@ return {
       ctx:wait_until(function() return status(city).launched > before end, 60 * 120, function()
         assert_.equals(status(city).launched, before + 1)
         assert_.equals(city.rocket_parts, 0)
+        assert_.truthy(remote.call("tt-goal", "status").won, "the launch did not win")
+        ctx:wait(61, function()
+          assert_.truthy(game.finished or game.finished_but_continuing, "game not marked finished")
+          local frame = assert(game.players[1].gui.left["tt_goal_frame"], "no goal panel")
+          assert_.equals(frame["rocket"]["label"].caption[1], "tt-gui.goal-rocket-won")
+        end)
       end)
     end,
   },

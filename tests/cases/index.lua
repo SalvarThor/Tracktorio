@@ -27,11 +27,11 @@ return {
     "__train-tycoon-tests__/cases/fuels",
     "__train-tycoon-tests__/cases/oil",
     "__train-tycoon-tests__/cases/chain",
-    "__train-tycoon-tests__/cases/silo",
     "__train-tycoon-tests__/cases/map",
     "__train-tycoon-tests__/cases/e2e",
-    -- keep last: winning finishes the game
     "__train-tycoon-tests__/cases/goal",
+    -- keep very last: a rocket launch wins (2.5.7)
+    "__train-tycoon-tests__/cases/silo",
   },
   selftest = {
     "__train-tycoon-tests__/cases/selftest",

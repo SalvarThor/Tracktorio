@@ -1,5 +1,6 @@
--- Goal box and win condition (SPEC MVP): cumulative iron and copper plates delivered to the
--- goal box. Every GOAL_TICK_INTERVAL ticks the box is emptied and the plates are counted.
+-- Win condition. Since 2.5.7 (user): launching the first rocket from the rocket silo city
+-- wins. The MVP goal box (cumulative iron and copper plates) only exists in older saves; it
+-- still counts deliveries but no longer decides the win.
 --
 -- storage.tt_goal = {
 --   delivered = { iron = n, copper = n },
@@ -62,18 +63,17 @@ function M.rates()
   }
 end
 
-local function check_win()
+--- A rocket left a rocket silo city: the first one wins (2.5.7).
+---@param silo LuaEntity?
+function M.rocket_launched(silo)
+  M.init()
   local g = storage.tt_goal
   if g.won then return end
-  local t = M.targets()
-  if g.delivered.iron >= t.iron and g.delivered.copper >= t.copper then
-    g.won = true
-    g.won_tick = game.tick
-    ---@type any
-    local message = { "tt-gui.victory-message", t.iron, t.copper }
-    game.set_win_ending_info({ title = { "tt-gui.victory-title" }, message = message })
-    game.set_game_state({ game_finished = true, player_won = true, can_continue = true })
-  end
+  g.won = true
+  g.won_tick = game.tick
+  g.won_by = "rocket"
+  game.set_win_ending_info({ title = { "tt-gui.victory-title" }, message = { "tt-gui.victory-rocket" } })
+  game.set_game_state({ game_finished = true, player_won = true, can_continue = true })
 end
 
 --- Empty every goal box, count what arrived, record a sample, check the win.
@@ -95,7 +95,6 @@ function M.tick()
   while #samples > 1 and samples[1][1] < game.tick - config.RATE_WINDOW_TICKS do
     table.remove(samples, 1)
   end
-  check_win()
 end
 
 function M.status()
@@ -116,7 +115,6 @@ function M.set_targets(iron, copper)
   if iron then settings.global["tt-goal-iron"] = { value = math.max(1, math.floor(iron)) } end
   if copper then settings.global["tt-goal-copper"] = { value = math.max(1, math.floor(copper)) } end
   refresh_filters()
-  check_win()
 end
 
 function M.remote_interface()

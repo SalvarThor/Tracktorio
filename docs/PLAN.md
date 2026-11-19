@@ -375,7 +375,7 @@ power = the equivalent vanilla buildings; tuning values):
 | Processing units | 4 green + 0.4 advanced circuits + 1 sulfuric acid | 0.2 processing units | ~400 kW |
 | Low density structure | 0.4 steel + 4 copper + 1 plastic | 0.2 LDS | ~600 kW |
 | Blue science | 0.2 steel + 0.8 iron + 0.3 advanced circuits + 0.1 sulfur | 0.2 packs | ~1 MW |
-| Rocket silo | 10 processing units + 10 LDS + 10 rocket fuel per part | 1 part / 3 s; 50 parts = 1 rocket | vanilla silo |
+| Rocket silo | 10 processing units + 10 LDS + 10 rocket fuel per part (own recipe; Space Age's is 1+1+1) | 1 part / 3 s; 50 parts = 1 rocket | vanilla silo |
 
 A rocket needs 500 processing units, 500 LDS and 500 rocket fuel: about 42 minutes of
 each tier 1 chain end at 0.2/s. Tiers x1/x2/x4 as usual; upgrade costs plates, then
@@ -393,7 +393,7 @@ circuits (and later advanced circuits) at tier 3.
       be a city (fixed recipe, protected, launches on its own with no space platforms,
       raises on_rocket_launched). Fallback: an assembling-machine city that builds the
       rocket from parts and a scripted launch. Window shows parts progress.
-- [ ] 2.5.7 Win condition: the first launch wins (victory screen, message). New maps get no
+- [x] 2.5.7 Win condition: the first launch wins (victory screen, message). New maps get no
       goal box; in older saves it stays, says it no longer decides the win, and the goal
       panel shows rocket progress instead of plates.
 - [ ] 2.5.8 Map: spots for the 9 new cities on the test map (no new resources needed);

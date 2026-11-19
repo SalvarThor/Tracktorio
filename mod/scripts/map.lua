@@ -21,7 +21,7 @@ M.CITIES = {
   { name = config.CITY.power, x = -64, y = 40, label = "Power city", tag_icon = "small-electric-pole" },
   { name = config.CITY.iron, x = 160, y = -96, label = "Iron smelting city", tag_icon = "iron-plate" },
   { name = config.CITY.copper, x = 160, y = 96, label = "Copper smelting city", tag_icon = "copper-plate" },
-  { name = config.CITY.goal, x = 272, y = 0, label = "Goal box", tag_icon = "iron-chest" },
+  -- 2.5.7: no goal box on new maps (the rocket launch wins); older saves keep theirs
   -- 2.2.6: intermediate cities and the research complex, on the grown map
   { name = "tt-city-circuits", x = 400, y = -200, label = "Circuit city", tag_icon = "electronic-circuit" },
   { name = "tt-city-red-science", x = 400, y = 200, label = "Red science city", tag_icon = "automation-science-pack" },
