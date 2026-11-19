@@ -396,7 +396,7 @@ circuits (and later advanced circuits) at tier 3.
 - [x] 2.5.7 Win condition: the first launch wins (victory screen, message). New maps get no
       goal box; in older saves it stays, says it no longer decides the win, and the goal
       panel shows rocket progress instead of plates.
-- [ ] 2.5.8 Map: spots for the 9 new cities on the test map (no new resources needed);
+- [x] 2.5.8 Map: spots for the 9 new cities on the test map (no new resources needed);
       older saves get them; mod 0.5.0.
 - [ ] 2.5.9 `/playtest` round: chain overview, blue research, the silo and a launch
       (helpers to skip ahead), numbers.

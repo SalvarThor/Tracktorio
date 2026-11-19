@@ -32,6 +32,16 @@ M.CITIES = {
   { name = "tt-city-refinery", x = -160, y = -250, label = "Refinery city", tag_icon = "pumpjack" },
   { name = "tt-city-solid-fuel-depot", x = 280, y = -250, label = "Solid fuel depot", tag_icon = "solid-fuel" },
   { name = "tt-city-rocket-fuel-depot", x = -400, y = 220, label = "Rocket fuel depot", tag_icon = "rocket-fuel" },
+  -- 2.5.8: the rocket chain (each at least 100 tiles from every patch and the lake)
+  { name = "tt-city-steel", x = 0, y = 280, label = "Steel city", tag_icon = "steel-plate" },
+  { name = "tt-city-plastic", x = -300, y = -280, label = "Plastic city", tag_icon = "plastic-bar" },
+  { name = "tt-city-sulfur", x = 40, y = -280, label = "Sulfur city", tag_icon = "sulfur" },
+  { name = "tt-city-sulfuric-acid", x = 140, y = -280, label = "Sulfuric acid city", tag_icon = "sulfur" },
+  { name = "tt-city-advanced-circuits", x = 280, y = -120, label = "Advanced circuit city", tag_icon = "advanced-circuit" },
+  { name = "tt-city-processing-units", x = 300, y = 100, label = "Processing unit city", tag_icon = "processing-unit" },
+  { name = "tt-city-low-density-structure", x = -320, y = -50, label = "Low density structure city", tag_icon = "low-density-structure" },
+  { name = "tt-city-blue-science", x = -140, y = -60, label = "Blue science city", tag_icon = "chemical-science-pack" },
+  { name = "tt-city-rocket-silo", x = 60, y = 60, label = "Rocket silo", tag_icon = "rocket-part" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).

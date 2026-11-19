@@ -66,7 +66,7 @@ return {
       for _, c in ipairs(remote.call("tt-map", "layout").cities) do
         local city = surface.find_entities_filtered({ name = c.name, position = { c.x + 0.5, c.y + 0.5 }, radius = 1 })[1]
         assert(city, "missing " .. c.name)
-        if c.name ~= "tt-city-goal" then
+        if c.name ~= "tt-city-goal" and prototypes.entity[c.name .. "-t2"] then -- the silo has one tier
           assert_.truthy(h.port_of(city), c.name .. " has no port on the map")
         end
       end

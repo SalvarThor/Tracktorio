@@ -4,6 +4,17 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: 2.5.7-2.5.8 win condition and map (mod 0.5.0)
+- The first on_rocket_launched from a silo city wins (victory screen, can continue). The
+  goal box leaves the map layout; older saves keep theirs, still counting plates, with a
+  description saying it no longer decides the win. The goal panel shows rocket parts.
+- Test order: the silo tests run last, since a launch now finishes the game.
+- Test map spots: steel (0, 280), plastic (-300, -280), sulfur (40, -280), sulfuric acid
+  (140, -280), advanced circuits (280, -120), processing units (300, 100), low density
+  structure (-320, -50), blue science (-140, -60), rocket silo (60, 60). All at least 100
+  tiles from every patch and the lake. The old goal box spot (272, 0) stays free for older
+  saves. Checked on the 2.4.6 playtest save: 22 cities, nothing blocked.
+
 ## 2026-11-19: 2.5.6 rocket silo city
 - The silo city is a copy of the vanilla rocket silo (it is 9x9 like every city),
   protected, with launches to space platforms off. When a rocket is ready the script calls
