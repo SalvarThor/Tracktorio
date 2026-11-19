@@ -27,6 +27,7 @@ M.CITIES = {
   { name = "tt-city-red-science", x = 400, y = 200, label = "Red science city", tag_icon = "automation-science-pack" },
   { name = "tt-city-green-science", x = -400, y = 0, label = "Green science city", tag_icon = "logistic-science-pack" },
   { name = "tt-city-research", x = -160, y = 230, label = "Research complex", tag_icon = "lab" },
+  { name = "tt-city-repair-packs", x = 160, y = 230, label = "Repair pack city", tag_icon = "repair-pack" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).

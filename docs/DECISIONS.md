@@ -4,6 +4,20 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: 2.3.1-2.3.4 reliability build notes (mod 0.3.0)
+- Wear and breakdowns run in the existing limp-mode poll (each locomotive about once a
+  second); no new on_tick work. A breakdown puts every locomotive of the train on the limp
+  fuel, so the train crawls however many locomotives it has (no reliance on how the engine
+  combines locomotives' speed multipliers). Broken state is kept by unit number in
+  storage.tt_reliability, so refuelling or a limp rescan does not cure it.
+- The service port is adopted by the next depot tier instead of being destroyed and
+  recreated, so packs and the "trains serviced" count survive upgrades.
+- Repair pack recipe corrected to the vanilla 2 circuits + 2 gears (4 iron) per pack; the
+  proposal said 1 circuit + 2 iron. 30 packs/min = 1 circuit/s + 2 iron/s, 150 kW.
+- Repair pack city uses the foundry's graphics (a look not used by another city yet).
+- Checked on the 2.2.8 playtest save: 10 cities, nothing blocked, the depot got its service
+  port, no errors.
+
 ## 2026-11-19: Phase 2.3 scope (user)
 - Decision: reliability = locomotive health; it drains with driving, the vanilla health bar
   shows it and the vanilla repair-pack tool is the manual repair. Servicing = a locomotive

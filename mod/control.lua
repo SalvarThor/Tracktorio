@@ -54,8 +54,11 @@ city_remote.set_upgrade_cost = function(entity, cost, delivered)
 end
 city_remote.strip_to_mvp = function(entity)
   local record = assert(storage.tt_cities[entity.unit_number])
-  if record.port and record.port.valid then record.port.destroy() end
+  for _, key in ipairs({ "port", "service_port" }) do
+    if record[key] and record[key].valid then record[key].destroy() end
+  end
   record.port, record.upgrade, record.port_blocked_notified = nil, nil, nil
+  record.service_port, record.service, record.service_blocked_notified = nil, nil, nil
 end
 remote.add_interface("tt-city", city_remote)
 
@@ -63,6 +66,7 @@ upgrade.on_upgraded(notify.upgraded)
 upgrade.on_upgraded(function(_, city) map.retag(city) end)
 ports.on_heads_up(notify.heads_up)
 ports.on_blocked(notify.port_blocked)
+service.on_blocked(notify.service_port_blocked)
 map.on_city_blocked(notify.city_blocked)
 reliability.on_breakdown(notify.breakdown)
 reliability.on_cured(notify.repaired)
@@ -104,6 +108,7 @@ migrate = function()
   -- Grow an existing scenario map to the current layout (2.2.6: new cities, bigger map).
   local surface = game.get_surface(map.SURFACE)
   if surface then map.extend(surface) end
+  service.ensure_all() -- 2.3.4: depots get their service port
   local total, with_port, without = 0, 0, 0
   for _, r in pairs(storage.tt_cities) do
     if r.entity.valid then total = total + 1 end
@@ -112,8 +117,15 @@ migrate = function()
   end
   local blocked = 0
   for _ in pairs(storage.tt_map_blocked or {}) do blocked = blocked + 1 end
-  log(string.format("tt: configuration changed: schema %s -> %d; cities: %d (spots blocked: %d); with a port: %d, still waiting for a port tile: %d",
-    tostring(from), storage.tt_schema, total, blocked, with_port, without))
+  local depots, serviced = 0, 0
+  for _, r in pairs(storage.tt_cities) do
+    if r.entity.valid and service.has_service(r.name) then
+      depots = depots + 1
+      if r.service_port and r.service_port.valid then serviced = serviced + 1 end
+    end
+  end
+  log(string.format("tt: configuration changed: schema %s -> %d; cities: %d (spots blocked: %d); with a port: %d, still waiting for a port tile: %d; depots with a service port: %d/%d",
+    tostring(from), storage.tt_schema, total, blocked, with_port, without, serviced, depots))
   limp.scan()
   goal_gui.rebuild_all()
 end

@@ -271,7 +271,8 @@ Proposed numbers (tuning values):
 - Servicing restores 100 HP per second and uses 1 repair pack per 300 HP (the vanilla
   pack's durability): a full service from 25% takes ~8 s and 2.5 packs.
 - Service area: a train stop within 30 tiles of the depot city's edge.
-- Repair pack city: 1 circuit + 2 iron -> 1 repair pack (vanilla), tier 1 30 packs/min,
+- Repair pack city: 2 circuits + 4 iron -> 1 repair pack (vanilla: 2 circuits + 2 gears; the plan
+  first said 1 + 2 by mistake), tier 1 30 packs/min (150 kW, one assembler 2),
   power as the equivalent assemblers. Tiers x1/x2/x4; costs plates, circuits at tier 3.
 
 - [x] 2.3.1 Reliability: decay with driving (per-prototype rate, 10% floor), periodic sliced
@@ -285,7 +286,7 @@ Proposed numbers (tuning values):
       protected, survives upgrades), stop-within-range detection, repair at the set rate,
       pack use, no packs = no servicing. Depot window shows packs in the port and trains
       serviced. Tests for each.
-- [ ] 2.3.4 Repair pack city: prototype, tiers, costs, locale, window, port, pips; a spot on
+- [x] 2.3.4 Repair pack city: prototype, tiers, costs, locale, window, port, pips; a spot on
       the test map. Existing saves get it (and depot service ports) on configuration change;
       mod 0.3.0.
 - [ ] 2.3.5 `/playtest` round: decay and breakdown feel, servicing station design, pack

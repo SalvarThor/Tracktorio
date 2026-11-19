@@ -161,6 +161,18 @@ function M.port_blocked(record, position)
   tell(city.force --[[@as LuaForce]], message)
 end
 
+--- A depot's service port tile is taken (2.3.4: saves from before servicing); tell the player once.
+---@param record table
+---@param position MapPosition
+function M.service_port_blocked(record, position)
+  local city = record.entity
+  if not (city and city.valid) then return end
+  ---@type any
+  local message = { "tt-notify.service-port-blocked", string.format("[gps=%d,%d,%s]", math.floor(position.x), math.floor(position.y), city.surface.name),
+    M.base_name(city.name) }
+  tell(city.force --[[@as LuaForce]], message)
+end
+
 --- A new city's spot on an extended map is taken by something the player built (2.2.6).
 ---@param label string
 ---@param surface LuaSurface

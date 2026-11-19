@@ -84,6 +84,10 @@ local red_recipe = { energy_required = 1,
 -- = 1.5 MW.
 local green_recipe = { energy_required = 2,
   ingredients = { item("iron-plate", 9), item("electronic-circuit", 2) }, results = { item("logistic-science-pack", 2) } }
+-- Repair packs (2.3.4): 2 circuits + 2 gears (4 iron), 0.5 s (vanilla). 30 packs/min = 1
+-- assembler 2 for the packs' 0.33 + 0.67 for gears = 150 kW.
+local repair_recipe = { energy_required = 1,
+  ingredients = { item("iron-plate", 4), item("electronic-circuit", 2) }, results = { item("repair-pack", 1) } }
 
 M.list = {
   smelting("iron-smelting", "iron-ore", "iron-plate", "copper-plate", { r = 0.55, g = 0.6, b = 0.7 }),
@@ -122,6 +126,8 @@ M.list = {
     { r = 0.85, g = 0.25, b = 0.25 }, 1100, red_recipe, 1, with_circuits(2000, 1000)),
   assembler_city("green-science", { type = "assembling-machine", name = "assembling-machine-2" },
     { r = 0.35, g = 0.85, b = 0.35 }, 1500, green_recipe, 1, with_circuits(2000, 1000)),
+  assembler_city("repair-packs", { type = "assembling-machine", name = "foundry" },
+    { r = 0.75, g = 0.55, b = 0.85 }, 150, repair_recipe, 0.5, with_circuits(2000, 1000)),
   {
     -- Research complex (PLAN 2.2.3): a lab prototype; the engine runs research. Tier 1 =
     -- 20 labs (speed 1, 60 kW each). Its "product" is research, so any items may pay.

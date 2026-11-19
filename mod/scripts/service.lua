@@ -52,18 +52,28 @@ function M.attach(city, record)
     cities.protect(port)
   end
   record.service_port = port
+  record.service_blocked_notified = nil
   set_filters(port)
   return true
 end
 
 cities.on_any_placed(M.attach)
 
---- Give every depot its service port (migration; retried every second).
+-- Called once per depot whose service port tile is taken (message to the player).
+local on_blocked = nil
+---@param fn fun(record: table, position: MapPosition)
+function M.on_blocked(fn) on_blocked = fn end
+
+--- Give every depot its service port (migration; retried every second). Never removes what
+--- the player built: a taken tile is reported once and retried.
 function M.ensure_all()
   for _, record in pairs(storage.tt_cities) do
     local city = record.entity
     if city.valid and not (record.service_port and record.service_port.valid) and M.has_service(record.name) then
-      M.attach(city, record)
+      if not M.attach(city, record) and not record.service_blocked_notified then
+        record.service_blocked_notified = true
+        if on_blocked then on_blocked(record, M.port_position(city)) end
+      end
     end
   end
 end

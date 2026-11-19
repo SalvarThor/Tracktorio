@@ -136,4 +136,40 @@ return {
       end)
     end,
   },
+  {
+    name = "service: an older depot gets its service port on migration; a blocked tile is reported once",
+    fn = function()
+      h.clear_area({ { X + 80, -230 }, { X + 100, -210 } })
+      local city = h.place_city(DEPOT, { X + 90.5, -219.5 })
+      remote.call("tt-city", "strip_to_mvp", city)
+      assert_.equals(status(city), nil)
+      local box = city.bounding_box
+      local tile = { math.ceil(box.right_bottom.x) + 0.5, math.floor(box.left_top.y) + 0.5 }
+      local blocker = h.create("iron-chest", tile)
+      local t0 = game.tick
+      remote.call("tt-city", "migrate", 1)
+      remote.call("tt-city", "service_tick"); remote.call("tt-city", "service_tick")
+      assert_.truthy(blocker.valid, "the player's chest was removed")
+      local s = status(city)
+      assert_.truthy(s and not s.port, "service port placed over the player's chest")
+      local n = 0
+      for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
+        if m.tick >= t0 and m.message[1] == "tt-notify.service-port-blocked" then n = n + 1 end
+      end
+      assert_.equals(n, 1, "blocked message count")
+      blocker.destroy()
+      remote.call("tt-city", "service_tick")
+      assert_.truthy(assert(status(city)).port, "service port did not appear after clearing the tile")
+    end,
+  },
+  {
+    name = "service: the generated map's depot has its service port and the repair pack city is placed",
+    fn = function()
+      local surface = remote.call("tt-map", "generate", "tt-map-service")
+      local depot = surface.find_entities_filtered({ name = DEPOT })[1]
+      assert(depot, "no depot on the map")
+      assert_.truthy(assert(status(depot)).port, "map depot has no service port")
+      assert_.equals(surface.count_entities_filtered({ name = "tt-city-repair-packs" }), 1)
+    end,
+  },
 }
