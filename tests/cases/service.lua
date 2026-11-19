@@ -10,10 +10,10 @@ local function status(city) return remote.call("tt-city", "service_status", city
 
 --- Rails along y from X to X+len, a depot south of them at X+60, a train stop (east-bound,
 --- south side) at stop_x, and a fuelled locomotive sent there to wait.
-local function layout(y, stop_x, len)
+local function layout(y, stop_x, len, depot)
   h.clear_area({ { X - 4, y - 6 }, { X + len + 4, y + 20 } })
   for x = X, X + len, 2 do h.create("straight-rail", { x, y }, { direction = E }) end
-  local city = h.place_city(DEPOT, { X + 60.5, y + 10.5 })
+  local city = h.place_city(depot or DEPOT, { X + 60.5, y + 10.5 })
   local st = h.create("train-stop", { stop_x, y + 2 }, { direction = E })
   st.backer_name = "tt-service-" .. y
   local loco = h.create("locomotive", { X + 6, y }, { direction = E, raise_built = true })
@@ -170,6 +170,33 @@ return {
       assert(depot, "no depot on the map")
       assert_.truthy(assert(status(depot)).port, "map depot has no service port")
       assert_.equals(surface.count_entities_filtered({ name = "tt-city-repair-packs" }), 1)
+    end,
+  },
+  {
+    -- playtest 2.4.6 step 8 was not actually tried in game; cover it here
+    name = "service: the solid and rocket fuel depots service stopped trains too",
+    fn = function(ctx)
+      local depots = { "tt-city-solid-fuel-depot", "tt-city-rocket-fuel-depot" }
+      local runs = {}
+      for i, name in ipairs(depots) do
+        local city, loco = layout(460 + i * 40, X + 80, 120, name)
+        runs[i] = { city = city, loco = loco }
+      end
+      ctx:wait_until(function()
+        for _, r in ipairs(runs) do if not arrived(r.loco)() then return false end end
+        return true
+      end, 1200, function()
+        for _, r in ipairs(runs) do
+          assert(assert(status(r.city)).port).insert({ name = "repair-pack", count = 10 })
+          remote.call("tt-reliability", "set", r.loco, 0.25)
+          r.start = r.loco.health
+        end
+        ctx:wait(130, function()
+          for i, r in ipairs(runs) do
+            assert_.truthy(r.loco.health > r.start + 100, depots[i] .. " did not repair: " .. (r.loco.health - r.start))
+          end
+        end)
+      end)
     end,
   },
   {
