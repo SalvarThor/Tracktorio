@@ -142,6 +142,12 @@ local processing_recipe = { energy_required = 10,
   ingredients = { item("electronic-circuit", 20), item("advanced-circuit", 2), fluid("sulfuric-acid", 5) },
   results = { item("processing-unit", 1) } }
 
+-- Low density structure (2.5.4): 2 steel + 20 copper + 5 plastic -> 1 in 15 s (vanilla);
+-- speed 3 = 0.2/s = 4 assemblers 2 = 600 kW.
+local lds_recipe = { energy_required = 15,
+  ingredients = { item("steel-plate", 2), item("copper-plate", 20), item("plastic-bar", 5) },
+  results = { item("low-density-structure", 1) } }
+
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
@@ -234,6 +240,8 @@ M.list = {
   assembler_city("processing-units", { type = "assembling-machine", name = "electromagnetic-plant" },
     { r = 0.3, g = 0.4, b = 0.9 }, 400, processing_recipe, 2, with_circuits(2000, 1000),
     { pipe_in(0, "sulfuric-acid") }),
+  assembler_city("low-density-structure", { type = "assembling-machine", name = "foundry" },
+    { r = 0.75, g = 0.6, b = 0.45 }, 600, lds_recipe, 3, with_circuits(2000, 1000)),
   fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
   fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {

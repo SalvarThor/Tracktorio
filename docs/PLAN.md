@@ -385,7 +385,7 @@ circuits (and later advanced circuits) at tier 3.
 - [x] 2.5.2 Chemistry cities: plastic, sulfur, sulfuric acid (fluid inputs/outputs, pipe
       positions in the window).
 - [x] 2.5.3 Electronics cities: advanced circuits and processing units.
-- [ ] 2.5.4 Low density structure city.
+- [x] 2.5.4 Low density structure city.
 - [ ] 2.5.5 Blue science city; the research complex accepts blue packs (all tiers, existing
       saves too). Gating tests for the blue part of the tree: what becomes reachable, and
       any research triggers that block it.
