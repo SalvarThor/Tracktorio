@@ -281,7 +281,7 @@ Proposed numbers (tuning values):
       health, manual repair cures. Alert and chat message with a map link when a train breaks
       down. Tests: forced breakdown limps the whole train; repairing to full cures it; a
       fuel-empty limp and a breakdown don't fight.
-- [ ] 2.3.3 Service port and servicing: fixed port beside every depot tier (placed,
+- [x] 2.3.3 Service port and servicing: fixed port beside every depot tier (placed,
       protected, survives upgrades), stop-within-range detection, repair at the set rate,
       pack use, no packs = no servicing. Depot window shows packs in the port and trains
       serviced. Tests for each.

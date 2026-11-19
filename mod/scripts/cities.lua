@@ -2,7 +2,8 @@
 -- Cities are entities named "tt-city-*" (see prototypes/blackbox.lua).
 --
 -- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, companion = LuaEntity?,
---   port = LuaEntity?, upgrade = table? (scripts/ports.lua) }
+--   port = LuaEntity?, upgrade = table? (scripts/ports.lua),
+--   service_port = LuaEntity?, service = table? (scripts/service.lua) }
 -- storage.tt_hand_transfers = count of hand transfers that reached a city (should stay 0;
 --   operable=false is expected to block them, see DECISIONS.md A2).
 
@@ -103,7 +104,7 @@ local function on_object_destroyed(e)
   if e.type == defines.target_type.entity and e.useful_id then
     local record = storage.tt_cities[e.useful_id]
     if record then
-      for _, key in ipairs({ "companion", "port" }) do
+      for _, key in ipairs({ "companion", "port", "service_port" }) do
         if record[key] and record[key].valid then record[key].destroy() end
       end
     end

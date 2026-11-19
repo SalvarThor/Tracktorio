@@ -91,6 +91,7 @@ M.list = {
   {
     -- Counts as chemical plants (210 kW, 0.5 fuel/s each): 2 fuel/s = 840 kW at T1.
     name = "depot",
+    service = true, -- has a service port for repairing locomotives (2.3.3)
     graphics = { type = "assembling-machine", name = "assembling-machine-3" },
     map_color = { r = 0.3, g = 0.3, b = 0.3 },
     tiers = {

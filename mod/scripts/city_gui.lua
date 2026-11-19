@@ -7,6 +7,7 @@ local city_info = require("scripts.city_info")
 local goal = require("scripts.goal")
 local ports = require("scripts.ports")
 local notify = require("scripts.notify")
+local service = require("scripts.service")
 
 local M = {}
 
@@ -121,6 +122,20 @@ local function add_tiers(body, city)
   add_text(body, { "tt-gui.tier-where" })
 end
 
+--- A depot's servicing: packs in the service port and locomotives serviced (2.3.3).
+---@param body LuaGuiElement
+---@param city LuaEntity
+local function add_service(body, city)
+  local s = service.status(city)
+  if not s then return end
+  body.add({ type = "line", direction = "horizontal" })
+  add_text(body, { "tt-gui.service-title" }, true)
+  add_text(body, s.port and { "tt-gui.service-packs", "[item=" .. config.SERVICE_ITEM .. "]", tostring(s.packs) }
+    or { "tt-gui.service-no-port" }, false, "service")
+  add_text(body, { "tt-gui.service-count", tostring(s.serviced) })
+  add_text(body, { "tt-gui.service-how", tostring(config.SERVICE_RANGE) })
+end
+
 --- The research complex: status, current research and the packs inside.
 ---@param body LuaGuiElement
 ---@param entity LuaEntity
@@ -172,6 +187,7 @@ local function fill_city(body, entity)
     add_line(body, p, { "tt-gui.city-output-line", fmt(p.amount), fmt(p.per_min), fmt(p.per_min_max) })
   end
   add_text(body, { "tt-gui.city-cycle", fmt(info.recipe.energy) })
+  add_service(body, entity)
   add_tiers(body, entity)
 end
 
@@ -211,16 +227,22 @@ local function fill(frame, entity)
       add_text(body, { "tt-gui.port-for", city.localised_name }, true, "status")
       add_tiers(body, city)
     end
+  elseif entity.name == config.SERVICE_PORT then
+    local city = service.city_of_port(entity)
+    if city then
+      add_text(body, { "tt-gui.port-for", city.localised_name }, true, "status")
+      add_service(body, city)
+    end
   else
     fill_city(body, entity)
   end
 end
 
---- Entities with a window: crafting cities, the goal box and construction ports.
+--- Entities with a window: crafting cities, the goal box, construction and service ports.
 ---@param entity LuaEntity?
 function M.has_window(entity)
   if not (entity and entity.valid) then return false end
-  if entity.name == config.PORT then return true end
+  if entity.name == config.PORT or entity.name == config.SERVICE_PORT then return true end
   return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.type == "lab"
     or entity.name == config.CITY.goal)
 end

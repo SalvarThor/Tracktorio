@@ -48,6 +48,16 @@ M.PORT = "tt-construction-port"
 M.PORT_SLOTS = 4
 M.PORT_CLOSED_ITEM = "tt-port-closed"
 M.PORT_HEADS_UP = 0.9 -- progress fraction for the "upgrade coming" message (2.1.4)
+
+-- Service port beside each depot city (PLAN 2.3.3): takes repair packs only. Locomotives of
+-- a train stopped at a train stop within SERVICE_RANGE tiles of the depot's edge are
+-- repaired at SERVICE_HP_PER_SECOND each, using one pack per SERVICE_HP_PER_PACK.
+M.SERVICE_PORT = "tt-service-port"
+M.SERVICE_SLOTS = 4
+M.SERVICE_ITEM = "repair-pack"
+M.SERVICE_RANGE = 30
+M.SERVICE_HP_PER_SECOND = 100
+M.SERVICE_HP_PER_PACK = 300 -- the vanilla repair pack's durability
 -- How often the goal box is emptied and counted, and the rate window (for the UI).
 M.GOAL_TICK_INTERVAL = 60
 M.RATE_WINDOW_TICKS = 60 * 60

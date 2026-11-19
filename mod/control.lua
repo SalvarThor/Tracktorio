@@ -14,6 +14,7 @@ local upgrade = require("scripts.upgrade")
 local notify = require("scripts.notify")
 local tier_marks = require("scripts.tier_marks")
 local reliability = require("scripts.reliability")
+local service = require("scripts.service")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -37,6 +38,8 @@ city_remote.open_gui = function(player_index, entity)
 end
 city_remote.recent_messages = function() return notify.recent() end
 city_remote.tier_marks = function(entity) return tier_marks.status(entity) end
+city_remote.service_status = function(entity) return service.status(entity) end
+city_remote.service_tick = function(seconds) service.tick(seconds) end
 city_remote.alerts_pending = function() return #(storage.tt_alerts or {}) end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.
@@ -122,6 +125,7 @@ script.on_event(defines.events.on_player_created, goal_gui.on_player_created)
 script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   goal.tick()
   ports.tick()
+  service.tick()
   goal_gui.update_all()
   city_info.sample()
   city_gui.update_all()

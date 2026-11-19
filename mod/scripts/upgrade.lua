@@ -49,6 +49,9 @@ function M.upgrade(record)
   old.destroy()
 
   local city = cities.place(target, surface, position, force)
+  -- The service port stayed (the new tier adopted it); keep its pack credit and count.
+  local new_record = storage.tt_cities[city.unit_number]
+  if record.service and new_record then new_record.service = record.service end
 
   -- Restore contents. What the new recipe can't take (coal after going electric) is spilled
   -- beside the port, for the player to pick up.
