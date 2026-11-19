@@ -239,4 +239,11 @@ product. Gears and cables stay inside the cities; circuits are shipped.
 - [x] 2.2.6 Bigger map (about 960x600) with the new cities, a second iron patch and room for
       every port. 2.1 saves get the new cities where the tiles are free, otherwise a message.
 - [x] 2.2.7 UI and map tags for the new cities, including research complex statuses.
-- [ ] 2.2.8 `/playtest` round: research flow, rates, power demand, map layout.
+- [x] 2.2.8 `/playtest` round: research flow, rates, power demand, map layout.
+      Result (2026-11-19): all 10 steps passed. Fixed: the city window repeated the
+      tooltip's "Click it for details"; the tier line ran "labsDraws" together (tests added).
+      Open for the user, not yet scheduled:
+      - Distances are far too short for a real train network (fine for testing). Map scale
+        is a design choice; ties in with procedural map generation (post-MVP 8).
+      - Cities are fast enough that inserting is almost always the bottleneck. A thought,
+        no decision yet.

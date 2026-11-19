@@ -59,7 +59,9 @@ end
 ---@param body LuaGuiElement
 ---@param entity LuaEntity
 local function add_description(body, entity)
-  local desc = add_text(body, entity.localised_description)
+  -- Cities: their description without the tooltip's "click it" hint (playtest 2.2.8).
+  local text = city_defs.by_entity[entity.name] and { "tt-city-description." .. entity.name } or entity.localised_description
+  local desc = add_text(body, text)
   desc.style.font_color = { 0.8, 0.8, 0.8 }
   body.add({ type = "line", direction = "horizontal" })
 end

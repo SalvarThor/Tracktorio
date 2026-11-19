@@ -91,4 +91,19 @@ return {
       assert_.equals(t2.name, "tt-city-research-t2")
     end,
   },
+  {
+    -- playtest 2.2.8: "like 40 labsDraws up to 2.4 MW" ran two sentences together
+    name = "ui 2.2: the research complex tier line reads as separate sentences",
+    fn = function(ctx)
+      h.clear_area({ { X + 98, -12 }, { X + 122, 12 } })
+      local city = h.place_city("tt-city-research-t2", { X + 110.5, 0.5 })
+      local p, body = open(city)
+      local id = p.request_translation(assert(body["tier"], "no tier line").caption)
+      p.opened = nil
+      ctx:wait_until(function() return h.translations[id] ~= nil end, 300, function()
+        local text = h.translations[id].result
+        assert_.truthy(text:find("labs. Draws", 1, true), "tier line: " .. text)
+      end)
+    end,
+  },
 }

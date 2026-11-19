@@ -87,7 +87,10 @@ return {
       remote.call("tt-city", "open_gui", p.index, city)
       local body = assert(p.gui.screen["tt_city_frame"])["body"]
       local first = body.children[1].caption
-      assert_.equals(type(first) == "table" and first[1], "entity-description.tt-city-depot")
+      -- the window shows the description without the tooltip's "click it" hint (playtest 2.2.8)
+      assert_.equals(type(first) == "table" and first[1], "tt-city-description.tt-city-depot")
+      local tooltip = prototypes.entity["tt-city-depot"].localised_description
+      assert_.equals(type(tooltip) == "table" and tooltip[1], "tt-gui.click-hint")
       p.opened = nil
     end,
   },

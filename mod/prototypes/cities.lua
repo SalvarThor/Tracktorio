@@ -21,6 +21,12 @@ for _, def in ipairs(defs.list) do
       fluid_boxes = def.fluid_boxes,
       map_color = def.map_color,
     })
+    -- Tooltip = description + click hint; the city window shows the description alone.
+    for _, p in ipairs(protos) do
+      if p.type == "assembling-machine" or p.type == "lab" then
+        p.localised_description = { "tt-gui.click-hint", { "tt-city-description." .. defs.entity_name(def.name, tier) } }
+      end
+    end
     if tier > 1 then
       -- recipe and category reuse the city's display name; the entity has its own locale
       local entity_name = defs.entity_name(def.name, tier)
