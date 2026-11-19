@@ -242,8 +242,7 @@ product. Gears and cables stay inside the cities; circuits are shipped.
 - [x] 2.2.8 `/playtest` round: research flow, rates, power demand, map layout.
       Result (2026-11-19): all 10 steps passed. Fixed: the city window repeated the
       tooltip's "Click it for details"; the tier line ran "labsDraws" together (tests added).
-      Open for the user, not yet scheduled:
-      - Distances are far too short for a real train network (fine for testing). Map scale
-        is a design choice; ties in with procedural map generation (post-MVP 8).
-      - Cities are fast enough that inserting is almost always the bottleneck. A thought,
-        no decision yet.
+      Follow-ups (user, 2026-11-19; see DECISIONS.md):
+      - Distances are far too short for a real train network. The map stays small while
+        the main mechanics are built; a full-size map comes for whole-mod testing.
+      - Inserting is almost always the bottleneck. No inserter or city changes for now.

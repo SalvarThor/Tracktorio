@@ -4,6 +4,14 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-19: playtest 2.2.8 follow-ups: map stays small, no inserter changes (user)
+- Decision: keep the 960 x 600 test map while the main mechanics are built. A map sized for
+  a real train network comes when the user tests the mod as a whole. City throughput,
+  footprint and inserter access stay as they are for now.
+- Why: short distances keep playtests quick; the inserter bottleneck matches vanilla and
+  needs a full run before judging it.
+- Rejected for now: a ~3x map before Phase 2.3; longer city edges or slower cities.
+
 ## 2026-11-18: 2.2.6 bigger map (960 x 600, mod 0.2.0)
 - Decision: the map grows from 640 x 400 to 960 x 600. The MVP cities and patches keep
   their positions (saves). New: circuit city (400, -200), red science city (400, 200),
