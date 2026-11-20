@@ -4,6 +4,17 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.7.1-2.7.2 elevated rail research and items
+- Elevated rail retuned in mod/prototypes/technology.lua (data-final-fixes, before the
+  restrictions pass): 500 x red/green/blue x 30 s after Concrete and Chemical science pack.
+  Unlocks unchanged. The gating test finds no new trigger blockers.
+- Rail ramp and rail support were already free items; elevated rails are placed with the
+  free rail item and signals with the free signal items. Before the research the ramp and
+  support recipes are locked and the rail planner can't build elevated track.
+- 2.1 check: water tiles (water and deepwater) don't collide with the layers a rail
+  support uses, so supports stand in the lakes and elevated track can cross them. Ground
+  rail can't. Only deep oil ocean (not on this map) refuses supports.
+
 ## 2026-11-20: Project renamed to Tracktorio
 - User decision: the project is called Tracktorio. Internal mod name `tracktorio` (was
   `train-tycoon`), test mod `tracktorio-tests`, scenario `tracktorio/tracktorio`, map
