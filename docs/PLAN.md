@@ -439,6 +439,7 @@ Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 c
       20 / 40 / 80 MW, window shows fuel and water use. Prefer a vanilla reactor/heat
       chain inside the city over a scripted generator if 2.1 allows it; check first.
       (Burner city + hidden 500 C generator; at (-40, 170).)
-- [ ] 2.6.5 Power-budget test: the total demand of every electric city per tier against
+- [x] 2.6.5 Power-budget test: the total demand of every electric city per tier against
       the coal-only and the nuclear supply, so a retune can't silently break the balance.
+      (Demand 17.9 / 49.0 / 94.1 MW; coal 21.6 / 43.2 / 86.4; nuclear 20 / 40 / 80.)
 - [ ] 2.6.6 `/playtest` round: the new power cities, uranium mining with acid, nuclear.

@@ -264,4 +264,47 @@ return {
       assert_.equals(surface.count_entities_filtered({ name = NUCLEAR }), 1)
     end,
   },
+  {
+    -- 2.6.5: the balance agreed with the user (DECISIONS 2026-11-20): coal power cities alone
+    -- cover every city at tier 1 and roughly every city at tier 3 (tight); nuclear is the
+    -- other way to get there.
+    name = "power budget: coal covers tier 1, is tight at tier 3, nuclear plus one coal city covers tier 3",
+    fn = function()
+      local function tier_name(name, tier)
+        if tier == 1 then return name end
+        local t = name .. "-t" .. tier
+        return prototypes.entity[t] and t or name -- single-tier cities (the silo) stay as they are
+      end
+      local function generator_w(name, tier)
+        local base = name == "tt-city-nuclear-power" and "tt-nuclear-generator" or "tt-power-generator"
+        return prototypes.entity[tier == 1 and base or (base .. "-t" .. tier)].get_max_energy_production() * 60
+      end
+      local l = remote.call("tt-map", "layout")
+      local demand, coal, nuclear = {}, {}, {}
+      for tier = 1, 3 do
+        demand[tier], coal[tier], nuclear[tier] = 0, 0, 0
+        for _, c in ipairs(l.cities) do
+          local p = prototypes.entity[tier_name(c.name, tier)]
+          if c.name == "tt-city-power" then
+            coal[tier] = coal[tier] + generator_w(c.name, tier)
+          elseif c.name == "tt-city-nuclear-power" then
+            nuclear[tier] = nuclear[tier] + generator_w(c.name, tier)
+          elseif p.electric_energy_source_prototype then
+            demand[tier] = demand[tier] + p.get_max_energy_usage() * 60
+          end
+        end
+      end
+      local function mw(w) return string.format("%.1f MW", w / 1e6) end
+      local summary = ""
+      for tier = 1, 3 do
+        summary = summary .. string.format(" T%d: demand %s, coal %s, nuclear %s;", tier, mw(demand[tier]), mw(coal[tier]), mw(nuclear[tier]))
+      end
+      log("power budget:" .. summary)
+      local one_coal_t3 = generator_w("tt-city-power", 3)
+      assert_.truthy(coal[1] >= demand[1], "coal does not cover tier 1:" .. summary)
+      assert_.truthy(coal[3] >= 0.9 * demand[3] and coal[3] <= 1.15 * demand[3], "coal at tier 3 is not tight:" .. summary)
+      assert_.truthy(nuclear[3] + one_coal_t3 >= demand[3], "nuclear + one coal city fall short at tier 3:" .. summary)
+      assert_.truthy(nuclear[3] < demand[3], "nuclear alone covers everything at tier 3 (no choice left):" .. summary)
+    end,
+  },
 }

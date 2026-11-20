@@ -4,6 +4,16 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.6.5 power budget test
+- Measured from the prototypes of every city on the map, at full output with the silo at
+  its 4 MW launch peak and engine drain included: demand 17.9 / 49.0 / 94.1 MW at tier
+  1 / 2 / 3; the four coal power cities give 21.6 / 43.2 / 86.4 MW; the nuclear city
+  20 / 40 / 80 MW.
+- The test holds the agreed balance: coal covers tier 1; coal at tier 3 is within 90-115%
+  of demand (now 92%); nuclear + one tier 3 coal city covers tier 3; nuclear alone does
+  not (so it stays a choice, not a replacement). The player's miners, pumps and inserters
+  come on top and are not counted.
+
 ## 2026-11-20: 2.6.4 nuclear power city
 - Built like the coal power city (assembling machine + linked hidden generator), with a
   burner instead of a coal ingredient: uranium fuel cells go into its fuel slot by
