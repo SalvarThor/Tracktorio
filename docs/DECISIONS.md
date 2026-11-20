@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.6.1 power city spots and the second lake (mod 0.6.0)
+- Three more coal power cities: East (450, 110), West (-460, -120), South (-280, 280). The
+  first keeps the label "Power city". Each sits on a different route: the West one has the
+  new lake (-330, 90) about 140 tiles away, the East one is far from both lakes and near
+  the east iron patch, the South one sits between the two lakes.
+- Blocked layout spots are now keyed by surface, name and position (several cities share a
+  name); keys from before 0.6.0 are dropped and re-recorded. A lake on an extended map goes
+  in only when no player entity stands in its area; otherwise it is reported once and
+  retried, like a blocked city.
+- No second coal patch: four T3 power cities burn ~19 coal/s and the patch holds ~1.3M,
+  over 18 hours. Revisit with procedural maps.
+- Test map rule added: cities at least 40 tiles apart and 16 from the map edge.
+
 ## 2026-11-20: 2.5.9 playtest, silo pips, power budget (mod 0.5.1)
 - The rocket silo city has one tier, so it gets no tier pips (cities need at least 2 tiers
   for pips). Mod 0.5.1 so the every-version migration removes the pip older saves drew.

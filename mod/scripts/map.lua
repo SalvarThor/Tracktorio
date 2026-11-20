@@ -42,6 +42,11 @@ M.CITIES = {
   { name = "tt-city-low-density-structure", x = -320, y = -50, label = "Low density structure city", tag_icon = "low-density-structure" },
   { name = "tt-city-blue-science", x = -140, y = -60, label = "Blue science city", tag_icon = "chemical-science-pack" },
   { name = "tt-city-rocket-silo", x = 60, y = 60, label = "Rocket silo", tag_icon = "rocket-part" },
+  -- 2.6.1: three more coal power cities (4 in all, ~86 MW at tier 3), spread out so each is
+  -- its own coal and water route. The west one has the second lake nearby.
+  { name = config.CITY.power, x = 450, y = 110, label = "East power city", tag_icon = "small-electric-pole" },
+  { name = config.CITY.power, x = -460, y = -120, label = "West power city", tag_icon = "small-electric-pole" },
+  { name = config.CITY.power, x = -280, y = 280, label = "South power city", tag_icon = "small-electric-pole" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).
@@ -57,8 +62,11 @@ M.PATCHES = {
     wells = { { -6, -3 }, { 0, -3 }, { 6, -3 }, { -6, 3 }, { 0, 3 }, { 6, 3 } } },
 }
 
--- Lake (deep water in the middle).
-M.LAKE = { x = 60, y = 165, radius = 10 }
+-- Lakes (deep water in the middle). 2.6.1 added the second.
+M.LAKES = {
+  { x = 60, y = 165, radius = 10 },
+  { x = -330, y = 90, radius = 10 },
+}
 
 -- Starting inventory: a little coal fuel to hand-fuel the first train (SPEC: hand-fueling
 -- helps at the start). Everything else is free to hand-craft.
@@ -92,13 +100,45 @@ local function circle(cx, cy, r, fn)
   end
 end
 
+-- Called once per lake whose area is taken by something the player built (extended map).
+local on_lake_blocked = nil
+---@param fn fun(surface: LuaSurface, position: MapPosition)
+function M.on_lake_blocked(fn) on_lake_blocked = fn end
+
+--- Key of a layout spot in storage.tt_map_blocked: surface, name and position, since several
+--- cities share a name (2.6.1). The surface name comes first, up to the first "/".
 ---@param surface LuaSurface
-local function place_lake(surface)
-  local tiles = {}
-  circle(M.LAKE.x, M.LAKE.y, M.LAKE.radius, function(x, y, d)
-    tiles[#tiles + 1] = { name = d < M.LAKE.radius * 0.6 and "deepwater" or "water", position = { x, y } }
-  end)
-  surface.set_tiles(tiles)
+local function blocked_key(surface, name, x, y)
+  return surface.name .. "/" .. name .. "@" .. x .. "," .. y
+end
+M.blocked_key = blocked_key
+
+--- Place every lake that is missing. On a new map nothing is in the way. On an extended map a
+--- lake goes in only if no player entity stands in its area; otherwise it is reported once
+--- and retried, like a blocked city.
+---@param surface LuaSurface
+local function place_lakes(surface)
+  storage.tt_map_blocked = storage.tt_map_blocked or {}
+  for _, lake in ipairs(M.LAKES) do
+    local key = blocked_key(surface, "lake", lake.x, lake.y)
+    if surface.get_tile(lake.x, lake.y).name ~= "deepwater" then
+      local r = lake.radius + 1
+      local area = { { lake.x - r, lake.y - r }, { lake.x + r, lake.y + r } }
+      if surface.count_entities_filtered({ area = area, force = "player" }) == 0 then
+        local tiles = {}
+        circle(lake.x, lake.y, lake.radius, function(x, y, d)
+          tiles[#tiles + 1] = { name = d < lake.radius * 0.6 and "deepwater" or "water", position = { x, y } }
+        end)
+        surface.set_tiles(tiles)
+        storage.tt_map_blocked[key] = nil
+      elseif not storage.tt_map_blocked[key] then
+        storage.tt_map_blocked[key] = true
+        if on_lake_blocked then on_lake_blocked(surface, { x = lake.x, y = lake.y }) end
+      end
+    else
+      storage.tt_map_blocked[key] = nil
+    end
+  end
 end
 
 ---@param surface LuaSurface
@@ -139,10 +179,14 @@ end
 ---@param surface LuaSurface
 local function place_cities(surface)
   storage.tt_map_blocked = storage.tt_map_blocked or {}
+  -- keys before 2.6.1 had no position ("surface/name"); place_cities re-records any still blocked
+  for key in pairs(storage.tt_map_blocked) do
+    if not string.find(key, "@", 1, true) then storage.tt_map_blocked[key] = nil end
+  end
   for _, c in ipairs(M.CITIES) do
     if not city_present(surface, c) then
       local pos = { c.x + 0.5, c.y + 0.5 }
-      local key = surface.name .. "/" .. c.name
+      local key = blocked_key(surface, c.name, c.x, c.y)
       if surface.can_place_entity({ name = c.name, position = pos, force = "player" }) then
         cities.place(c.name, surface, pos, "player")
         storage.tt_map_blocked[key] = nil
@@ -227,7 +271,7 @@ function M.generate(name)
   local chunk_radius = math.ceil(math.max(M.WIDTH, M.HEIGHT) / 2 / 32) + 1
   surface.request_to_generate_chunks({ 0, 0 }, chunk_radius)
   surface.force_generate_chunk_requests()
-  place_lake(surface)
+  place_lakes(surface)
   place_patches(surface)
   place_cities(surface)
   game.forces["player"].chart(surface, { { -M.WIDTH / 2, -M.HEIGHT / 2 }, { M.WIDTH / 2, M.HEIGHT / 2 } })
@@ -255,6 +299,7 @@ function M.extend(surface)
     tiles[#tiles + 1] = { name = "grass-1", position = t.position }
   end
   if #tiles > 0 then surface.set_tiles(tiles) end
+  place_lakes(surface)
   place_patches(surface)
   place_cities(surface)
   game.forces["player"].chart(surface, area)
@@ -269,7 +314,7 @@ function M.retry_blocked()
   for key in pairs(storage.tt_map_blocked) do surfaces[string.match(key, "^(.*)/")] = true end
   for name in pairs(surfaces) do
     local surface = game.get_surface(name)
-    if surface then place_cities(surface); tag_cities(surface) else
+    if surface then place_lakes(surface); place_cities(surface); tag_cities(surface) else
       for key in pairs(storage.tt_map_blocked) do
         if string.match(key, "^(.*)/") == name then storage.tt_map_blocked[key] = nil end
       end
@@ -300,7 +345,7 @@ function M.remote_interface()
     setup_player = function(player_index) M.setup_player(assert(game.get_player(player_index))) end,
     layout = function()
       return { width = M.WIDTH, height = M.HEIGHT, spawn = M.SPAWN, cities = M.CITIES,
-        patches = M.PATCHES, lake = M.LAKE }
+        patches = M.PATCHES, lakes = M.LAKES }
     end,
   }
 end

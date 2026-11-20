@@ -188,6 +188,16 @@ function M.city_blocked(label, surface, position)
   tell(game.forces["player"], message)
 end
 
+--- A new lake's area on an extended map is taken by something the player built (2.6.1).
+---@param surface LuaSurface
+---@param position MapPosition
+function M.lake_blocked(surface, position)
+  ---@type any
+  local message = { "tt-notify.lake-blocked",
+    string.format("[gps=%d,%d,%s]", math.floor(position.x), math.floor(position.y), surface.name) }
+  tell(game.forces["player"], message)
+end
+
 --- A locomotive broke down (2.3.2): chat message and an alert that stays until it is repaired.
 ---@param loco LuaEntity
 function M.breakdown(loco)

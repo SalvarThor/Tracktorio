@@ -35,9 +35,12 @@ return {
         for _, e in pairs(surface.find_entities_filtered({ area = area, name = p.name })) do total = total + e.amount end
         assert_.truthy(total > 200000, p.name .. " total " .. total)
       end
-      local lake = layout().lake
-      assert_.equals(surface.get_tile(lake.x, lake.y).name, "deepwater")
-      assert_.truthy(surface.get_tile(lake.x + lake.radius - 1, lake.y).name == "water", "lake edge")
+      local lakes = layout().lakes
+      assert_.truthy(#lakes >= 2, "expected at least two lakes")
+      for _, lake in ipairs(lakes) do
+        assert_.equals(surface.get_tile(lake.x, lake.y).name, "deepwater")
+        assert_.truthy(surface.get_tile(lake.x + lake.radius - 1, lake.y).name == "water", "lake edge")
+      end
     end,
   },
   {
@@ -49,8 +52,17 @@ return {
           assert_.truthy(dist(p, c) >= 100, p.name .. " too close to " .. c.name .. ": " .. dist(p, c))
         end
       end
-      for _, c in ipairs(l.cities) do
-        assert_.truthy(dist(l.lake, c) >= 100, "lake too close to " .. c.name)
+      for _, lake in ipairs(l.lakes) do
+        for _, c in ipairs(l.cities) do
+          assert_.truthy(dist(lake, c) >= 100, "lake too close to " .. c.label)
+        end
+      end
+      -- cities don't crowd each other (9x9 plus ports)
+      for i, a in ipairs(l.cities) do
+        for j = i + 1, #l.cities do
+          assert_.truthy(dist(a, l.cities[j]) >= 40, a.label .. " too close to " .. l.cities[j].label)
+        end
+        assert_.truthy(math.abs(a.x) <= l.width / 2 - 16 and math.abs(a.y) <= l.height / 2 - 16, a.label .. " at the map edge")
       end
       assert_.truthy(dist(city_pos("tt-city-depot"), l.spawn) <= 40, "depot not near spawn")
     end,
@@ -161,7 +173,11 @@ return {
         assert_.equals(n, c == green and 0 or 1, c.name)
       end
       assert_.truthy(chest.valid, "the player's chest was removed")
-      assert_.truthy(remote.call("tt-map", "blocked")[name .. "/" .. green.name], "blocked spot not recorded")
+      assert_.truthy(remote.call("tt-map", "blocked")[name .. "/" .. green.name .. "@" .. green.x .. "," .. green.y], "blocked spot not recorded")
+      local west_lake
+      for _, lake in ipairs(l.lakes) do if lake.x < -320 then west_lake = lake end end
+      assert(west_lake, "no lake outside the old bounds")
+      assert_.equals(surface.get_tile(west_lake.x, west_lake.y).name, "deepwater", "new lake not placed")
       local said = false
       for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
         if type(m.message) == "table" and m.message[1] == "tt-notify.city-blocked" then said = true end
@@ -198,6 +214,54 @@ return {
         remote.call("tt-map", "extend", name)
         assert_.equals(force.find_chart_tags(surface, area)[1].text, "Coal fuel depot (tier 2)")
       end)
+    end,
+  },
+  {
+    name = "map: four coal power cities, each with its own label",
+    fn = function()
+      local surface = assert(game.get_surface(SURFACE))
+      local labels = {}
+      for _, c in ipairs(layout().cities) do
+        if c.name == "tt-city-power" then
+          assert_.falsy(labels[c.label], "duplicate label " .. c.label)
+          labels[c.label] = true
+          assert_.equals(surface.count_entities_filtered({ name = c.name, position = { c.x + 0.5, c.y + 0.5 }, radius = 1 }), 1, c.label)
+        end
+      end
+      assert_.equals(table_size(labels), 4)
+    end,
+  },
+  {
+    name = "map: a lake blocked by the player's building waits, is reported once, then appears",
+    fn = function()
+      local name = "tt-map-lake"
+      local surface = remote.call("tt-map", "generate", name)
+      local lake = layout().lakes[2]
+      local tiles = {}
+      for x = lake.x - lake.radius - 1, lake.x + lake.radius + 1 do
+        for y = lake.y - lake.radius - 1, lake.y + lake.radius + 1 do tiles[#tiles + 1] = { name = "grass-1", position = { x, y } } end
+      end
+      surface.set_tiles(tiles)
+      local chest = assert(surface.create_entity({ name = "iron-chest", position = { lake.x + 3.5, lake.y + 0.5 }, force = "player" }))
+      remote.call("tt-map", "extend", name)
+      local key = name .. "/lake@" .. lake.x .. "," .. lake.y
+      assert_.truthy(remote.call("tt-map", "blocked")[key], "blocked lake not recorded")
+      assert_.equals(surface.get_tile(lake.x, lake.y).name, "grass-1", "lake placed over the chest")
+      local said = 0
+      for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
+        if type(m.message) == "table" and m.message[1] == "tt-notify.lake-blocked" then said = said + 1 end
+      end
+      remote.call("tt-map", "retry_blocked")
+      local again = 0
+      for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
+        if type(m.message) == "table" and m.message[1] == "tt-notify.lake-blocked" then again = again + 1 end
+      end
+      assert_.equals(said, 1, "lake message count")
+      assert_.equals(again, 1, "lake reported twice")
+      chest.destroy()
+      remote.call("tt-map", "retry_blocked")
+      assert_.equals(surface.get_tile(lake.x, lake.y).name, "deepwater", "lake not placed after clearing")
+      assert_.falsy(remote.call("tt-map", "blocked")[key], "blocked entry left")
     end,
   },
 }

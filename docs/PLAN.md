@@ -426,8 +426,10 @@ Proposed numbers (tuning values):
 Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 cells, so
 ~143 ore per cell; spare U-238 stays inside.
 
-- [ ] 2.6.1 Three more coal power city spots and a second lake (spread out so each is its
+- [x] 2.6.1 Three more coal power city spots and a second lake (spread out so each is its
       own route); map tags; older saves get them. Check whether coal needs a second patch.
+      (East (450, 110), West (-460, -120), South (-280, 280); lake 2 at (-330, 90); no second
+      coal patch; mod 0.6.0.)
 - [ ] 2.6.2 Uranium ore patch, far from the cities. Check in 2.1: Uranium mining is
       reachable in the red/green/blue zone (its Concrete prerequisite included), and an
       electric mining drill on uranium takes sulfuric acid. Gating test.
