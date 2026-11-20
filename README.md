@@ -107,10 +107,7 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 
 ## Next steps
 
-1. **Elevated rails** (Space Age), as late research.
-2. **Procedural map generation**, and a map sized for a real network. The current map is
-   kept small on purpose for testing.
-3. **Water city:** water would come only from water cities and be shipped by fluid wagon.
+1. **Water city:** water would come only from water cities and be shipped by fluid wagon.
    Offshore pumps would be removed.
 
 Open ideas that aren't scheduled yet:
