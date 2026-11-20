@@ -538,5 +538,11 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       scenarios) sets up procedural Nauvis with the map settings screen, its own
       description, and the starting coal fuel. Freeplay with the mod on gives the same
       game plus a note. The fixed map stays for the tests only. Smoke runs cover both.
-- [ ] 2.8.11 `/playtest`: New Game -> Mod scenarios -> Tracktorio (title, description, map
-      settings and preview), the start, and 750-tile spacing.
+- [x] 2.8.11 `/playtest`: New Game -> Mod scenarios -> Tracktorio (title, description, map
+      settings and preview), the start, and 750-tile spacing. Playtest 2026-11-20: all
+      passed; the layout is "too uniform" (2.8.12).
+- [x] 2.8.12 More varied distances (user): the minimum between cities is 500 at 1x, a hard
+      floor; each city draws its own elbow room (1x..4x, skewed low), and two cities keep
+      the larger of their two apart. Nearest neighbour over 10 seeds: min 515, median
+      974, 10% under 581, 10% over 1,852. Tested.
+- [ ] 2.8.13 `/playtest`: the varied layout (look at the map at the start).

@@ -4,6 +4,20 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.8.12 varied city distances (user, playtest 2.8.11)
+- At 750 tiles the layout was "too uniform": every city kept the same distance, which
+  packs them into an even grid. User: "I'd like the minimum distance to be as low as 500
+  but the variance should be a lot higher."
+- The minimum is 500 tiles at 1x, a hard floor (the site search no longer allows 0.8x).
+  Each city draws its own elbow room: spacing x (1 + 3 x random^2.5), so 1x to 4x, mean
+  ~1.75x. Two cities stay at least the larger of their two elbow rooms apart. The coal
+  fuel depot keeps only the minimum, so it doesn't push the early game away. Distance
+  from spawn is more random too: 1.5 + 5 x (0.4 x depth share + 0.6 x random) spacings.
+- Measured, 10 seeds at 1x: nearest neighbour min 515, median 974, 10% under 581, 10%
+  over 1,852, max 2,355 tiles. The furthest city is ~4,000 tiles from spawn. All tuning.
+- Rejected: one wider random range of distance from spawn alone, which still packs the
+  cities evenly, because the uniform minimum is what sets the grid.
+
 ## 2026-11-20: Tracktorio is its own game (user, playtest 2.8.9)
 - Starting through "Freeplay (Space Age)" was misleading: its description is of another
   game, and a mod can't change it. Tracktorio's own scenario is now the way to play.

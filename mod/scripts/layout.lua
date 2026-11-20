@@ -8,11 +8,18 @@ local city_defs = require("shared.city_defs")
 
 local M = {}
 
-M.SPACING = 750 -- tiles between any two cities at "City spacing" 1 (playtests: 1000 "a bit much", 500 "too tight")
+-- Minimum tiles between any two cities at "City spacing" 1. Playtests: 1000 "a bit much",
+-- 500 "too tight" with every city alike, 750 "too uniform". Since 2.8.12 the minimum is
+-- 500 and the spread comes from GAP (user: "as low as 500 but the variance a lot higher").
+M.SPACING = 500
+-- Each city's own elbow room, in spacings: 1 + GAP_SPREAD * random^GAP_SKEW (skewed to the
+-- low end: 1x..4x, mean ~1.75x). Two cities stay at least the larger of their two gaps
+-- apart, so some sit 500 tiles from a neighbour and others alone in open country.
+M.GAP_SPREAD, M.GAP_SKEW = 3, 2.5
 M.DEPOT_RADIUS = { 40, 80 } -- the coal fuel depot's distance from spawn
 -- Distance from spawn, in spacings: MIN_R + SPREAD * (DEPTH_WEIGHT * depth share +
 -- (1 - DEPTH_WEIGHT) * random). Crowding pushes a city further out.
-M.MIN_R, M.SPREAD, M.DEPTH_WEIGHT = 1, 2.5, 0.5
+M.MIN_R, M.SPREAD, M.DEPTH_WEIGHT = 1.5, 5, 0.4
 M.TRIES = 30 -- random angles per radius before stepping out
 M.STEP_OUT = 1.1
 
@@ -69,13 +76,16 @@ function M.plan(cities, seed, spacing)
   end)
 
   local placed = {}
-  local function clear(x, y)
+  local function clear(x, y, gap)
     for _, p in ipairs(placed) do
-      if (p.x - x) ^ 2 + (p.y - y) ^ 2 < spacing * spacing then return false end
+      local need = math.max(gap, p.gap)
+      if (p.x - x) ^ 2 + (p.y - y) ^ 2 < need * need then return false end
     end
     return true
   end
   for _, e in ipairs(todo) do
+    -- (the depot by spawn keeps only the minimum, or it would push the early game away)
+    e.gap = e.name == config.CITY.depot and spacing or spacing * (1 + M.GAP_SPREAD * rng() ^ M.GAP_SKEW)
     local r
     if e.name == config.CITY.depot then
       r = M.DEPOT_RADIUS[1] + rng() * (M.DEPOT_RADIUS[2] - M.DEPOT_RADIUS[1])
@@ -89,7 +99,7 @@ function M.plan(cities, seed, spacing)
         local a = rng() * 2 * math.pi
         local rr = r * (0.9 + 0.2 * rng())
         local x, y = math.floor(rr * math.cos(a)), math.floor(rr * math.sin(a))
-        if clear(x, y) then
+        if clear(x, y, e.gap) then
           e.x, e.y = x, y
           done = true
           break

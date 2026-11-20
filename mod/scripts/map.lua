@@ -332,8 +332,8 @@ function M.retry_blocked()
 end
 
 -- 2.8.3: a site may move up to sites.SEARCH from its planned spot; cities stay at least
--- this share of the spacing apart.
-M.MIN_APART = 0.8
+-- this share of the spacing apart (1 since 2.8.12: the minimum is a hard floor).
+M.MIN_APART = 1
 M.CHART_AROUND = 16 -- tiles charted around each city at the start (2.8.5)
 M.ALT_TURN = 15 -- degrees around spawn between alternative spots when a site finds no land
 

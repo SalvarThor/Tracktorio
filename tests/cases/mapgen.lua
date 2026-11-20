@@ -32,7 +32,7 @@ return {
     fn = function()
       local want = #remote.call("tt-map", "layout").cities
       local spacing = remote.call("tt-map", "spacing")
-      assert_.equals(spacing, 750, "default spacing (1x)")
+      assert_.equals(spacing, 500, "default minimum spacing (1x)")
       for _, seed in ipairs({ 1, 42, 123456789, 4000000000 }) do
         local plan = remote.call("tt-map", "plan", seed)
         assert_.equals(#plan, want, "cities planned, seed " .. seed)
@@ -102,6 +102,30 @@ return {
       log("mapgen: mean distance by depth " .. serpent.line(mean))
       assert_.truthy(mean[5] > mean[1] * 1.3, "depth 5 " .. mean[5] .. " vs depth 1 " .. mean[1])
       assert_.truthy(mean[3] > mean[1], "depth 3 " .. mean[3] .. " vs depth 1 " .. mean[1])
+    end,
+  },
+  {
+    -- 2.8.12 (user, playtest 2.8.11: "too uniform"): the minimum is a floor, and the
+    -- distances between neighbours vary a lot
+    name = "mapgen: neighbour distances vary widely: some at the minimum, some several times it",
+    fn = function()
+      local all = {}
+      for seed = 1, 10 do
+        local plan = remote.call("tt-map", "plan", seed, 500)
+        for i, a in ipairs(plan) do
+          local nearest = math.huge
+          for j, b in ipairs(plan) do
+            if i ~= j then nearest = math.min(nearest, math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)) end
+          end
+          all[#all + 1] = nearest
+        end
+      end
+      table.sort(all)
+      local p10, p50, p90 = all[math.floor(#all * 0.1)], all[math.floor(#all * 0.5)], all[math.floor(#all * 0.9)]
+      log(string.format("mapgen: nearest-neighbour distance at 500: min %d, p10 %d, median %d, p90 %d, max %d", all[1], p10, p50, p90, all[#all]))
+      assert_.truthy(all[1] >= 500, "below the minimum: " .. all[1])
+      assert_.truthy(p10 < 700, "few cities near the minimum: p10 " .. p10)
+      assert_.truthy(p90 > 2 * p10, "too uniform: p90 " .. p90 .. " vs p10 " .. p10)
     end,
   },
   {
@@ -208,7 +232,7 @@ return {
         for j = i + 1, #result.placed do
           local o = result.placed[j]
           local apart = math.sqrt((c.x - o.x) ^ 2 + (c.y - o.y) ^ 2)
-          assert_.truthy(apart >= 0.8 * spacing, c.label .. " and " .. o.label .. " " .. apart .. " apart")
+          assert_.truthy(apart >= spacing, c.label .. " and " .. o.label .. " " .. apart .. " apart")
         end
       end
       log("mapgen: vanilla terrain, furthest move from the planned spot " .. math.floor(moved))
