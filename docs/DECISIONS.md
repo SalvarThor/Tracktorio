@@ -4,6 +4,23 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.1 loaders as belt ports (spike result)
+- A 2.1 loader-1x1 only connects to entities with the "player-creation" flag. Vanilla
+  machines have it; our cities didn't, so loaders ignored them (inserters don't care).
+  Cities, the silo and the goal box now carry the flag. Found by elimination: protection
+  flags (operable, destructible, ...), collision box, energy source, fixed recipe and
+  crafting category made no difference.
+- With the flag, a loader at the wall fills an assembling-machine city's inputs, the
+  nuclear city's fuel slot, the rocket silo and the research complex (a lab), and takes a
+  city's output.
+- A wrong item is refused and stays on the belt, blocking it (like vanilla).
+- A chest placed inside the building, on the tile in front of a port, wins the loader's
+  target over the city. That is how construction materials and repair packs will enter:
+  a hidden chest per such port, counted by script.
+- Loader direction is the direction items move: an input loader faces the city, an
+  output loader faces away from it.
+- Throughput not settled yet: the vanilla loader-1x1 is yellow speed. The mod's port
+  loader gets its own prototype with a top speed (2.10.4).
 ## 2026-11-20: phase 2.10, Factorissimo buildings and belt ports (user decisions)
 - Art: the Factorissimo 3 buildings (MIT, (c) MagmaMcFry, checked in the 3.11.19 package;
   no separate art license), copied in with the license notice. No dependency, no code:

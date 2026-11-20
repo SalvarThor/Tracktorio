@@ -635,13 +635,15 @@ south wall has the door in the middle on every building):
   use lines that tier 3 adds.
 - Pipes connect at port spots too, as in Factorissimo.
 
-- [ ] 2.10.1 Spike: a hidden, indestructible loader-1x1 at a port spot fills a city's
+- [x] 2.10.1 Spike: a hidden, indestructible loader-1x1 at a port spot fills a city's
       inputs and empties its outputs at full belt speed, filtered to its item. Check every
       city kind: the assembling-machine cities, the nuclear city's fuel slot, the rocket
       silo. Also check how a port can take items the recipe doesn't use (construction
       materials, repair packs): e.g. a loader into a hidden container inside the
       building, counted by script. Record what 2.1 does in DECISIONS.md. Fallback if a
       kind won't take a loader: script moves the items (to be discussed first).
+      Done: every kind takes a loader once the city has the "player-creation" flag; a
+      hidden chest under a port takes off-recipe items (DECISIONS.md).
 - [ ] 2.10.2 Art: copy the three building images and shadows (and the port marker dots)
       into `mod/graphics/factorissimo/` with the LICENSE. Credit in README. Cities use
       them at 8/12/16 tiles by tier instead of the scaled vanilla stand-ins.

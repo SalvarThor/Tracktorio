@@ -36,6 +36,7 @@ data:extend({
     flags = {
       "placeable-neutral", "not-rotatable", "not-blueprintable", "not-deconstructable",
       "not-upgradable", "no-copy-paste", "not-flammable", "not-repairable", "not-in-kill-statistics",
+      "player-creation", -- 2.1: loaders only connect to entities with this flag (2.10.1)
     },
     minable = nil,
     max_health = 10000,

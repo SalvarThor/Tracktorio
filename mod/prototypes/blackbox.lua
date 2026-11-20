@@ -124,6 +124,7 @@ function M.make_city(def)
       "placeable-neutral", "not-rotatable", "not-blueprintable", "not-deconstructable",
       "not-upgradable", "no-copy-paste", "not-flammable", "not-repairable",
       "not-in-kill-statistics", "not-in-made-in",
+      "player-creation", -- 2.1: loaders only connect to entities with this flag (2.10.1)
     },
     minable = nil,
     max_health = 10000,
@@ -180,6 +181,7 @@ function M.make_lab(def)
       "placeable-neutral", "not-rotatable", "not-blueprintable", "not-deconstructable",
       "not-upgradable", "no-copy-paste", "not-flammable", "not-repairable",
       "not-in-kill-statistics", "not-in-made-in",
+      "player-creation", -- 2.1: loaders only connect to entities with this flag (2.10.1)
     },
     minable = nil,
     max_health = 10000,
@@ -215,6 +217,7 @@ function M.make_silo(def)
     "placeable-neutral", "not-rotatable", "not-blueprintable", "not-deconstructable",
     "not-upgradable", "no-copy-paste", "not-flammable", "not-repairable",
     "not-in-kill-statistics", "not-in-made-in",
+    "player-creation", -- 2.1: loaders only connect to entities with this flag (2.10.1)
   }
   silo.minable = nil
   silo.placeable_by = nil

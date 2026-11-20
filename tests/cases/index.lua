@@ -14,6 +14,7 @@ return {
     "__tracktorio-tests__/cases/power",
     "__tracktorio-tests__/cases/tiers",
     "__tracktorio-tests__/cases/ports",
+    "__tracktorio-tests__/cases/belt_ports",
     "__tracktorio-tests__/cases/upgrade",
     "__tracktorio-tests__/cases/upgrade_ui",
     "__tracktorio-tests__/cases/migration",
