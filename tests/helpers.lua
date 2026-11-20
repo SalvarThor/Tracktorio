@@ -215,22 +215,67 @@ function M.pipe_at(city, fluid, flow, fill)
   return p
 end
 
---- Clear an area and build: input chest -> inserter -> city -> inserter -> output chest.
---- The city is placed at {x + 0.5, 0.5}. Returns city, input chest, output chest (or nil).
+--- A chest of `stack` feeding a belt into the city's port for that item (2.10.10): chest
+--- -> fast loader -> 2 belts -> port. Returns the chest.
+---@param city LuaEntity
+---@param stack ItemStackDefinition
+function M.belt_in(city, stack)
+  local s = assert(M.port_spots(city, stack.name, "input")[1], "no input port for " .. stack.name .. " on " .. city.name)
+  local d, back = STEP[s.dir], BACK[s.dir]
+  local function at(k) return { s.pos[1] + d[1] * k, s.pos[2] + d[2] * k } end
+  M.create("transport-belt", at(0), { direction = back })
+  M.create("transport-belt", at(1), { direction = back })
+  M.create("tt-belt-port", at(2), { direction = back, type = "output" })
+  local chest = M.create("steel-chest", at(3))
+  chest.insert(stack)
+  return chest
+end
+
+--- The city's output port for `item` -> 2 belts -> fast loader -> chest. Returns the chest.
+---@param city LuaEntity
+---@param item string
+function M.belt_out(city, item)
+  local s = assert(M.port_spots(city, item, "output")[1], "no output port for " .. item .. " on " .. city.name)
+  local d = STEP[s.dir]
+  local function at(k) return { s.pos[1] + d[1] * k, s.pos[2] + d[2] * k } end
+  M.create("transport-belt", at(0), { direction = s.dir })
+  M.create("transport-belt", at(1), { direction = s.dir })
+  M.create("tt-belt-port", at(2), { direction = s.dir, type = "input" })
+  return M.create("steel-chest", at(3))
+end
+
+--- Clear an area and build a city at {x + 0.5, 0.5} with its inputs delivered by belt into
+--- its ports (one chest per item) and, with `with_output`, its item products belted out
+--- into one chest (2.10.10). The MVP goal box has no ports: it keeps input chest ->
+--- inserter -> box. Returns city, the first input chest, the output chest (or nil).
 ---@param name string city entity name
 ---@param x number
----@param contents ItemStackDefinition[] input chest contents
+---@param contents ItemStackDefinition[] what to deliver
 ---@param with_output boolean
 function M.city_rig(name, x, contents, with_output)
   local half = M.city_size(name) / 2
-  M.clear_area({ { x - half - 5, -half - 5 }, { x + half + 6, half + 6 } })
+  M.clear_area({ { x - half - 7, -half - 7 }, { x + half + 8, half + 8 } })
   local city = M.place_city(name, { x + 0.5, 0.5 })
   local e = M.edges(city)
-  local N = defines.direction.north
-  local cin = M.feeder({ x + 0.5, e.top - 1 }, { x + 0.5, e.top }, N, contents)
+  if not city_defs.by_entity[name] then -- the goal box
+    local cin = M.feeder({ x + 0.5, e.top - 1 }, { x + 0.5, e.top }, defines.direction.north, contents)
+    return city, cin, nil
+  end
+  local first
+  for _, stack in ipairs(contents) do
+    local chest = M.belt_in(city, stack)
+    first = first or chest
+  end
   local cout
-  if with_output then cout = M.feeder({ x + 0.5, e.bottom + 1 }, { x + 0.5, e.bottom }, N, {}) end
-  return city, cin, cout
+  if with_output then
+    local info = city_defs.by_entity[name]
+    for _, p in ipairs(port_layout.ports(info.def)) do
+      if p.kind == "item" and p.flow == "output" and p.tiers[info.tier] and not p.second and not cout then
+        cout = M.belt_out(city, p.name)
+      end
+    end
+  end
+  return city, first, cout
 end
 
 return M

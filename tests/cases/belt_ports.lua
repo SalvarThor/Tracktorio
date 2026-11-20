@@ -138,6 +138,25 @@ return {
     end,
   },
   {
+    -- 2.10.10
+    name = "belt ports: one red belt per item runs a tier 2 smelting city at its full 30/s",
+    fn = function(ctx)
+      local x = X + 730
+      h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
+      local city = h.place_city("tt-city-iron-smelting-t2", { x + 0.5, 0.5 })
+      h.belt_to_port(city, "iron-ore", "input", "fast-transport-belt")
+      h.belt_to_port(city, "iron-plate", "output", "fast-transport-belt")
+      h.test_power({ h.edges(city).right + 1.5, 0 }, 20e6)
+      ctx:wait(300, function()
+        local start = city.products_finished
+        ctx:wait(600, function()
+          local plates = (city.products_finished - start) * 10
+          assert_.truthy(plates >= 280, "plates in 10 s: " .. plates .. " (want 300)")
+        end)
+      end)
+    end,
+  },
+  {
     name = "belt ports: tier 3 smelting has two ports per item; two blue belts each way run it at 60/s",
     fn = function(ctx)
       local x = X + 760

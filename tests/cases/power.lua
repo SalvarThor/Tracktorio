@@ -4,15 +4,14 @@ local h = require("__tracktorio-tests__/helpers")
 
 local CITY = "tt-city-power"
 
---- Power city at {x+0.5, 0.5}, coal fed from the north, water from an infinity pipe at its
+--- Power city at {x+0.5, 0.5}, coal belted into its port, water from an infinity pipe at its
 --- water port, a pole east of it, and an optional electric-energy-interface consumer
 --- drawing `demand_w` watts.
 local function power_rig(x, demand_w)
   h.clear_area({ { x - 12, -12 }, { x + 16, 14 } })
   local city = h.place_city(CITY, { x + 0.5, 0.5 })
   local e = h.edges(city)
-  h.feeder({ x + 0.5, e.top - 1 }, { x + 0.5, e.top }, defines.direction.north,
-    { { name = "coal", count = 200 } })
+  h.belt_in(city, { name = "coal", count = 200 })
   h.pipe_at(city, "water", "input", true)
   h.create("small-electric-pole", { e.right, 0.5 })
   local eei

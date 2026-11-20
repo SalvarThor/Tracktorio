@@ -265,12 +265,11 @@ return {
     end,
   },
   {
-    name = "nuclear: an inserter feeds fuel cells into the nuclear city's burner",
+    name = "nuclear: a belt feeds fuel cells into the nuclear city's burner through its port",
     fn = function(ctx)
       local x = X + 280
       local city = nuclear_rig(x, nil, 0)
-      h.feeder({ x + 0.5, -5.5 }, { x + 0.5, -4.5 }, defines.direction.north,
-        { { name = "uranium-fuel-cell", count = 3 } })
+      h.belt_in(city, { name = "uranium-fuel-cell", count = 3 })
       ctx:wait_until(function()
         return fuel_left(city) > 0
       end, 60 * 10, function()
