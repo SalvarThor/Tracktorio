@@ -4,6 +4,7 @@
 local config = require("shared.config")
 local cities = require("scripts.cities")
 local city_defs = require("shared.city_defs")
+local layout = require("scripts.layout")
 
 local M = {}
 
@@ -350,6 +351,9 @@ function M.remote_interface()
     retry_blocked = function() M.retry_blocked() end,
     tick_tags = function() return M.tick_tags() end,
     setup_player = function(player_index) M.setup_player(assert(game.get_player(player_index))) end,
+    -- 2.8.2: procedural layout for a seed (spacing defaults to the startup setting)
+    plan = function(seed, spacing) return layout.plan(M.CITIES, seed, spacing or layout.spacing()) end,
+    spacing = function() return layout.spacing() end,
     layout = function()
       return { width = M.WIDTH, height = M.HEIGHT, spawn = M.SPAWN, cities = M.CITIES,
         patches = M.PATCHES, lakes = M.LAKES }

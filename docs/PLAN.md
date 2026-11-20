@@ -498,7 +498,7 @@ At 1,000 tiles, 28 cities fill a disc of roughly 3,600 tiles' radius around spaw
       are 0, a city is one more than its deepest input). Test: the coal fuel depot and
       the coal power city are shallow and the rocket silo is the deepest. A new city type
       gets a depth with no extra code.
-- [ ] 2.8.2 Layout planner: pure Lua, seeded by the map seed. Places one of each layout
+- [x] 2.8.2 Layout planner: pure Lua, seeded by the map seed. Places one of each layout
       city (the 28 of today's map), with the coal fuel depot near spawn and the others at
       least the spacing apart. Distance from spawn is drawn at random, weighted by depth.
       Startup setting "City spacing" (0.5x to 3x, default 1x = 1,000 tiles). Tests: the

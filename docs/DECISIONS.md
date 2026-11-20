@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.8.2 layout planner
+- Cities are placed one at a time: the coal fuel depot 40-80 tiles from spawn, then the
+  rest from shallow to deep. Each draws a distance from spawn of 1 + 2.5 x (half its
+  depth share + half random) spacings and tries 30 random angles there. If none is at
+  least the spacing from every placed city, the distance grows 10% and it tries again.
+  Measured (10 seeds, 1x): mean distance 1,650 tiles at depth 1 up to 3,400 at depth 5.
+  The furthest city is about 1,700 / 3,450 / 10,350 tiles out at 0.5x / 1x / 3x. All of
+  these numbers are for tuning.
+- 2.1 surprise: LuaRandomGenerator treats seeds below 341 alike (seeds 7 and 8 gave the
+  same layout), so the map seed is spread first (`layout.mix_seed`).
+- Rejected: Poisson-disc filling of a fixed disc, which gives no control by depth;
+  rings by depth, which the user turned down.
+
 ## 2026-11-20: procedural maps (phase 2.8), user decisions
 - New games start from the normal New Game screen on Nauvis, with vanilla terrain (lakes,
   trees, cliffs) and vanilla resource patches, and no resources near spawn. The scenario
