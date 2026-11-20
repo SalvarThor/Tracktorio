@@ -76,9 +76,13 @@ return {
       assert_.equals(c[1].offset, 2.5)
       local p = assert(game.players[1])
       remote.call("tt-city", "open_gui", p.index, city)
-      local line = assert(p.gui.screen["tt_city_frame"])["body"]["pipe-1"]
-      assert_.truthy(line, "no pipe line in the window")
-      assert_.equals(line.caption[1], "tt-gui.city-pipe-line")
+      -- 2.10.9: pipes are listed with the ports
+      local line
+      for _, child in pairs(assert(p.gui.screen["tt_city_frame"])["body"].children) do
+        if child.name:find("^port%-") and child.caption[2] == "[fluid=water]" then line = child end
+      end
+      assert_.truthy(line, "no water port line in the window")
+      assert_.equals(line.caption[1], "tt-gui.city-port-line")
       assert_.equals(line.caption[4][1], "tt-gui.city-pipe-pos-north-b") -- "top right" (playtest 2.4.6)
       p.opened = nil
     end,

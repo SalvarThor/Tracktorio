@@ -663,7 +663,7 @@ south wall has the door in the middle on every building):
       along their lines, and keeps everything in the city.
 - [x] 2.10.8 Footprint: the 16x16 area is marked on the ground from the start; sites
       reserve it (site search, layout, the fixed test map).
-- [ ] 2.10.9 City window: ports listed with item, direction and the belt needed at this
+- [x] 2.10.9 City window: ports listed with item, direction and the belt needed at this
       tier.
 - [ ] 2.10.10 Tests: helpers feed cities by belt instead of inserter; rate tests per tier
       (tier 1 at one yellow belt per item, tier 3 smelting at two blue belts); upgrade

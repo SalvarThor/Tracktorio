@@ -317,6 +317,36 @@ return {
     end,
   },
   {
+    -- 2.10.9
+    name = "city window: lists every port with the belt it needs (smelting: yellow at tier 1, two blue at tier 3)",
+    fn = function()
+      local x = X + 1220
+      h.clear_area({ { x - 12, -12 }, { x + 50, 12 } })
+      local function by(city)
+        local out = {}
+        for _, p in ipairs(remote.call("tt-city", "info", city).ports) do
+          local key = p.kind .. "/" .. tostring(p.name) .. "/" .. p.flow
+          out[key] = out[key] or {}
+          table.insert(out[key], p)
+        end
+        return out
+      end
+      local t1 = by(h.place_city("tt-city-iron-smelting", { x + 0.5, 0.5 }))
+      assert_.equals(t1["item/iron-ore/input"][1].belt, "yellow")
+      assert_.equals(t1["item/iron-ore/input"][1].per_s, 15)
+      assert_.equals(t1["item/coal/input"][1].belt, "yellow")
+      assert_.equals(t1["item/iron-plate/output"][1].per_s, 15)
+      assert_.equals(#t1["construction/nil/input"], 1, "construction port")
+      local t3 = by(h.place_city("tt-city-iron-smelting-t3", { x + 30.5, 0.5 }))
+      assert_.equals(#t3["item/iron-ore/input"], 2, "tier 3 ore ports")
+      for _, p in ipairs(t3["item/iron-ore/input"]) do
+        assert_.equals(p.per_s, 30); assert_.equals(p.belt, "red")
+      end
+      assert_.falsy(t3["construction/nil/input"], "max tier has a construction port")
+      assert_.falsy(t3["item/coal/input"], "tier 3 takes coal")
+    end,
+  },
+  {
     -- 2.10.1: 2.1 loaders only connect to entities flagged "player-creation"
     name = "belt ports: a loader at the wall connects to every kind of city",
     fn = function(ctx)

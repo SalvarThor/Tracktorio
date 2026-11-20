@@ -4,6 +4,15 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.9 ports in the city window
+- The window's "Pipe connections" list became "Ports": one line per port at this tier,
+  with the item or fluid icon, in or out, where on the wall ("top left", ...) and what it
+  carries at full output: the slowest belt that is enough (yellow 15/s, red 30/s, blue
+  45/s, turbo 60/s) or the fluid flow. Construction and service ports say so. Tier 3
+  smelting lists its two ports per item at 30/s each (red belts).
+- City descriptions no longer mention inserters or pipe positions; they point at the
+  ports.
+- 2.1: `LuaEntityPrototype.fixed_recipe` is the recipe prototype, not its name.
 ## 2026-11-20: 2.10.8 footprint
 - Below its last tier a city shows a dashed grey outline on the ground (decal layer, under
   belts) of the 16x16 building it grows to. Drawn on the city entity, so the next tier

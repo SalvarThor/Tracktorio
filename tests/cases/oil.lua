@@ -56,7 +56,7 @@ return {
       assert_.equals(by["petroleum-gas"].kind, "output"); assert_.equals(by["petroleum-gas"].offset, 2.5)
       local p = assert(game.players[1])
       remote.call("tt-city", "open_gui", p.index, city)
-      assert_.truthy(assert(p.gui.screen["tt_city_frame"])["body"]["pipe-4"], "fourth pipe line missing")
+      assert_.truthy(assert(p.gui.screen["tt_city_frame"])["body"]["port-4"], "fourth port line missing") -- 2.10.9: pipes are listed with the ports
       p.opened = nil
     end,
   },

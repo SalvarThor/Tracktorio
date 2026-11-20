@@ -91,7 +91,7 @@ local LAB_STATUS = {
 --- Snapshot of the research complex (a lab, PLAN 2.2.3).
 ---@param entity LuaEntity
 local function lab_info(entity)
-  local out = { name = entity.name, unit_number = entity.unit_number }
+  local out = { name = entity.name, unit_number = entity.unit_number, ports = M.ports(entity.name) }
   local inv = entity.get_inventory(defines.inventory.lab_input)
   local accepts = {}
   out.lab = { speed = entity.prototype.get_researching_speed(), packs = {} }
@@ -132,6 +132,53 @@ function M.connections(entity_name)
   return out
 end
 
+-- Belt speeds (items/s, both lanes) for "the belt this port needs" (2.10.9).
+M.BELTS = { { "yellow", 15 }, { "red", 30 }, { "blue", 45 }, { "turbo", 60 } }
+
+--- Every port of a city at its tier (2.10), for the window: { kind, name, flow, side,
+--- offset, per_s, belt }. per_s is what one port carries at full output (items or fluid
+--- units per second; nil where it doesn't apply: research packs, construction, service);
+--- belt is the slowest belt that carries it ("yellow", "red", "blue", "turbo").
+---@param entity_name string
+function M.ports(entity_name)
+  local info = city_defs.by_entity[entity_name]
+  local out = {}
+  if not info then return out end
+  local proto = prototypes.entity[entity_name]
+  local recipe = proto.fixed_recipe -- 2.1: the recipe prototype itself, not its name
+  local per_craft = recipe and proto.get_crafting_speed() / recipe.energy or 0
+  local rate = {}
+  if recipe then
+    for _, x in ipairs(recipe.ingredients) do rate["input/" .. x.name] = x.amount * per_craft end
+    for _, x in ipairs(recipe.products) do
+      rate["output/" .. x.name] = (x.amount or ((x.amount_min + x.amount_max) / 2)) * per_craft
+    end
+  end
+  local fuel = info.def.burner and info.def.burner.fuel
+  if fuel then rate["input/" .. fuel] = proto.get_max_energy_usage() * 60 / prototypes.item[fuel].fuel_value end
+  local ports, count = {}, {}
+  for _, p in ipairs(port_layout.ports(info.def)) do
+    if p.tiers[info.tier] then
+      ports[#ports + 1] = p
+      local key = p.flow .. "/" .. tostring(p.name)
+      count[key] = (count[key] or 0) + 1
+    end
+  end
+  for _, p in ipairs(ports) do
+    local key = p.flow .. "/" .. tostring(p.name)
+    local per_s = (p.kind == "item" or p.kind == "fluid") and rate[key] and rate[key] / count[key] or nil
+    local belt
+    if per_s and p.kind == "item" then
+      for _, b in ipairs(M.BELTS) do
+        if not belt and per_s <= b[2] + 1e-6 then belt = b[1] end
+      end
+    end
+    out[#out + 1] = { kind = p.kind, name = p.name, flow = p.flow, side = p.wall, offset = p.offset,
+      per_s = per_s, belt = belt }
+  end
+  return out
+end
+
 --- Products holding up a city whose output is full: fluids with no room for one more
 --- cycle, items with at least one cycle waiting. Falls back to every product.
 ---@param entity LuaEntity
@@ -162,7 +209,8 @@ function M.info(entity)
   if entity.type == "lab" then return lab_info(entity) end
   local record = storage.tt_cities[entity.unit_number] or {}
   local recipe = recipe_of(entity)
-  local out = { name = entity.name, unit_number = entity.unit_number, connections = M.connections(entity.name) }
+  local out = { name = entity.name, unit_number = entity.unit_number, connections = M.connections(entity.name),
+    ports = M.ports(entity.name) }
   if entity.type == "rocket-silo" then out.silo = silo.status(entity) end
   if not recipe then out.status = "other"; return out end
 

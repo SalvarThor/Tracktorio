@@ -141,18 +141,28 @@ local function add_tiers(body, city)
   add_text(body, { "tt-gui.tier-where" })
 end
 
---- Where each fluid connects (2.4.2).
+--- Every port at this tier (2.10.9): what goes through it, which way, where on the wall,
+--- and the belt it needs at full output (pipes: the flow).
 ---@param body LuaGuiElement
----@param connections table[]?
-local function add_pipes(body, connections)
-  if not connections or #connections == 0 then return end
-  body.add({ type = "label", caption = { "tt-gui.city-pipes" }, style = "caption_label" })
-  for i, c in ipairs(connections) do
-    -- "bottom left", "top right", "left side, middle"... (playtest 2.4.6: no tile counts)
-    local along = math.abs(c.offset) < 0.01 and "mid" or (c.offset < 0 and "a" or "b")
-    add_text(body, { "tt-gui.city-pipe-line", "[fluid=" .. c.fluid .. "]",
-      { c.kind == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" },
-      { "tt-gui.city-pipe-pos-" .. c.side .. "-" .. along } }, false, "pipe-" .. i)
+---@param ports table[]?
+local function add_ports(body, ports)
+  if not ports or #ports == 0 then return end
+  body.add({ type = "line", direction = "horizontal" })
+  body.add({ type = "label", caption = { "tt-gui.city-ports" }, style = "caption_label" })
+  for i, p in ipairs(ports) do
+    -- "bottom left", "top right", "left side, top"... (playtest 2.4.6: no tile counts)
+    local along = math.abs(p.offset) < 0.01 and "mid" or (p.offset < 0 and "a" or "b")
+    local what = p.kind == "construction" and "[img=utility/upgrade_mark]" or p.kind == "service" and "[item=repair-pack]"
+      or ("[" .. p.kind .. "=" .. p.name .. "]")
+    local key, arg = "", nil
+    if p.kind == "construction" then key = "tt-gui.city-port-construction"
+    elseif p.kind == "service" then key = "tt-gui.city-port-service"
+    elseif p.belt then key, arg = "tt-gui.city-port-belt-" .. p.belt, fmt(p.per_s)
+    elseif p.per_s then key, arg = "tt-gui.city-port-rate", fmt(p.per_s) end
+    local extra = { key, arg }
+    add_text(body, { "tt-gui.city-port-line", what,
+      { p.flow == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" },
+      { "tt-gui.city-pipe-pos-" .. p.side .. "-" .. along }, extra }, false, "port-" .. i)
   end
 end
 
@@ -199,6 +209,7 @@ local function fill_lab(body, entity, info)
     add_line(body, p, { "tt-gui.lab-pack-line", tostring(p.count) })
   end
   add_text(body, { "tt-gui.lab-speed", tostring(math.floor(info.lab.speed + 0.5)) })
+  add_ports(body, info.ports)
   add_tiers(body, entity)
 end
 
@@ -234,7 +245,7 @@ local function fill_city(body, entity)
     add_text(body, { "tt-gui.silo-how", tostring(info.silo.required) })
     add_text(body, { "tt-gui.silo-launched", tostring(info.silo.launched) })
   end
-  add_pipes(body, info.connections)
+  add_ports(body, info.ports)
   add_service(body, entity)
   add_tiers(body, entity)
 end
