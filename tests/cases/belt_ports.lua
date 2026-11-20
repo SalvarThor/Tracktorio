@@ -366,6 +366,31 @@ return {
     end,
   },
   {
+    name = "roof icons: every city but the silo has a large icon of its product on the roof, at every tier",
+    fn = function()
+      local i = 0
+      for _, def in ipairs(city_defs.list) do
+        for tier = 1, #def.tiers do
+          local name = city_defs.entity_name(def.name, tier)
+          local x = X + 2000 + i * 24
+          i = i + 1
+          h.clear_area({ { x - 10, -10 }, { x + 11, 11 } })
+          local city = h.place_city(name, { x + 0.5, 0.5 })
+          local roof
+          for _, o in pairs(rendering.get_all_objects("tracktorio")) do
+            if o.type == "sprite" and o.target.entity == city and o.x_scale > 1.5 then roof = o end
+          end
+          if def.kind == "silo" then
+            assert_.falsy(roof, name .. " has a roof icon")
+          else
+            assert(roof, name .. " has no roof icon")
+            assert_.equals(roof.x_scale, 1.8 * h.city_size(name) / 8, name .. " roof icon scale")
+          end
+        end
+      end
+    end,
+  },
+  {
     -- 2.10.1: 2.1 loaders only connect to entities flagged "player-creation"
     name = "belt ports: a loader at the wall connects to every kind of city",
     fn = function(ctx)

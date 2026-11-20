@@ -4,6 +4,11 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: roof icons (user, before the 2.10 playtest)
+- Every city but the silo has a large icon of what it makes painted on its roof, as in
+  Factorissimo, so cities tell apart at a glance: its first product, or `roof_icon` in its
+  definition (power city: steam engine; nuclear: reactor; research complex: lab). About 3.6
+  tiles on the 8x8 building, scaled with the size; centred on the roof in the art.
 ## 2026-11-20: 2.10.9 ports in the city window
 - The window's "Pipe connections" list became "Ports": one line per port at this tier,
   with the item or fluid icon, in or out, where on the wall ("top left", ...) and what it

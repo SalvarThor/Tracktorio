@@ -230,6 +230,7 @@ M.list = {
     -- Coal + water -> steam into a hidden generator. 150 steam per craft; the generator burns
     -- `generator_usage` steam per tick: 3 = 180/s = 5.4 MW, 6 = 10.8 MW, 12 = 21.6 MW.
     name = "power",
+    roof_icon = "item/steam-engine", -- 2.10: painted on the roof (default: the first product)
     graphics = { type = "assembling-machine", name = "centrifuge" }, -- 2.4.3: the refinery city took the oil refinery look
     map_color = { r = 0.9, g = 0.85, b = 0.3 },
     fluid_boxes = {
@@ -244,6 +245,7 @@ M.list = {
   },
   {
     name = "nuclear-power",
+    roof_icon = "item/nuclear-reactor",
     graphics = { type = "reactor", name = "nuclear-reactor" },
     map_color = { r = 0.35, g = 0.85, b = 0.3 },
     generator = "tt-nuclear-generator",
@@ -340,6 +342,7 @@ M.list = {
     -- Research complex (PLAN 2.2.3): a lab prototype; the engine runs research. Tier 1 =
     -- 20 labs (speed 1, 60 kW each). Its "product" is research, so any items may pay.
     name = "research",
+    roof_icon = "item/lab",
     kind = "lab",
     graphics = { type = "lab", name = "lab" },
     map_color = { r = 0.4, g = 0.6, b = 0.95 },

@@ -70,6 +70,37 @@ local function draw_footprint(city, def, size)
   end
 end
 
+--- The icon painted on a city's roof: `roof_icon` from its definition, else its first
+--- product. Nil for the rocket silo (it keeps the vanilla silo).
+---@param def table
+---@param tier integer
+local function roof_sprite(def, tier)
+  if def.roof_icon then return def.roof_icon end
+  if def.kind == "silo" then return nil end
+  local recipe = def.tiers[tier].recipe
+  local p = recipe and recipe.results and recipe.results[1]
+  return p and ((p.type == "fluid" and "fluid/" or "item/") .. p.name) or nil
+end
+
+--- A large icon of what the city makes, painted on its roof as in Factorissimo (2.10), so
+--- cities tell apart at a glance. Scaled with the building; drawn on the city.
+---@param city LuaEntity
+---@param def table
+---@param tier integer
+---@param size integer
+local function draw_roof(city, def, tier, size)
+  local sprite = roof_sprite(def, tier)
+  if not sprite then return end
+  local k = size / 8
+  rendering.draw_sprite({
+    sprite = sprite,
+    target = { entity = city, offset = { 0, -1.2 * k } }, -- the middle of the roof in the art
+    surface = city.surface,
+    x_scale = 1.8 * k, y_scale = 1.8 * k, -- a 64 px icon is 2 tiles at scale 1
+    render_layer = "higher-object-under",
+  })
+end
+
 --- Build the ports for a city's tier: loaders for items, markers for items and fluids.
 ---@param city LuaEntity
 ---@param record table
@@ -78,6 +109,7 @@ function M.attach(city, record)
   if not info then return end
   local size = port_layout.size(info.def, info.tier)
   draw_footprint(city, info.def, size)
+  draw_roof(city, info.def, info.tier, size)
   record.belt_ports = {}
   for _, p in ipairs(port_layout.ports(info.def)) do
     if p.tiers[info.tier] then
