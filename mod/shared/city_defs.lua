@@ -185,6 +185,12 @@ local function nuclear_tier(f, tier_cost)
     generator_usage = nuclear_steam_per_s / 60 * f, cost = tier_cost }
 end
 
+-- Water (2.9.1): the only source of water (offshore pumps are removed). No inputs and no
+-- power: the vanilla offshore pump draws none in 2.x. 600 water per craft of 1 s: 600 /
+-- 1,200 / 2,400 water/s at tiers 1-3 (user, 2026-11-20).
+M.WATER_PER_S = 600
+local water_recipe = { energy_required = 1, ingredients = {}, results = { fluid("water", M.WATER_PER_S) } }
+
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
@@ -254,7 +260,22 @@ M.list = {
       nuclear_tier(4, with_circuits(4000, 2000)),
     },
   },
-  assembler_city("circuits", { type = "assembling-machine", name = "electromagnetic-plant" },
+  {
+    -- Water out at the middle of the south side; room for two crafts at tier 3.
+    name = "water",
+    graphics = { type = "mining-drill", name = "pumpjack" },
+    map_color = { r = 0.25, g = 0.5, b = 0.9 },
+    fluid_boxes = {
+      { production_type = "output", position = { 0, 4 }, direction = defines.direction.south, filter = "water",
+        volume = 2 * 4 * M.WATER_PER_S },
+    },
+    tiers = {
+      { crafting_speed = 1, recipe = water_recipe },
+      { crafting_speed = 2, recipe = water_recipe, cost = both_plates(1000) },
+      { crafting_speed = 4, recipe = water_recipe, cost = with_circuits(2000, 1000) },
+    },
+  },
+  assembler_city("circuits",{ type = "assembling-machine", name = "electromagnetic-plant" },
     { r = 0.3, g = 0.7, b = 0.35 }, 1250, circuit_recipe, 0.5, both_plates(3000)),
   assembler_city("red-science", { type = "assembling-machine", name = "assembling-machine-1" },
     { r = 0.85, g = 0.25, b = 0.25 }, 1100, red_recipe, 1, with_circuits(2000, 1000)),

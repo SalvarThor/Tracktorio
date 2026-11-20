@@ -29,6 +29,7 @@ return {
     "__tracktorio-tests__/cases/chain",
     "__tracktorio-tests__/cases/nuclear",
     "__tracktorio-tests__/cases/elevated",
+    "__tracktorio-tests__/cases/water",
     "__tracktorio-tests__/cases/map",
     "__tracktorio-tests__/cases/mapgen",
     "__tracktorio-tests__/cases/e2e",

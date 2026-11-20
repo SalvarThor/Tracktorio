@@ -571,7 +571,7 @@ Decided with the user (DECISIONS.md, 2026-11-20):
   30-80 tiles from the starter power city, close enough to pipe, so the first power needs
   no train.
 
-- [ ] 2.9.1 Water city: no inputs, water out through a pipe connection, tiers x1/x2/x4
+- [x] 2.9.1 Water city: no inputs, water out through a pipe connection, tiers x1/x2/x4
       (600 / 1,200 / 2,400 per s), upgrade costs like the other tier 1 chain cities. Its
       window shows the output rate and "output full" when nothing drains it. Tests:
       rates, no power, backpressure, upgrade.

@@ -18,11 +18,13 @@ return {
         assert_.truthy(depth[def.name] and depth[def.name] >= 1, def.name .. " has no depth")
       end
       for name, want in pairs({
-        ["depot"] = 1, ["power"] = 1, ["iron-smelting"] = 1, ["refinery"] = 1,
-        ["circuits"] = 2, ["uranium"] = 2, ["plastic"] = 2,
-        ["green-science"] = 3, ["nuclear-power"] = 3, ["rocket-fuel-depot"] = 3,
-        ["blue-science"] = 4, ["processing-units"] = 4,
-        ["rocket-silo"] = 5,
+        -- 2.9: water comes from the water city, so its users move one level deeper
+        ["depot"] = 1, ["water"] = 1, ["iron-smelting"] = 1,
+        ["power"] = 2, ["refinery"] = 2, ["circuits"] = 2, ["uranium"] = 2,
+        ["plastic"] = 3, ["green-science"] = 3, ["nuclear-power"] = 3,
+        ["rocket-fuel-depot"] = 4,
+        ["blue-science"] = 5, ["processing-units"] = 5,
+        ["rocket-silo"] = 6,
       }) do
         assert_.equals(depth[name], want, name .. " depth")
       end
