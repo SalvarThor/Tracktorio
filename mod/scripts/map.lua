@@ -53,6 +53,13 @@ M.CITIES = {
   { name = "tt-city-uranium", x = 160, y = 0, label = "Uranium city", tag_icon = "uranium-fuel-cell" },
   -- 2.6.4: thirsty (206 water/s per 20 MW), so 100 tiles from the first lake
   { name = "tt-city-nuclear-power", x = -40, y = 170, label = "Nuclear power city", tag_icon = "nuclear-reactor" },
+  -- 2.9.4: water cities, the only source of water (offshore pumps are removed). On
+  -- procedural maps they stand on lake shores; the first is the starter, by the starter
+  -- power city (2.9.5). Fixed-map spots: at least 110 tiles from every patch, lake and city.
+  { name = "tt-city-water", x = -220, y = 30, label = "Water city", tag_icon = "water-barrel" },
+  { name = "tt-city-water", x = 70, y = -170, label = "North water city", tag_icon = "water-barrel" },
+  { name = "tt-city-water", x = 290, y = -10, label = "East water city", tag_icon = "water-barrel" },
+  { name = "tt-city-water", x = -440, y = 110, label = "West water city", tag_icon = "water-barrel" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).
@@ -335,7 +342,13 @@ end
 -- this share of the spacing apart (1 since 2.8.12: the minimum is a hard floor).
 M.MIN_APART = 1
 M.CHART_AROUND = 16 -- tiles charted around each city at the start (2.8.5)
-M.ALT_TURN = 15 -- degrees around spawn between alternative spots when a site finds no land
+M.ALT_TURN = 15
+M.ALT_OUT, M.ALT_OUT_STEPS = 1.15, 4 -- then further out from spawn, up to 4 times
+M.ALT_SEARCH = 96 -- how far a fallback spot's site may move
+-- 2.9.5: the starter water city looks for a lake shore this far from spawn; the starter
+-- power city may move this far from its spot next to it.
+M.STARTER_SHORE_SEARCH = 600
+M.STARTER_PIPE_SEARCH = 16 -- degrees around spawn between alternative spots when a site finds no land
 
 M.COMPASS = { "East", "South-east", "South", "South-west", "West", "North-west", "North", "North-east" }
 
@@ -371,44 +384,110 @@ end
 ---@param spacing number
 function M.place_procedural(surface, seed, spacing)
   local placed, missing = {}, {}
-  for _, c in ipairs(layout.plan(M.CITIES, seed, spacing)) do
-    -- the same pair rules as the plan (starter by the depot, power cities further apart)
-    local function apart(t) return layout.need(c, t, spacing) * M.MIN_APART end
-    local site = sites.find(surface, c.x, c.y, placed, apart)
-    -- no land near the planned spot (a big lake): same distance from spawn, turned around
-    -- spawn in ALT_TURN steps, so the depth weighting holds
-    local turn = 0
-    while not site and turn < 360 / M.ALT_TURN - 1 do
-      turn = turn + 1
-      -- +15, -15, +30, -30, ... degrees
-      local a = math.rad(M.ALT_TURN * math.ceil(turn / 2) * (turn % 2 == 1 and 1 or -1))
-      local ca, sa = math.cos(a), math.sin(a)
-      local ax, ay = math.floor(c.x * ca - c.y * sa), math.floor(c.x * sa + c.y * ca)
-      site = sites.find(surface, ax, ay, placed, apart)
-    end
-    if site then
-      sites.clear(surface, site.x, site.y)
-      local pos = { site.x + 0.5, site.y + 0.5 }
-      if surface.can_place_entity({ name = c.name, position = pos, force = "player" }) then
-        cities.place(c.name, surface, pos, "player")
-        c.planned = { x = c.x, y = c.y }
-        c.x, c.y = site.x, site.y
-        placed[#placed + 1] = c
-      else
-        missing[#missing + 1] = c.label
-        local what = {}
-        for _, e in pairs(surface.find_entities_filtered({ area = { { pos[1] - 5, pos[2] - 5 }, { pos[1] + 5, pos[2] + 5 } } })) do
-          what[#what + 1] = e.name .. "/" .. e.type
-        end
-        local tiles = {}
-        for _, tl in pairs(surface.find_tiles_filtered({ area = { { pos[1] - 5, pos[2] - 5 }, { pos[1] + 5, pos[2] + 5 } } })) do tiles[tl.name] = true end
-        log("tracktorio: site for " .. c.label .. " at " .. site.x .. "," .. site.y .. " is blocked by " .. serpent.line(what) .. " tiles " .. serpent.line(tiles))
+
+  --- Clear the site and place the city there; false if something still blocks it.
+  local function place_at(c, site)
+    sites.clear(surface, site.x, site.y)
+    local pos = { site.x + 0.5, site.y + 0.5 }
+    if not surface.can_place_entity({ name = c.name, position = pos, force = "player" }) then
+      local what = {}
+      for _, e in pairs(surface.find_entities_filtered({ area = { { pos[1] - 5, pos[2] - 5 }, { pos[1] + 5, pos[2] + 5 } } })) do
+        what[#what + 1] = e.name .. "/" .. e.type
       end
+      log("tracktorio: site for " .. c.label .. " at " .. site.x .. "," .. site.y .. " is blocked by " .. serpent.line(what))
+      return false
+    end
+    cities.place(c.name, surface, pos, "player")
+    c.planned = { x = c.x, y = c.y }
+    c.x, c.y = site.x, site.y
+    placed[#placed + 1] = c
+    return true
+  end
+
+  --- A site STARTER_PIPE tiles from `other` (the starter pair: close enough to pipe),
+  --- trying 8 directions, the one towards spawn first.
+  local function next_to(c, other, apart)
+    local mid = (layout.STARTER_PIPE[1] + layout.STARTER_PIPE[2]) / 2
+    local base = math.atan2(-other.y, -other.x)
+    for k = 0, 7 do
+      local a = base + k * math.pi / 4
+      local site = sites.find(surface, math.floor(other.x + mid * math.cos(a)), math.floor(other.y + mid * math.sin(a)),
+        placed, apart, M.STARTER_PIPE_SEARCH)
+      if site then
+        local d = math.sqrt((site.x - other.x) ^ 2 + (site.y - other.y) ^ 2)
+        if d >= layout.STARTER_PIPE[1] and d <= layout.STARTER_PIPE[2] then return site end
+      end
+    end
+    return nil
+  end
+
+  --- The usual search: near the planned spot, else the same distance from spawn turned
+  --- around it in ALT_TURN steps (+15, -15, +30, ...), so the depth weighting holds; if
+  --- every turn is blocked (a crowded ring), a little further out (ALT_OUT), and again.
+  local function free(x, y, apart)
+    for _, t in ipairs(placed) do
+      local need = apart(t)
+      if (t.x - x) ^ 2 + (t.y - y) ^ 2 < need * need then return false end
+    end
+    return true
+  end
+  local function near_plan(c, apart, finder)
+    local site = finder(surface, c.x, c.y, placed, apart)
+    -- fallback spots: only searched (a little) if the spot itself is free
+    local function try_spot(x, y)
+      if not free(x, y, apart) then return nil end
+      return finder(surface, x, y, placed, apart, M.ALT_SEARCH)
+    end
+    local scale = 1
+    for _ = 0, M.ALT_OUT_STEPS do
+      local turn = 0
+      while not site and turn < 360 / M.ALT_TURN - 1 do
+        turn = turn + 1
+        local a = math.rad(M.ALT_TURN * math.ceil(turn / 2) * (turn % 2 == 1 and 1 or -1))
+        local ca, sa = math.cos(a) * scale, math.sin(a) * scale
+        site = try_spot(math.floor(c.x * ca - c.y * sa), math.floor(c.x * sa + c.y * ca))
+      end
+      if site then break end
+      scale = scale * M.ALT_OUT
+      site = try_spot(math.floor(c.x * scale), math.floor(c.y * scale))
+    end
+    return site
+  end
+
+  local starter_water, deferred_water, starter_power
+  for _, c in ipairs(layout.plan(M.CITIES, seed, spacing)) do
+    -- the same pair rules as the plan (the starting trio, power and water cities apart)
+    local function apart(t) return layout.need(c, t, spacing) * M.MIN_APART end
+    local site
+    if c.starter_water then
+      -- 2.9.5: the lake shore nearest spawn; without one near enough, it stands by the
+      -- starter power city instead (placed right after it)
+      site = sites.find_shore(surface, 0, 0, placed, apart, M.STARTER_SHORE_SEARCH)
+      if not site then deferred_water = c end
+    elseif c.starter and starter_water then
+      site = next_to(c, starter_water, apart)
+    elseif c.name == layout.WATER then
+      -- 2.9.4: on a lake shore; if no lake is in reach, any land
+      site = sites.find_shore(surface, c.x, c.y, placed, apart) or near_plan(c, apart, sites.find)
+    else
+      site = near_plan(c, apart, sites.find)
+    end
+    if c == deferred_water then
+      -- placed after the starter power city
+    elseif site and place_at(c, site) then
+      if c.starter_water then starter_water = c end
+      if c.starter then starter_power = c end
     else
       missing[#missing + 1] = c.label
     end
-  end
-  for _, label in ipairs(missing) do log("tracktorio: no site for " .. label) end
+    if c.starter and deferred_water then
+      local w = deferred_water
+      local function w_apart(t) return layout.need(w, t, spacing) * M.MIN_APART end
+      local wsite = starter_power and next_to(w, starter_power, w_apart)
+      if not (wsite and place_at(w, wsite)) then missing[#missing + 1] = w.label end
+      deferred_water = nil
+    end
+  end  for _, label in ipairs(missing) do log("tracktorio: no site for " .. label) end
   M.compass_names(placed)
   storage.tt_layout = storage.tt_layout or {}
   storage.tt_layout[surface.name] = placed

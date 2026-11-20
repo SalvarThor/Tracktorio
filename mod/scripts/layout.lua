@@ -22,20 +22,35 @@ M.DEPOT_RADIUS = { 40, 80 } -- the coal fuel depot's distance from spawn
 -- is exempt from the minimum (they only keep STARTER_APART).
 M.STARTER_RADIUS = { 200, 350 }
 M.STARTER_APART = 100
--- Power cities (coal and nuclear) keep at least this many spacings apart (playtest 2.8.13).
+-- Power cities (coal and nuclear) keep at least this many spacings apart (playtest 2.8.13);
+-- so do water cities (2.9.4).
 M.POWER_APART = 3
+M.WATER_APART = 3
+-- 2.9.5: the first water city is the starter water city. It stands by the starter power
+-- city, close enough to pipe (filling a wagon needs an electric pump, so the first power
+-- can't come by train): STARTER_PIPE tiles apart (scripts/map.lua places the pair).
+M.STARTER_PIPE = { 30, 80 }
 
 local POWER = { [config.CITY.power] = true, ["tt-city-nuclear-power"] = true }
+M.WATER = "tt-city-water"
 
---- Distance two planned cities must keep apart (entries with name, gap, starter).
+--- Is this entry one of the starting trio (the depot, the starter power city, the starter
+--- water city)?
+local function trio(e) return e.name == config.CITY.depot or e.starter or e.starter_water end
+
+--- Distance two planned cities must keep apart (entries with name, gap, starter flags).
 ---@param a table
 ---@param b table
 ---@param spacing number
 function M.need(a, b, spacing)
-  local depot = config.CITY.depot
-  if (a.name == depot and b.starter) or (b.name == depot and a.starter) then return M.STARTER_APART end
+  -- the starting trio stands together near spawn: they only keep out of each other's way
+  if trio(a) and trio(b) then
+    if (a.starter and b.starter_water) or (b.starter and a.starter_water) then return M.STARTER_PIPE[1] end
+    return M.STARTER_APART
+  end
   local need = math.max(a.gap or spacing, b.gap or spacing)
   if POWER[a.name] and POWER[b.name] then need = math.max(need, M.POWER_APART * spacing) end
+  if a.name == M.WATER and b.name == M.WATER then need = math.max(need, M.WATER_APART * spacing) end
   return need
 end
 -- Distance from spawn, in spacings: MIN_R + SPREAD * (DEPTH_WEIGHT * depth share +
@@ -85,6 +100,7 @@ function M.plan(cities, seed, spacing)
     copies[c.name] = e.copy + 1
     e.depth = depth_of(c.name) + e.copy
     e.starter = c.name == config.CITY.power and e.copy == 0 or nil
+    e.starter_water = c.name == M.WATER and e.copy == 0 or nil
     e.order = rng()
     max_depth = math.max(max_depth, e.depth)
     todo[#todo + 1] = e
@@ -93,7 +109,9 @@ function M.plan(cities, seed, spacing)
   table.sort(todo, function(a, b)
     local da, db = a.name == config.CITY.depot, b.name == config.CITY.depot
     if da ~= db then return da end
-    if (a.starter or false) ~= (b.starter or false) then return a.starter or false end
+    local sa, sb = (a.starter or a.starter_water) and true or false, (b.starter or b.starter_water) and true or false
+    if sa ~= sb then return sa end
+    if sa and (a.starter_water or false) ~= (b.starter_water or false) then return a.starter_water or false end
     if a.depth ~= b.depth then return a.depth < b.depth end
     return a.order < b.order
   end)
@@ -108,12 +126,12 @@ function M.plan(cities, seed, spacing)
   end
   for _, e in ipairs(todo) do
     -- (the depot and the starter keep only the minimum, or they'd push the early game away)
-    local early = e.name == config.CITY.depot or e.starter
+    local early = trio(e)
     e.gap = early and spacing or spacing * (1 + M.GAP_SPREAD * rng() ^ M.GAP_SKEW)
     local r
     if e.name == config.CITY.depot then
       r = M.DEPOT_RADIUS[1] + rng() * (M.DEPOT_RADIUS[2] - M.DEPOT_RADIUS[1])
-    elseif e.starter then
+    elseif e.starter or e.starter_water then
       r = M.STARTER_RADIUS[1] + rng() * (M.STARTER_RADIUS[2] - M.STARTER_RADIUS[1])
     else
       local share = max_depth > 1 and (e.depth - 1) / (max_depth - 1) or 0

@@ -87,6 +87,16 @@ local function usable(surface, x, y)
   return not any(water(surface, box_points(x, y))) and M.mainland(surface, x, y)
 end
 
+--- Is the whole disc of `search` around (x, y) too close to some taken site? Then there
+--- is nothing to find there, and no grid needs building.
+local function blocked(x, y, taken, apart, search)
+  for _, t in ipairs(taken or {}) do
+    local need = type(apart) == "function" and apart(t) or apart or 0
+    if math.sqrt((t.x - x) ^ 2 + (t.y - y) ^ 2) + search < need then return true end
+  end
+  return false
+end
+
 --- Generate the chunks under a site's box.
 ---@param surface LuaSurface
 local function generate(surface, x, y)
@@ -102,8 +112,8 @@ end
 --- Water forecast over a square around (x, y), one point per RAY_STEP tiles, read in one
 --- batch. Returns wet(px, py) for any point in the square.
 ---@param surface LuaSurface
-local function grid(surface, x, y, radius)
-  local g = M.RAY_STEP
+local function grid(surface, x, y, radius, step)
+  local g = step or M.RAY_STEP
   local n = math.ceil(radius / g)
   local pts = {}
   for i = -n, n do
@@ -161,7 +171,10 @@ end
 ---@param y integer
 ---@param taken table[]?
 ---@param apart (number|fun(t: table): number)? distance to keep from each taken site
-function M.find(surface, x, y, taken, apart)
+---@param search number? furthest the site may move (default SEARCH)
+function M.find(surface, x, y, taken, apart, search)
+  search = search or M.SEARCH
+  if blocked(x, y, taken, apart, search) then return nil end
   local function free(cx, cy)
     for _, t in ipairs(taken or {}) do
       local need = type(apart) == "function" and apart(t) or apart or 0
@@ -175,16 +188,23 @@ function M.find(surface, x, y, taken, apart)
   end
   -- most planned spots are fine as they are: check that before building the grid
   if free(x, y) and usable(surface, x + 0.5, y + 0.5) and try(x, y) then return { x = x, y = y } end
-  local wet = grid(surface, x + 0.5, y + 0.5, M.SEARCH + M.RAY_LENGTH + M.HALF + M.MARGIN + M.RAY_STEP)
-  for ring = 1, math.floor(M.SEARCH / M.STEP) do
-    local r = ring * M.STEP
-    local n = ring * 6
-    for i = 0, n - 1 do
-      local a = i * 2 * math.pi / n
-      local cx, cy = math.floor(x + r * math.cos(a)), math.floor(y + r * math.sin(a))
-      -- the grid is a forecast: confirm on the real tiles
-      if free(cx, cy) and usable_on(wet, cx + 0.5, cy + 0.5) and try(cx, cy) then return { x = cx, y = cy } end
+  -- in stages: a small grid first (most sites are close), a wider one only if needed
+  local done = 0
+  for _, stage in ipairs(M.STAGES) do
+    local reach = math.min(stage, search)
+    local wet = grid(surface, x + 0.5, y + 0.5, reach + M.RAY_LENGTH + M.HALF + M.MARGIN + M.RAY_STEP)
+    for ring = done + 1, math.floor(reach / M.STEP) do
+      local r = ring * M.STEP
+      local n = ring * 6
+      for i = 0, n - 1 do
+        local a = i * 2 * math.pi / n
+        local cx, cy = math.floor(x + r * math.cos(a)), math.floor(y + r * math.sin(a))
+        -- the grid is a forecast: confirm on the real tiles
+        if free(cx, cy) and usable_on(wet, cx + 0.5, cy + 0.5) and try(cx, cy) then return { x = cx, y = cy } end
+      end
     end
+    done = math.floor(reach / M.STEP)
+    if reach >= search then break end
   end
   return nil
 end
@@ -193,6 +213,11 @@ M.SHORE_RING = 12 -- water must be within this many tiles outside the city's box
 M.LAKE_RADIUS = 40 -- the lake is measured within this radius of the city
 M.LAKE_MIN = 600 -- tiles of water there, or it's a puddle (tuning)
 M.SHORE_SEARCH = 640 -- furthest a shore site moves from its planned spot
+-- Searches go in stages: a grid only as wide as the stage, a wider one if nothing is found
+-- (2.9.4: one wide grid per search cost ~11 s for a whole layout).
+M.STAGES = { 96, 320 }
+M.SHORE_STAGES = { 160, 400, 640 }
+M.SHORE_GRID = 8 -- shore searches forecast on a coarser grid (a lake is big; the real tiles are checked)
 
 --- Is there a real lake at the edge of the box around (x, y), on the forecast grid?
 local function shore_on(wet, x, y)
@@ -234,6 +259,7 @@ end
 ---@param search number?
 function M.find_shore(surface, x, y, taken, apart, search)
   search = search or M.SHORE_SEARCH
+  if blocked(x, y, taken, apart, search) then return nil end
   local function free(cx, cy)
     for _, t in ipairs(taken or {}) do
       local need = type(apart) == "function" and apart(t) or apart or 0
@@ -241,23 +267,33 @@ function M.find_shore(surface, x, y, taken, apart, search)
     end
     return true
   end
-  local reach = math.max(M.RAY_LENGTH, M.LAKE_RADIUS, M.HALF + M.MARGIN + M.SHORE_RING)
-  local wet = grid(surface, x + 0.5, y + 0.5, search + reach + M.RAY_STEP)
-  for ring = 0, math.floor(search / M.STEP) do
-    local r = ring * M.STEP
-    local n = ring == 0 and 1 or ring * 6
-    for i = 0, n - 1 do
-      local a = i * 2 * math.pi / n
-      local cx, cy = math.floor(x + r * math.cos(a)), math.floor(y + r * math.sin(a))
-      local px, py = cx + 0.5, cy + 0.5
-      if free(cx, cy) and usable_on(wet, px, py) and shore_on(wet, px, py) then
-        -- generate the lake around it too, so the real check sees it
-        local reach_area = M.LAKE_RADIUS + 16
-        surface.request_to_generate_chunks({ px, py }, math.ceil(reach_area / 32))
-        surface.force_generate_chunk_requests()
-        if confirmed(surface, px, py) and shore_confirmed(surface, px, py) then return { x = cx, y = cy } end
+  local around = math.max(M.RAY_LENGTH, M.LAKE_RADIUS, M.HALF + M.MARGIN + M.SHORE_RING)
+  local done = -1
+  for _, stage in ipairs(M.SHORE_STAGES) do
+    local reach = math.min(stage, search)
+    local wet = grid(surface, x + 0.5, y + 0.5, reach + around + M.SHORE_GRID, M.SHORE_GRID)
+    for ring = done + 1, math.floor(reach / M.STEP) do
+      local r = ring * M.STEP
+      local n = ring == 0 and 1 or ring * 6
+      for i = 0, n - 1 do
+        local a = i * 2 * math.pi / n
+        local cx, cy = math.floor(x + r * math.cos(a)), math.floor(y + r * math.sin(a))
+        local px, py = cx + 0.5, cy + 0.5
+        if free(cx, cy) and usable_on(wet, px, py) and shore_on(wet, px, py) then
+          -- generate the chunks under the lake circle too, so the real check sees it
+          local r = M.LAKE_RADIUS
+          for chx = math.floor((px - r) / 32), math.floor((px + r) / 32) do
+            for chy = math.floor((py - r) / 32), math.floor((py + r) / 32) do
+              surface.request_to_generate_chunks({ chx * 32 + 16, chy * 32 + 16 }, 0)
+            end
+          end
+          surface.force_generate_chunk_requests()
+          if confirmed(surface, px, py) and shore_confirmed(surface, px, py) then return { x = cx, y = cy } end
+        end
       end
     end
+    done = math.floor(reach / M.STEP)
+    if reach >= search then break end
   end
   return nil
 end

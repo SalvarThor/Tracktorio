@@ -3,10 +3,10 @@ local assert_ = require("__tracktorio-tests__/assert")
 local city_defs = require("__tracktorio__/shared/city_defs")
 local h = require("__tracktorio-tests__/helpers")
 
---- The one pair allowed under the minimum: the coal fuel depot and the starter power city.
-local function exempt(a, b)
-  return (a.name == "tt-city-depot" and b.starter) or (b.name == "tt-city-depot" and a.starter)
-end
+--- Pairs allowed under the minimum: within the starting trio (the coal fuel depot, the
+--- starter power city and, since 2.9.5, the starter water city).
+local function trio(e) return e.name == "tt-city-depot" or e.starter or e.starter_water end
+local function exempt(a, b) return trio(a) and trio(b) end
 
 return {
   {

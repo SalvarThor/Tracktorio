@@ -112,6 +112,45 @@ return {
     end,
   },
   {
+    -- 2.9.4 / 2.9.5
+    name = "water: on new maps, four water cities on lake shores, apart; the starter water city pipes to the starter power city",
+    fn = function()
+      for _, seed in ipairs({ 314159, 271828, 161803 }) do
+        local mgs = game.surfaces["nauvis"].map_gen_settings
+        mgs.seed = seed
+        local s = game.create_surface("tt-water-layout-" .. seed, mgs)
+        local result = remote.call("tt-nauvis", "prepare", s.name, seed, 500)
+        assert_.equals(#result.missing, 0, "missing " .. serpent.line(result.missing) .. ", seed " .. seed)
+        local water, starter_water, starter_power = {}, nil, nil
+        for _, c in ipairs(result.placed) do
+          if c.name == WATER then water[#water + 1] = c end
+          if c.starter_water then starter_water = c end
+          if c.starter then starter_power = c end
+        end
+        assert_.equals(#water, 4, "water cities, seed " .. seed)
+        assert(starter_water and starter_power, "no starter pair, seed " .. seed)
+        local d = math.sqrt((starter_water.x - starter_power.x) ^ 2 + (starter_water.y - starter_power.y) ^ 2)
+        assert_.truthy(d >= 30 and d <= 80, "starter pair " .. d .. " apart, seed " .. seed)
+        local shores = 0
+        for i, a in ipairs(water) do
+          local x, y = a.x + 0.5, a.y + 0.5
+          local edge = s.count_tiles_filtered({ area = { { x - 24.5, y - 24.5 }, { x + 24.5, y + 24.5 } }, collision_mask = "water_tile" })
+          if edge > 0 then shores = shores + 1 end
+          for j = i + 1, #water do
+            local b = water[j]
+            local dd = math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
+            assert_.truthy(dd >= 1500 or (a.starter_water or b.starter_water) and dd >= 500,
+              a.label .. " and " .. b.label .. " " .. dd .. " apart, seed " .. seed)
+          end
+        end
+        log(string.format("water: seed %d: starter pair %d apart, starter water %d from spawn, %d of 4 on a shore",
+          seed, d, math.sqrt(starter_water.x ^ 2 + starter_water.y ^ 2), shores))
+        assert_.truthy(shores >= 3, "only " .. shores .. " water cities on a shore, seed " .. seed)
+        game.delete_surface(s)
+      end
+    end,
+  },
+  {
     name = "water: plates delivered to its port upgrade it to tier 2 (1,200/s)",
     fn = function()
       local city = place(X + 120)

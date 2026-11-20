@@ -4,6 +4,30 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.9.4-2.9.5 water cities in the layout, the starter trio
+- Four water cities join the layout: 30 cities now. The first is the starter water city;
+  the others spread like the coal power cities (each further copy one level deeper,
+  compass names, at least 3x the minimum apart). Each stands on a lake shore: dry site,
+  water within 12 tiles of its edge, at least 600 tiles of lake within 40. If no shore is
+  in reach (640 tiles), it takes any land.
+- Placement order: the depot, then the starter water city on the lake shore nearest spawn
+  (within 600 tiles), then the starter power city 30-80 tiles from it (pipe distance),
+  then the rest. Without a shore near spawn, the starter water city stands 30-80 tiles from
+  the starter power city instead. The trio is exempt from the minimum among itself.
+- Measured (3 seeds at 1x): starter pair 55-64 tiles apart, the starter water city 40-112
+  tiles from spawn, 4 of 4 water cities on a shore every time.
+- Speed. Adding shores first made a layout take 8-20 s. Changes:
+  - searches whose whole circle is ruled out by a placed city return at once;
+  - the "turn around spawn" fallback only searches (96 tiles) at spots that are free, and
+    steps 15% further out (up to 4 times) when a ring is crowded, which also fixed a city
+    finding no site (seed 161803, Sulfur city);
+  - grids are built in stages (96, then 320; shores 160, 400, 640);
+  - shores forecast on an 8-tile grid;
+  - a shore candidate generates only the chunks under its lake circle.
+  Now 2.8-5 s per layout at 1x, and 3.8 s at 3x.
+- The fixed test map gets water cities at (-220, 30), (70, -170), (290, -10) and
+  (-440, 110), each at least 110 tiles from every patch, lake and city.
+
 ## 2026-11-20: water city (phase 2.9), user decisions
 - Starter pair: a starter water city stands within pipe distance (30-80 tiles) of the
   starter power city. Filling a fluid wagon needs an electric pump, so the first power

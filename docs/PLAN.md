@@ -582,11 +582,11 @@ Decided with the user (DECISIONS.md, 2026-11-20):
       puddle) right at its edge. Found with the same elevation forecast as other sites.
       Tests on Nauvis terrain: every water city is on a shore of a lake of at least a
       minimum size.
-- [ ] 2.9.4 Layout: four water cities, placed like the coal power cities (the first copy
+- [x] 2.9.4 Layout: four water cities, placed like the coal power cities (the first copy
       plans shallow, the others further out, compass names, at least 3x the minimum
       apart). Chain depth now counts water as made by a city, so the power cities and
       the refinery move one level deeper (check the layout tests still hold).
-- [ ] 2.9.5 Starter pair: the starter water city takes the lake shore nearest spawn
+- [x] 2.9.5 Starter pair: the starter water city takes the lake shore nearest spawn
       (within a limit, tuning), and the starter power city stands 30-80 tiles from it, with
       the depot near spawn. If no lake is near enough, the starter water city stands by the
       starter power city without a shore. Tests over several seeds.
