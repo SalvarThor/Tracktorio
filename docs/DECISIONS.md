@@ -4,6 +4,18 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.7 growing on upgrade
+- Before the bigger building goes in, what the player built inside its footprint is mined
+  (contents too, like a player mining it) and goes to the nearest connected player of the
+  city's force; what doesn't fit, or with nobody online, is spilled just south of the
+  building. Characters there step outside. Mod entities stay for the swap.
+- Belts keep working: a belt that ran into a tier 1 port is now 2 tiles shorter and runs
+  into the same port on the moved wall (tested with a station built at tier 1).
+- Inserters within 3 tiles of the new walls are checked as if just built; one that now
+  reaches the city goes back to that player.
+- Not handled: rails under a train can't be mined, so a train standing in the footprint
+  keeps its rails under the new building. Sites reserve the 16x16 footprint (2.10.8 marks
+  it), so a player has to build there on purpose.
 ## 2026-11-20: 2.10.6 construction and service by port
 - The construction and service chests are hidden inside the building (no collision, not
   selectable, no picture). Each is fed by a port in the wall like the item ports, marked

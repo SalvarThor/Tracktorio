@@ -4,6 +4,8 @@
 local cities = require("scripts.cities")
 local ports = require("scripts.ports")
 local belt_ports = require("scripts.belt_ports")
+local city_defs = require("shared.city_defs")
+local port_layout = require("shared.port_layout")
 
 local M = {}
 
@@ -20,6 +22,53 @@ local function contents(inv)
     for _, c in ipairs(inv.get_contents()) do out[#out + 1] = { name = c.name, count = c.count, quality = c.quality } end
   end
   return out
+end
+
+--- The connected player of `force` nearest to `position`, or nil.
+---@param force LuaForce
+---@param position MapPosition
+local function nearest_player(force, position)
+  local best, best_d
+  for _, player in pairs(force.connected_players) do
+    local p = player.position
+    local d = (p.x - position.x) ^ 2 + (p.y - position.y) ^ 2
+    if not best_d or d < best_d then best, best_d = player, d end
+  end
+  return best
+end
+
+--- Make room for the bigger building (2.10.7). What the player built inside its footprint
+--- is mined and goes to the nearest player of the city's force (what doesn't fit, or with
+--- no player online, is spilled south of the building); characters there step outside.
+--- Mod entities (the city, its ports and hidden chests) are left for the swap. Returns the
+--- player things went to, if any.
+---@param old LuaEntity
+---@param size integer the new building's size
+local function clear_footprint(old, size)
+  local c, surface, half = old.position, old.surface, size / 2
+  local area = { { c.x - half, c.y - half }, { c.x + half, c.y + half } }
+  local edge = { x = c.x, y = c.y + half + 1.5 }
+  local player = nearest_player(old.force --[[@as LuaForce]], c)
+  local buffer = game.create_inventory(1000)
+  for _, e in pairs(surface.find_entities_filtered({ area = area })) do
+    if e.valid and string.sub(e.name, 1, 3) ~= "tt-" then
+      if e.type == "character" then
+        e.teleport(surface.find_non_colliding_position("character", edge, 32, 0.5) or edge)
+      elseif e.force == old.force and e.type ~= "item-entity" then
+        e.mine({ inventory = buffer, force = true, raise_destroyed = true })
+      end
+    end
+  end
+  for _, stack in ipairs(buffer.get_contents()) do
+    local left = stack.count
+    if player then left = left - player.insert({ name = stack.name, count = left, quality = stack.quality }) end
+    if left > 0 then
+      surface.spill_item_stack({ position = edge, stack = { name = stack.name, count = left, quality = stack.quality },
+        enable_looted = true, allow_belts = false })
+    end
+  end
+  buffer.destroy()
+  return player
 end
 
 --- Replace the record's city with its next tier. Returns the new entity, or nil.
@@ -46,6 +95,11 @@ function M.upgrade(record)
   local burner = old.burner
   local burning = burner and burner.currently_burning
   local burning_left = burner and burner.remaining_burning_fuel or 0
+
+  -- The bigger building's footprint is cleared before the swap (2.10.7).
+  local target_info = city_defs.by_entity[target]
+  local size = target_info and port_layout.size(target_info.def, target_info.tier) or old.prototype.tile_width
+  local player = size > old.prototype.tile_width and clear_footprint(old, size) or nil
 
   -- Forget the old record first, so on_object_destroyed does not tear down the new parts.
   storage.tt_cities[old_unit] = nil
@@ -104,6 +158,15 @@ function M.upgrade(record)
     -- 2.1: writing currently_burning needs remaining_burning_fuel set right after
     city.burner.currently_burning = burning
     city.burner.remaining_burning_fuel = burning_left
+  end
+
+  -- Inserters the bigger building now reaches go back too (2.10.5).
+  if player or size > old.prototype.tile_width then
+    local box = city.bounding_box
+    for _, ins in pairs(surface.find_entities_filtered({ type = "inserter",
+      area = { { box.left_top.x - 3, box.left_top.y - 3 }, { box.right_bottom.x + 3, box.right_bottom.y + 3 } } })) do
+      belt_ports.check_inserter(ins, player and player.index)
+    end
   end
 
   -- Open windows on the city or its old port follow the new city.

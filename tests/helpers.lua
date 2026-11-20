@@ -176,16 +176,17 @@ local BACK = {
 ---@param name string
 ---@param flow "input"|"output"
 ---@param belt string? default "transport-belt"
-function M.belt_to_port(city, name, flow, belt)
+---@param length integer? tiles of belt, default 2
+function M.belt_to_port(city, name, flow, belt, length)
+  length = length or 2
   for _, s in ipairs(M.port_spots(city, name, flow)) do
     local d = STEP[s.dir]
     local function at(k) return { s.pos[1] + d[1] * k, s.pos[2] + d[2] * k } end
     local belt_dir = flow == "input" and BACK[s.dir] or s.dir
-    M.create(belt or "transport-belt", at(0), { direction = belt_dir })
-    M.create(belt or "transport-belt", at(1), { direction = belt_dir })
+    for k = 0, length - 1 do M.create(belt or "transport-belt", at(k), { direction = belt_dir }) end
     -- the loader moves items away from the chest on inputs, towards it on outputs
-    M.create("tt-belt-port", at(2), { direction = belt_dir, type = flow == "input" and "output" or "input" })
-    local chest = M.create("infinity-chest", at(3))
+    M.create("tt-belt-port", at(length), { direction = belt_dir, type = flow == "input" and "output" or "input" })
+    local chest = M.create("infinity-chest", at(length + 1))
     if flow == "input" and prototypes.item[name] then
       chest.set_infinity_container_filter(1, { name = name, count = 100, mode = "exactly" })
     else

@@ -223,6 +223,58 @@ return {
     end,
   },
   {
+    -- 2.10.7
+    name = "growing: an upgrade clears the new footprint, returns what was built there, and belts still reach the ports",
+    fn = function(ctx)
+      local p = assert(game.players[1])
+      local x = X + 1040
+      h.clear_area({ { x - 20, -20 }, { x + 22, 22 } })
+      local city = h.place_city("tt-city-iron-smelting", { x + 0.5, 0.5 })
+      local pos = city.position
+      -- belts built against the tier 1 walls, long enough to reach the tier 3 walls
+      h.belt_to_port(city, "iron-ore", "input", nil, 5)
+      h.belt_to_port(city, "iron-plate", "output", nil, 5)
+      local e = h.edges(city)
+      local chest = h.create("wooden-chest", { e.right + 1, 0.5 }) -- the player's chest, 2 tiles off the east wall
+      local had = p.get_item_count("wooden-chest")
+      local belts = p.get_item_count("transport-belt")
+      h.test_power({ x + 12, 0 }, 20e6)
+      h.feed_port(city, "copper-plate", 2000)
+      local t2 = assert(h.city_at(pos))
+      assert_.equals(t2.name, "tt-city-iron-smelting-t2")
+      assert_.falsy(chest.valid, "the chest inside the new footprint is still there")
+      assert_.equals(p.get_item_count("wooden-chest"), had + 1, "chest not returned")
+      assert_.equals(p.get_item_count("transport-belt"), belts + 4, "belts inside the new footprint not returned")
+      local start = t2.products_finished
+      ctx:wait(600, function()
+        assert_.truthy(t2.products_finished - start >= 5, "tier 2 is not fed through its moved ports: " .. (t2.products_finished - start) .. " crafts")
+      end)
+    end,
+  },
+  {
+    name = "growing: an inserter the bigger building now reaches goes back to the player",
+    fn = function(ctx)
+      local p = assert(game.players[1])
+      local x = X + 1100
+      h.clear_area({ { x - 20, -20 }, { x + 22, 22 } })
+      local city = h.place_city("tt-city-copper-smelting", { x + 0.5, 0.5 })
+      local pos = city.position
+      local e = h.edges(city)
+      -- 2 tiles above the tier 1 wall, working along it: fine now, reaches the tier 2 wall
+      local ins = h.create("inserter", { x + 0.5, e.top - 2 }, { direction = defines.direction.north, raise_built = true })
+      ctx:wait(15, function()
+        assert_.truthy(ins.valid, "removed before the upgrade")
+        local had = p.get_item_count("inserter")
+        h.feed_port(city, "iron-plate", 2000)
+        assert_.equals(assert(h.city_at(pos)).name, "tt-city-copper-smelting-t2")
+        ctx:wait(15, function()
+          assert_.falsy(ins.valid, "inserter reaching the new wall left")
+          assert_.equals(p.get_item_count("inserter"), had + 1, "inserter not returned")
+        end)
+      end)
+    end,
+  },
+  {
     -- 2.10.1: 2.1 loaders only connect to entities flagged "player-creation"
     name = "belt ports: a loader at the wall connects to every kind of city",
     fn = function(ctx)
