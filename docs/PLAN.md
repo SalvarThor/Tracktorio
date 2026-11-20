@@ -451,3 +451,24 @@ Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 c
       network uses. Idea for later (user): a circuit signal for fuel control (README).
 - [x] 2.6.9 Short `/playtest`: flat-out nuclear (fuel use and the usage line), decimals.
       Playtest 2026-11-20: all passed.
+
+### Phase 2.7: elevated rails (approved by the user 2026-11-20)
+
+Decided with the user (DECISIONS.md, 2026-11-20):
+- Space Age's Elevated rail tech needs production science (100 x red/green/blue/purple,
+  after Concrete and Production science pack). The research complex takes no purple, so
+  the tech is retuned to red + green + blue, after Concrete and Chemical science pack.
+  Proposed cost (tuning): 500 units x 30 s. Rejected: a purple science city (needs stone,
+  bricks, and opens the whole purple tree).
+- No map change in this phase; terrain that rewards elevated rails comes with procedural
+  maps.
+
+- [ ] 2.7.1 Retune the Elevated rail tech (red + green + blue, 500 units, after Concrete
+      and Chemical science pack). Gating test: reachable, and nothing else changed.
+- [ ] 2.7.2 Ramps, supports, elevated rails and signals: free once researched, locked
+      before (restrictions test). Check rail supports on water (the lakes become
+      crossable) and note what 2.1 allows.
+- [ ] 2.7.3 End-to-end test: a train drives up a ramp, over a ground line, down to a stop.
+- [ ] 2.7.4 Limp mode, breakdowns and depot servicing for trains on elevated track (no
+      elevated train stops, so servicing stays on the ground).
+- [ ] 2.7.5 `/playtest` round: research, building up and over, trains on elevated track.

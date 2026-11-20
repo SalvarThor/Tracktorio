@@ -4,6 +4,15 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: Phase 2.7 elevated rails, gating
+- Found: in 2.1 Space Age, Elevated rail (unlocks rail ramp, rail support and building
+  elevated rails) costs 100 x red/green/blue/purple after Concrete and Production science
+  pack, so it was unreachable (the complex takes no purple).
+- User decision: retune it to red + green + blue (proposed 500 units x 30 s), after
+  Concrete and Chemical science pack. Rejected: a production science city (needs a stone
+  patch and bricks, and opens the whole purple tree, which would need its own review).
+- User decision: no test-map terrain for elevated rails now; it comes with procedural maps.
+
 ## 2026-11-20: 2.6.6 playtest: nuclear runs flat out
 - User decision: the nuclear power city can't throttle, like a vanilla reactor. With fuel
   in it burns at its full rate (one cell per 400 s at T1) whatever the demand. Unused steam
