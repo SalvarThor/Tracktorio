@@ -473,4 +473,4 @@ Decided with the user (DECISIONS.md, 2026-11-20):
 - [x] 2.7.4 Limp mode, breakdowns and depot servicing for trains on elevated track (no
       elevated train stops, so servicing stays on the ground). (Limp and breakdown tested
       on elevated track; servicing needs a stop, so it is unchanged.)
-- [ ] 2.7.5 `/playtest` round: research, building up and over, trains on elevated track.
+- [x] 2.7.5 `/playtest` round: research, building up and over, trains on elevated track. (Research, items, ramps and elevated track checked by hand; water, limp and breakdown left to the automated tests, as vanilla behaviour.)

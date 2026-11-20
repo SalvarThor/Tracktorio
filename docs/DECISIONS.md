@@ -4,6 +4,16 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: playtest 2.7.5, keep vanilla behaviour out of playtests
+- The user checked research gating, free items, ramps and elevated track, and skipped the
+  water, limp and breakdown steps as standard Factorio behaviour. Those are covered by the
+  automated tests in tests/cases/elevated.lua. Phase 2.7 is closed.
+- From now on, playtest checklists cover only what the mod changes or adds. Vanilla
+  behaviour that a mod change could affect is left to automated tests.
+- Rejected: repeating the skipped steps. They test the engine, not the mod, and the
+  automated tests already cover the places where the mod's own systems (limp, reliability)
+  meet elevated track.
+
 ## 2026-11-20: 2.7.3-2.7.4 trains on elevated track
 - Tested on a scripted overpass (ground line, ramp up, elevated rails over a crossing
   ground line, ramp down, ground stop): a fuelled train makes the trip; a fuel-empty train
