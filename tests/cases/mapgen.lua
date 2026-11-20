@@ -238,6 +238,32 @@ return {
     end,
   },
   {
+    -- 2.8.6: start-up stays fast at the widest spacing. A profiler can't be read in Lua, so
+    -- the time is logged as a TT-TIMING line that run-tests.ps1 checks against its budget;
+    -- the chunk count is checked here.
+    name = "mapgen: laying out Nauvis at 3x spacing generates few chunks and stays under 10 s",
+    fn = function()
+      local mgs = game.surfaces["nauvis"].map_gen_settings
+      mgs.seed = 577215
+      local s = game.create_surface("tt-mapgen-wide", mgs)
+      local prof = helpers.create_profiler()
+      local result = remote.call("tt-nauvis", "prepare", s.name, 577215, 3000)
+      prof.stop()
+      log({ "", "TT-TIMING budget_ms=10000 name=layout-3x ", prof }) ---@diagnostic disable-line: assign-type-mismatch
+      assert_.equals(#result.missing, 0, "missing " .. serpent.line(result.missing))
+      local chunks = 0
+      for chunk in s.get_chunks() do
+        if s.is_chunk_generated(chunk) then chunks = chunks + 1 end
+      end
+      log("mapgen: 3x layout generated " .. chunks .. " chunks")
+      assert_.truthy(chunks <= 26 * 9, chunks .. " chunks generated")
+      local far = 0
+      for _, c in ipairs(result.placed) do far = math.max(far, math.sqrt(c.x ^ 2 + c.y ^ 2)) end
+      assert_.truthy(far > 6000, "furthest city only " .. far)
+      game.delete_surface(s)
+    end,
+  },
+  {
     -- 2.8.5
     name = "mapgen: nothing is charted up front; a city's tag appears when its chunk is charted",
     fn = function(ctx)

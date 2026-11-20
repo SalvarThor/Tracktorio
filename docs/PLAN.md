@@ -517,7 +517,7 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
 - [x] 2.8.5 Finding cities: nothing is charted up front. A city gets its map tag when
       the player first charts its chunk (walking, trains, radar), so the layout is
       discovered. Test: no tag before charting, tag after.
-- [ ] 2.8.6 Start-up time: creating the map stays fast (target under 10 s at 3x spacing,
-      tested).
+- [x] 2.8.6 Start-up time: creating the map stays fast (target under 10 s at 3x spacing,
+      tested). (2.4 s at 3x, 96 chunks; run-tests.ps1 checks TT-TIMING budgets.)
 - [ ] 2.8.7 `/playtest` round: a New Game from the menu with the map preview, the spacing
       setting, the layout on the map, and the first routes on real terrain.

@@ -94,6 +94,15 @@ if ($SelfTest) {
 
 if ($r.ExitCode -ne 0 -or $results.failed -gt 0 -or $results.passed -eq 0) { exit 1 }
 
+# Timing budgets (2.8.6): a test logs "TT-TIMING budget_ms=<n> name=<name> Duration: <ms>ms".
+$slow = $false
+foreach ($m in (Select-String -Path $TT.Log -Pattern 'TT-TIMING budget_ms=(\d+) name=(\S+) Duration: ([\d.]+)ms')) {
+    $budget, $name, $ms = [double]$m.Matches[0].Groups[1].Value, $m.Matches[0].Groups[2].Value, [double]$m.Matches[0].Groups[3].Value
+    if ($ms -gt $budget) { Write-Host ("TIMING FAILED: {0} took {1:N0} ms (budget {2:N0} ms)" -f $name, $ms, $budget); $slow = $true }
+    else { Write-Host ("timing: {0} {1:N0} ms (budget {2:N0} ms)" -f $name, $ms, $budget) }
+}
+if ($slow) { exit 1 }
+
 # Scenario smoke: the shipped MVP scenario must load and run without script errors.
 # (--test-ticks exits 0 when the ticks run out, 1 on any error.)
 if (-not $Filter) {
