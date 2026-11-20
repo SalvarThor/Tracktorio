@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: water city (phase 2.9), user decisions
+- Starter pair: a starter water city stands within pipe distance (30-80 tiles) of the
+  starter power city. Filling a fluid wagon needs an electric pump, so the first power
+  can't come from a water train. Rejected: a one-off water store in the starter power
+  city; water cities that fill wagons without a pump.
+- Four water cities at 600 / 1,200 / 2,400 water/s per tier. Rejected: 3 at 1,200; 6 at
+  300.
+- Water cities stand on lake shores. Rejected: anywhere.
+- Offshore pumps are removed outright. The user has no saves to keep ("We're literally
+  building this from nothing"). Pre-release, save migrations and old-save compatibility
+  are suspended (CLAUDE.md).
+- No inputs and no power: the 2.x offshore pump draws no power (SPEC power rule).
+
 ## 2026-11-20: 2.8.14 starter power city, power cities further apart (user, playtest 2.8.13)
 - User: "make sure one appears fairly close to the start. you really need power and fuel
   to even start properly." The first coal power city is the starter. It plans 200-350

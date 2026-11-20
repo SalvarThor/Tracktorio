@@ -53,8 +53,11 @@ The design spec is authoritative:
 - Lua rules for this codebase are in `.claude/rules/factorio-lua.md` (load automatically for
   .lua files).
 - Every prototype gets a locale entry in `mod/locale/en/`.
-- Persistent state lives in `storage`. Schema changes go through `on_configuration_changed`
-  migrations.
+- Persistent state lives in `storage`.
+- Pre-release (user, 2026-11-20): there are no saves to keep. Don't write save migrations
+  or keep removed things working in existing saves; just change the behaviour. This
+  suspends the migration rules in `.claude/rules/factorio-lua.md` until the mod is
+  published.
 - Debug commands are prefixed `/tt-` and must keep working: they are how tests and playtests
   inspect state.
 

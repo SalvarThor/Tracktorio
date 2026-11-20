@@ -554,3 +554,45 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       2026-11-20: passed. Dump: started from the scenario, 26 cities; depot 81 tiles from
       spawn, starter power city 334; other power cities 2,200-3,300 out, the closest two
       1,901 apart.
+
+### Phase 2.9: water city (approved by the user 2026-11-20)
+
+Decided with the user (DECISIONS.md, 2026-11-20):
+- Water comes only from water cities and is shipped by fluid wagon (SPEC post-MVP 9).
+  Offshore pumps are removed from the game, with no special handling for existing saves
+  (the user has none to keep).
+- A water city needs no inputs and no power: its vanilla equivalent, the offshore pump,
+  draws none in 2.x (SPEC: cities draw power only when the vanilla buildings would).
+- Four water cities, 600 / 1,200 / 2,400 water/s at tiers 1 / 2 / 3. Total demand with
+  every city at tier 1 is ~1,000/s and at tier 3 ~4,000/s, so four at tier 1 cover tier 1
+  demand, and tier 3 demand needs upgrades.
+- Water cities stand on lake shores.
+- Bootstrap: filling a fluid wagon needs an electric pump. A starter water city stands
+  30-80 tiles from the starter power city, close enough to pipe, so the first power needs
+  no train.
+
+- [ ] 2.9.1 Water city: no inputs, water out through a pipe connection, tiers x1/x2/x4
+      (600 / 1,200 / 2,400 per s), upgrade costs like the other tier 1 chain cities. Its
+      window shows the output rate and "output full" when nothing drains it. Tests:
+      rates, no power, backpressure, upgrade.
+- [ ] 2.9.2 Offshore pumps removed: no recipe, no research unlock, none in the crafting
+      menu (restrictions and gating tests). The cities that take water name it when it's
+      missing (as now).
+- [ ] 2.9.3 Lake-shore sites: a water city's site is dry land with a real lake (not a
+      puddle) right at its edge. Found with the same elevation forecast as other sites.
+      Tests on Nauvis terrain: every water city is on a shore of a lake of at least a
+      minimum size.
+- [ ] 2.9.4 Layout: four water cities, placed like the coal power cities (the first copy
+      plans shallow, the others further out, compass names, at least 3x the minimum
+      apart). Chain depth now counts water as made by a city, so the power cities and
+      the refinery move one level deeper (check the layout tests still hold).
+- [ ] 2.9.5 Starter pair: the starter water city takes the lake shore nearest spawn
+      (within a limit, tuning), and the starter power city stands 30-80 tiles from it, with
+      the depot near spawn. If no lake is near enough, the starter water city stands by the
+      starter power city without a shore. Tests over several seeds.
+- [ ] 2.9.6 Water budget test (like the power budget): supply of the four water cities per
+      tier against the total demand of every water-using city per tier.
+- [ ] 2.9.7 The fixed test map gets water cities in place of its lakes' role. Tests that
+      relied on offshore pumps use the water city or scripted water.
+- [ ] 2.9.8 `/playtest`: the start (piping water from the starter water city to the power
+      city), a water train to another city, water city windows and upgrades.
