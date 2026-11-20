@@ -158,8 +158,11 @@ return {
         local city = s.find_entities_filtered({ name = c.name, position = { x, y }, radius = 1 })
         assert_.equals(#city, 1, c.label .. " not built")
         assert_.truthy(remote.call("tt-map", "mainland", s.name, x, y), c.label .. " on an island")
+        -- a site stays near its planned spot, or (no land there) at the same distance from
+        -- spawn, turned around it
         local d = math.sqrt((c.x - c.planned.x) ^ 2 + (c.y - c.planned.y) ^ 2)
-        assert_.truthy(d <= 330, c.label .. " moved " .. d)
+        local dr = math.abs(math.sqrt(c.x ^ 2 + c.y ^ 2) - math.sqrt(c.planned.x ^ 2 + c.planned.y ^ 2))
+        assert_.truthy(d <= 330 or dr <= 330, c.label .. " moved " .. d .. ", " .. dr .. " in distance from spawn")
         moved = math.max(moved, d)
         for j = i + 1, #result.placed do
           local o = result.placed[j]
@@ -169,6 +172,69 @@ return {
       end
       log("mapgen: vanilla terrain, furthest move from the planned spot " .. math.floor(moved))
       game.delete_surface(s)
+    end,
+  },
+  {
+    -- 2.8.4
+    name = "mapgen: the test scenario is not freeplay, so Nauvis is left alone",
+    fn = function()
+      assert_.falsy(remote.call("tt-nauvis", "is_freeplay"), "test scenario taken for freeplay")
+      -- (other tests build cities on Nauvis by hand, so ask the mod, not the map)
+      assert_.falsy(remote.call("tt-nauvis", "is_managed", "nauvis"), "Nauvis taken over")
+    end,
+  },
+  {
+    name = "mapgen: a New Game turns off the crash site and the intro and starts with coal fuel only",
+    fn = function()
+      local calls = {}
+      local function rec(name) return function(v) calls[name] = v end end
+      remote.add_interface("freeplay", {
+        set_disable_crashsite = rec("crashsite"), set_skip_intro = rec("intro"),
+        set_created_items = rec("created"), set_respawn_items = rec("respawn"),
+      })
+      local ok, err = pcall(remote.call, "tt-nauvis", "setup_freeplay")
+      remote.remove_interface("freeplay")
+      assert(ok, err)
+      assert_.equals(calls.crashsite, true, "crash site")
+      assert_.equals(calls.intro, true, "intro")
+      assert_.equals(serpent.line(calls.created), serpent.line({ ["tt-coal-fuel"] = 20 }), "starting items")
+      assert_.equals(table_size(calls.respawn), 0, "respawn items")
+    end,
+  },
+  {
+    name = "mapgen: a prepared Nauvis has no biters (also in later chunks) and no resources near spawn",
+    fn = function(ctx)
+      local mgs = game.surfaces["nauvis"].map_gen_settings
+      mgs.seed = 271828
+      mgs.no_enemies_mode = false
+      local s = game.create_surface("tt-mapgen-nauvis", mgs)
+      local clear = remote.call("tt-nauvis", "start_clear")
+      s.request_to_generate_chunks({ 0, 0 }, math.ceil(clear / 32) + 4)
+      s.force_generate_chunk_requests()
+      local near = { { -clear, -clear }, { clear, clear } }
+      local before = s.count_entities_filtered({ area = near, type = "resource" })
+      assert_.truthy(before > 0, "the seed has no resources near spawn to clear")
+      local result = remote.call("tt-nauvis", "prepare", s.name, 271828, 1000)
+      assert_.equals(#result.missing, 0, "missing " .. serpent.line(result.missing))
+      assert_.truthy(s.peaceful_mode, "not peaceful")
+      assert_.falsy(game.map_settings.enemy_expansion.enabled, "expansion on")
+      assert_.equals(s.count_entities_filtered({ force = "enemy" }), 0, "enemies left")
+      for _, r in pairs(s.find_entities_filtered({ area = near, type = "resource" })) do
+        local d = math.sqrt(r.position.x ^ 2 + r.position.y ^ 2)
+        assert_.truthy(d > clear, r.name .. " " .. math.floor(d) .. " tiles from spawn")
+      end
+      local outer = s.count_entities_filtered({ area = { { -clear - 120, -clear - 120 }, { clear + 120, clear + 120 } }, type = "resource" })
+      local depot
+      for _, c in ipairs(result.placed) do if c.name == "tt-city-depot" then depot = c end end
+      assert_.truthy(depot and math.sqrt(depot.x ^ 2 + depot.y ^ 2) < 200, "depot not near spawn")
+      -- chunks generated later are cleaned as they appear
+      s.request_to_generate_chunks({ 2000, 2000 }, 4)
+      s.force_generate_chunk_requests()
+      ctx:wait(2, function()
+        assert_.equals(s.count_entities_filtered({ force = "enemy" }), 0, "enemies in later chunks")
+        log("mapgen: resources " .. before .. " near spawn before, " .. outer .. " within " .. (clear + 120) .. " after")
+        game.delete_surface(s)
+      end)
     end,
   },
 }

@@ -492,14 +492,14 @@ Decided with the user (DECISIONS.md, 2026-11-20):
 - Cities later in the production chain are more likely to be far from spawn, but at
   random, not in fixed rings.
 
-At 1,000 tiles, 28 cities fill a disc of roughly 3,600 tiles' radius around spawn.
+At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spawn.
 
 - [x] 2.8.1 Chain depth of every city type, worked out from the city recipes (raw inputs
       are 0, a city is one more than its deepest input). Test: the coal fuel depot and
       the coal power city are shallow and the rocket silo is the deepest. A new city type
       gets a depth with no extra code.
 - [x] 2.8.2 Layout planner: pure Lua, seeded by the map seed. Places one of each layout
-      city (the 28 of today's map), with the coal fuel depot near spawn and the others at
+      city (the 26 of today's map), with the coal fuel depot near spawn and the others at
       least the spacing apart. Distance from spawn is drawn at random, weighted by depth.
       Startup setting "City spacing" (0.5x to 3x, default 1x = 1,000 tiles). Tests: the
       same seed gives the same layout, different seeds differ, spacing is never broken,
@@ -509,7 +509,7 @@ At 1,000 tiles, 28 cities fill a disc of roughly 3,600 tiles' radius around spaw
       footprint are cleared. Only the chunks around each city are generated, not the
       whole disc. Tests on a surface with vanilla terrain: every city stands on land, is
       not on an island, and nothing overlaps.
-- [ ] 2.8.4 Nauvis start: on a New Game, the mod sets up Nauvis instead of its own
+- [x] 2.8.4 Nauvis start: on a New Game, the mod sets up Nauvis instead of its own
       surface. Biters forced off (no enemy bases, peaceful). No resources within 300 tiles of spawn (tuning); spawn and the depot are
       on land. Freeplay extras are replaced: no crash site, and starting items limited to
       the coal fuel of today's scenario. The scenario keeps its fixed map, and old saves

@@ -17,6 +17,7 @@ local reliability = require("scripts.reliability")
 local service = require("scripts.service")
 local silo = require("scripts.silo")
 local nuclear = require("scripts.nuclear")
+local nauvis = require("scripts.nauvis")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -91,6 +92,7 @@ reliability.on_cured(notify.repaired)
 remote.add_interface("tt-goal", goal.remote_interface())
 remote.add_interface("tt-limp", limp.remote_interface())
 remote.add_interface("tt-map", map.remote_interface())
+remote.add_interface("tt-nauvis", nauvis.remote_interface())
 remote.add_interface("tt-reliability", {
   get = function(loco) return reliability.fraction(loco) end,
   set = function(loco, fraction) reliability.set(loco, fraction) end,
@@ -112,6 +114,17 @@ script.on_init(function()
   limp.scan()
   research.init()
   goal_gui.rebuild_all()
+  nauvis.on_init() -- 2.8.4: a New Game lays out Nauvis
+end)
+
+script.on_event(defines.events.on_chunk_generated, nauvis.on_chunk_generated)
+script.on_event(defines.events.on_surface_deleted, function(e)
+  if storage.tt_nauvis then storage.tt_nauvis[e.surface_index] = nil end
+  if storage.tt_layout then
+    for name in pairs(storage.tt_layout) do
+      if not game.get_surface(name) then storage.tt_layout[name] = nil end
+    end
+  end
 end)
 
 migrate = function()

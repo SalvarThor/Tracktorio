@@ -4,6 +4,25 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.8.4 New Game on Nauvis
+- A game counts as a New Game when the freeplay remote interface exists. Then the mod's
+  on_init sets up Nauvis (scripts/nauvis.lua). Freeplay's own on_init runs first and waits
+  for remote calls, so the mod turns off the crash site (its ship and debris hold furnaces
+  and drills) and the intro, and replaces the starting items with the scenario's 20 coal
+  fuel. Respawn items are emptied. The Tracktorio scenario and the test scenario are not
+  freeplay, so they leave Nauvis alone.
+- Biters off: enemy-base autoplace at 0 and no_enemies_mode, the surface set peaceful,
+  expansion and evolution off. Enemy entities in any chunk are destroyed, both chunks that
+  exist at the start and chunks generated later (on_chunk_generated). Resources within 300
+  tiles of spawn (tuning) are destroyed the same way.
+- A city that finds no site near its planned spot, for example behind a big lake, tries
+  spots at the same distance from spawn, turned +15, -15, +30, -30 degrees and so on
+  around it. That keeps the depth weighting. (Seed 271828: the Circuit city needed it.)
+- run-tests.ps1 now also smoke-tests base/freeplay with the mod and checks the log for
+  "Nauvis layout: 26 cities placed, 0 without a site".
+- Rejected: waiting for on_player_created, which comes after freeplay has already given
+  its items; a Tracktorio scenario with random maps, which the user turned down.
+
 ## 2026-11-20: 2.8.3 city sites on real terrain
 - Water is forecast from the map generator's `elevation` property, read with
   `LuaSurface.calculate_tile_properties`: below 0 is water on Nauvis. Land counts only
@@ -11,7 +30,7 @@ decided during the build.
   points in ~9 ms; a chunk costs ~3 ms). Points in chunks that already exist use the real
   tile. A planned spot that is fine is checked directly. Otherwise one grid, a point per 4
   tiles, covers the whole search. Only the chunks under the chosen site are generated,
-  and its real tiles are checked again. All 28 cities take ~3.4 s on a vanilla Nauvis
+  and its real tiles are checked again. All 26 cities take ~3.4 s on a vanilla Nauvis
   surface (first try: 9.2 s with per-candidate queries; 74 s when whole squares of chunks
   were generated).
 - A site is the 9 x 9 city plus an 8-tile margin, with no water. It counts as mainland

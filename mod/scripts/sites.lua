@@ -6,7 +6,7 @@
 -- cost ~9 ms, a chunk ~3 ms. Positions in chunks that already exist use the real tile,
 -- so script-set tiles count. A planned spot that is fine is checked directly; otherwise one
 -- batched grid covers the whole search. Only the chunks under the chosen site are
--- generated, and its real tiles are checked again. 28 cities: ~3.4 s.
+-- generated, and its real tiles are checked again. 26 cities: ~3.4 s.
 local M = {}
 
 M.HALF = 4.5 -- a city is 9 x 9

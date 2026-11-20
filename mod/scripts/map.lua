@@ -334,6 +334,7 @@ end
 -- 2.8.3: a site may move up to sites.SEARCH from its planned spot; cities stay at least
 -- this share of the spacing apart.
 M.MIN_APART = 0.8
+M.ALT_TURN = 15 -- degrees around spawn between alternative spots when a site finds no land
 
 --- Place a procedural layout on a surface with real terrain (2.8.3): plan it from the
 --- seed, move each city to the nearest usable land, clear it and place the city. The
@@ -346,6 +347,17 @@ function M.place_procedural(surface, seed, spacing)
   local placed, missing = {}, {}
   for _, c in ipairs(layout.plan(M.CITIES, seed, spacing)) do
     local site = sites.find(surface, c.x, c.y, placed, spacing * M.MIN_APART)
+    -- no land near the planned spot (a big lake): same distance from spawn, turned around
+    -- spawn in ALT_TURN steps, so the depth weighting holds
+    local turn = 0
+    while not site and turn < 360 / M.ALT_TURN - 1 do
+      turn = turn + 1
+      -- +15, -15, +30, -30, ... degrees
+      local a = math.rad(M.ALT_TURN * math.ceil(turn / 2) * (turn % 2 == 1 and 1 or -1))
+      local ca, sa = math.cos(a), math.sin(a)
+      local ax, ay = math.floor(c.x * ca - c.y * sa), math.floor(c.x * sa + c.y * ca)
+      site = sites.find(surface, ax, ay, placed, spacing * M.MIN_APART)
+    end
     if site then
       sites.clear(surface, site.x, site.y)
       local pos = { site.x + 0.5, site.y + 0.5 }

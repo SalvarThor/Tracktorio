@@ -104,5 +104,15 @@ if (-not $Filter) {
         Show-LogTail; exit 2
     }
     Write-Host 'scenario smoke: tracktorio/tracktorio loads and runs 300 ticks'
+
+    # New Game smoke (2.8.4): freeplay with the mod lays out Nauvis with every city.
+    $f = Invoke-TTFactorio -TimeoutSec 300 -Arguments @(
+        '--test-scenario', 'base/freeplay', '--test-ticks', '120', '--disable-audio')
+    $line = Select-String -Path $TT.Log -Pattern 'tracktorio: Nauvis layout: (\d+) cities placed, (\d+) without a site' | Select-Object -Last 1
+    if ($f.TimedOut -or $f.ExitCode -ne 0 -or -not $line -or $line.Matches[0].Groups[2].Value -ne '0') {
+        Write-Host "NEW GAME SMOKE FAILED: base/freeplay (exit $($f.ExitCode)) $($line.Line)"
+        Show-LogTail; exit 2
+    }
+    Write-Host "new game smoke: freeplay lays out Nauvis ($($line.Matches[0].Groups[1].Value) cities, none missing)"
 }
 exit 0
