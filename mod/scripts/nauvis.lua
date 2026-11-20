@@ -39,8 +39,13 @@ end
 ---@param surface LuaSurface
 ---@param area BoundingBox
 ---@param spawn MapPosition
+---@return integer enemies removed
 local function clean(surface, area, spawn)
-  for _, e in pairs(surface.find_entities_filtered({ area = area, force = "enemy" })) do e.destroy() end
+  local removed = 0
+  for _, e in pairs(surface.find_entities_filtered({ area = area, force = "enemy" })) do
+    e.destroy()
+    removed = removed + 1
+  end
   local r2 = M.START_CLEAR * M.START_CLEAR
   local lt, rb = area.left_top or area[1], area.right_bottom or area[2]
   local lx, ly = lt.x or lt[1], lt.y or lt[2]
@@ -48,11 +53,12 @@ local function clean(surface, area, spawn)
   -- skip chunks wholly outside the clear radius
   local nx = math.max(lx, math.min(spawn.x, rx)) - spawn.x
   local ny = math.max(ly, math.min(spawn.y, ry)) - spawn.y
-  if nx * nx + ny * ny > r2 then return end
+  if nx * nx + ny * ny > r2 then return removed end
   for _, e in pairs(surface.find_entities_filtered({ area = area, type = "resource" })) do
     local dx, dy = e.position.x - spawn.x, e.position.y - spawn.y
     if dx * dx + dy * dy <= r2 then e.destroy() end
   end
+  return removed
 end
 
 --- Make a surface a Tracktorio map: biters off, no resources near spawn, the city layout.
@@ -86,7 +92,13 @@ end
 ---@param e EventData.on_chunk_generated
 function M.on_chunk_generated(e)
   local spawn = storage.tt_nauvis and storage.tt_nauvis[e.surface.index]
-  if spawn then clean(e.surface, e.area, spawn) end
+  if spawn then
+    -- counted so a test can tell whether the map generator still places nests after
+    -- prepare turned enemy bases off (the clean-up hides it otherwise)
+    local n = clean(e.surface, e.area, spawn)
+    storage.tt_nauvis_removed = storage.tt_nauvis_removed or {}
+    storage.tt_nauvis_removed[e.surface.index] = (storage.tt_nauvis_removed[e.surface.index] or 0) + n
+  end
 end
 
 --- on_init: a New Game sets up Nauvis.
@@ -105,6 +117,11 @@ function M.remote_interface()
     end,
     start_clear = function() return M.START_CLEAR end,
     setup_freeplay = function() M.setup_freeplay() end,
+    --- Enemies removed from chunks generated after prepare (0 if the generator places none).
+    removed_later = function(surface_name)
+      local s = assert(game.get_surface(surface_name))
+      return storage.tt_nauvis_removed and storage.tt_nauvis_removed[s.index] or 0
+    end,
     is_freeplay = function() return M.is_freeplay() end,
     is_managed = function(surface_name)
       local s = game.get_surface(surface_name)

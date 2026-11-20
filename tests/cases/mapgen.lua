@@ -238,6 +238,36 @@ return {
     end,
   },
   {
+    -- follow-up to 2.8.4 (user question): does the generator still place nests after
+    -- prepare, with the clean-up only hiding them? Same seed and area on two surfaces: one
+    -- untouched (nests expected, so the area is a fair test), one prepared.
+    name = "mapgen: after prepare the map generator places no biter nests at all",
+    fn = function(ctx)
+      local mgs = game.surfaces["nauvis"].map_gen_settings
+      mgs.seed = 141421
+      mgs.no_enemies_mode = false
+      local area = { { 1500, 1500 }, { 2500, 2500 } }
+      local control = game.create_surface("tt-mapgen-biters-on", mgs)
+      control.request_to_generate_chunks({ 2000, 2000 }, 16)
+      control.force_generate_chunk_requests()
+      local nests = control.count_entities_filtered({ area = area, type = "unit-spawner" })
+      game.delete_surface(control)
+      assert_.truthy(nests > 0, "the control area has no nests, so it proves nothing")
+      local s = game.create_surface("tt-mapgen-biters-off", mgs)
+      remote.call("tt-nauvis", "prepare", s.name, 141421, 500)
+      local before = remote.call("tt-nauvis", "removed_later", s.name)
+      s.request_to_generate_chunks({ 2000, 2000 }, 16)
+      s.force_generate_chunk_requests()
+      ctx:wait(2, function()
+        local removed = remote.call("tt-nauvis", "removed_later", s.name) - before
+        log("mapgen: nests with biters on " .. nests .. "; enemies removed from the same area after prepare " .. removed)
+        assert_.equals(removed, 0, "enemies the generator placed after prepare")
+        assert_.equals(s.count_entities_filtered({ force = "enemy" }), 0, "enemies left")
+        game.delete_surface(s)
+      end)
+    end,
+  },
+  {
     -- 2.8.6: start-up stays fast at the widest spacing. A profiler can't be read in Lua, so
     -- the time is logged as a TT-TIMING line that run-tests.ps1 checks against its budget;
     -- the chunk count is checked here.

@@ -15,6 +15,10 @@ decided during the build.
   expansion and evolution off. Enemy entities in any chunk are destroyed, both chunks that
   exist at the start and chunks generated later (on_chunk_generated). Resources within 300
   tiles of spawn (tuning) are destroyed the same way.
+- Verified (user question): after prepare, the generator places no nests at all; the
+  clean-up is only a backstop. Same seed and area, biters left on: 865 nests. Prepared:
+  0 enemies removed from the newly generated chunks. What stops them is the enemy-base
+  autoplace set to 0; no_enemies_mode alone did not.
 - A city that finds no site near its planned spot, for example behind a big lake, tries
   spots at the same distance from spawn, turned +15, -15, +30, -30 degrees and so on
   around it. That keeps the depth weighting. (Seed 271828: the Circuit city needed it.)

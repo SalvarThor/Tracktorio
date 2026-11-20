@@ -121,6 +121,7 @@ script.on_event(defines.events.on_chunk_generated, nauvis.on_chunk_generated)
 script.on_event(defines.events.on_chunk_charted, map.on_chunk_charted)
 script.on_event(defines.events.on_surface_deleted, function(e)
   if storage.tt_nauvis then storage.tt_nauvis[e.surface_index] = nil end
+  if storage.tt_nauvis_removed then storage.tt_nauvis_removed[e.surface_index] = nil end
   if storage.tt_layout then
     for name in pairs(storage.tt_layout) do
       if not game.get_surface(name) then storage.tt_layout[name] = nil end
