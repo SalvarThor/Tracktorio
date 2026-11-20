@@ -103,25 +103,19 @@ foreach ($m in (Select-String -Path $TT.Log -Pattern 'TT-TIMING budget_ms=(\d+) 
 }
 if ($slow) { exit 1 }
 
-# Scenario smoke: the shipped MVP scenario must load and run without script errors.
+# Smoke runs (2.8.10): the Tracktorio scenario (the way to play) and Freeplay with the mod
+# on (the fallback) must both load, run, and lay out Nauvis with every city.
 # (--test-ticks exits 0 when the ticks run out, 1 on any error.)
 if (-not $Filter) {
-    $s = Invoke-TTFactorio -TimeoutSec 180 -Arguments @(
-        '--test-scenario', 'tracktorio/tracktorio', '--test-ticks', '300', '--disable-audio')
-    if ($s.TimedOut -or $s.ExitCode -ne 0) {
-        Write-Host "SCENARIO SMOKE FAILED: tracktorio/tracktorio (exit $($s.ExitCode))"
-        Show-LogTail; exit 2
+    foreach ($run in @(@{ Scenario = 'tracktorio/tracktorio'; How = 'scenario' }, @{ Scenario = 'base/freeplay'; How = 'freeplay' })) {
+        $s = Invoke-TTFactorio -TimeoutSec 300 -Arguments @(
+            '--test-scenario', $run.Scenario, '--test-ticks', '300', '--disable-audio')
+        $line = Select-String -Path $TT.Log -Pattern "tracktorio: Nauvis layout \($($run.How)\): (\d+) cities placed, (\d+) without a site" | Select-Object -Last 1
+        if ($s.TimedOut -or $s.ExitCode -ne 0 -or -not $line -or $line.Matches[0].Groups[2].Value -ne '0') {
+            Write-Host "SMOKE FAILED: $($run.Scenario) (exit $($s.ExitCode)) $($line.Line)"
+            Show-LogTail; exit 2
+        }
+        Write-Host "smoke: $($run.Scenario) runs 300 ticks and lays out Nauvis ($($line.Matches[0].Groups[1].Value) cities, none missing)"
     }
-    Write-Host 'scenario smoke: tracktorio/tracktorio loads and runs 300 ticks'
-
-    # New Game smoke (2.8.4): freeplay with the mod lays out Nauvis with every city.
-    $f = Invoke-TTFactorio -TimeoutSec 300 -Arguments @(
-        '--test-scenario', 'base/freeplay', '--test-ticks', '120', '--disable-audio')
-    $line = Select-String -Path $TT.Log -Pattern 'tracktorio: Nauvis layout: (\d+) cities placed, (\d+) without a site' | Select-Object -Last 1
-    if ($f.TimedOut -or $f.ExitCode -ne 0 -or -not $line -or $line.Matches[0].Groups[2].Value -ne '0') {
-        Write-Host "NEW GAME SMOKE FAILED: base/freeplay (exit $($f.ExitCode)) $($line.Line)"
-        Show-LogTail; exit 2
-    }
-    Write-Host "new game smoke: freeplay lays out Nauvis ($($line.Matches[0].Groups[1].Value) cities, none missing)"
 }
 exit 0

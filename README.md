@@ -8,8 +8,18 @@ network, and design the stations that feed and drain the cities. Cities chain ac
 map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
 
-> Status: in development. Post-MVP phases 2.1 to 2.5 are built and tested. The 2.5 phase
-> (full chain to the rocket) is waiting for its playtest. Not on the mod portal yet.
+> Status: in development. Post-MVP phases 2.1 to 2.7 are built and playtested; 2.8
+> (procedural maps) is in its last playtest. Not on the mod portal yet.
+
+## How to play
+
+Enable the mod, then New Game -> Mod scenarios -> **Tracktorio**. You get the usual map
+settings (seed, preview, resources). The cities are laid out across a new Nauvis map
+each game, far apart, and all of them are marked on the map from the start. Biters are
+always off. The "City spacing" startup setting (Settings -> Mod settings -> Startup)
+scales the distance between cities.
+
+Starting Freeplay with the mod on gives the same game, with a note saying so.
 
 ## The rules
 
@@ -121,7 +131,7 @@ Windows, PowerShell, Factorio 2.1 with Space Age. Machine paths are in
 ```powershell
 ./tools/check.ps1        # static check (LuaLS with Factorio 2.1 types)
 ./tools/run-tests.ps1    # in-game tests; -Filter <text> for a subset
-./tools/playtest.ps1     # launch the game with the scenario
+./tools/playtest.ps1     # launch the game with the scenario (-Menu: at the main menu)
 ```
 
 Debug commands for playtests:

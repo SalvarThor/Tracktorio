@@ -534,3 +534,9 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       tight", so 1x = 750 tiles (to be felt in the next playtest, no separate round). The
       user finds starting Tracktorio from Freeplay (Space Age) misleading (its description
       is of another game): 2.8.10.
+- [x] 2.8.10 Tracktorio is its own game (user): the mod's scenario ("Tracktorio" under Mod
+      scenarios) sets up procedural Nauvis with the map settings screen, its own
+      description, and the starting coal fuel. Freeplay with the mod on gives the same
+      game plus a note. The fixed map stays for the tests only. Smoke runs cover both.
+- [ ] 2.8.11 `/playtest`: New Game -> Mod scenarios -> Tracktorio (title, description, map
+      settings and preview), the start, and 750-tile spacing.

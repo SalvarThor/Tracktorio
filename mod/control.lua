@@ -167,7 +167,10 @@ end
 
 script.on_configuration_changed(migrate)
 
-script.on_event(defines.events.on_player_created, goal_gui.on_player_created)
+script.on_event(defines.events.on_player_created, function(e)
+  goal_gui.on_player_created(e)
+  nauvis.on_player_created(e)
+end)
 
 script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   goal.tick()

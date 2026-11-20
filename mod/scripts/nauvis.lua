@@ -101,12 +101,48 @@ function M.on_chunk_generated(e)
   end
 end
 
---- on_init: a New Game sets up Nauvis.
+--- Is this game the mod's own scenario (New Game -> Mod scenarios -> Tracktorio)?
+function M.is_own_scenario()
+  return script.level.mod_name == "tracktorio" and script.level.level_name == "tracktorio"
+end
+
+M.START_CHART = 200 -- the own scenario charts this far around spawn, as freeplay does
+
+--- on_init (2.8.10): the Tracktorio scenario is the way to play; it sets up Nauvis. Freeplay
+--- with the mod on does the same, so nothing breaks, and says where the game really lives
+--- (user, playtest 2.8.9). Any other scenario is left alone.
 function M.on_init()
-  if not M.is_freeplay() then return end
-  M.setup_freeplay()
-  local placed, missing = M.prepare(game.surfaces["nauvis"])
-  log(string.format("tracktorio: Nauvis layout: %d cities placed, %d without a site", #placed, #missing))
+  local how
+  if M.is_own_scenario() then
+    how = "scenario"
+  elseif M.is_freeplay() then
+    how = "freeplay"
+    M.setup_freeplay()
+  else
+    return
+  end
+  storage.tt_start = how
+  local surface = game.surfaces["nauvis"]
+  local placed, missing = M.prepare(surface)
+  if how == "scenario" then
+    local spawn = game.forces["player"].get_spawn_position(surface)
+    local r = M.START_CHART
+    game.forces["player"].chart(surface, { { spawn.x - r, spawn.y - r }, { spawn.x + r, spawn.y + r } })
+  end
+  log(string.format("tracktorio: Nauvis layout (%s): %d cities placed, %d without a site", how, #placed, #missing))
+end
+
+--- on_player_created: in the own scenario the mod gives the starting items (freeplay gives
+--- them itself); in freeplay it says this is Tracktorio and where to start it properly.
+---@param e EventData.on_player_created
+function M.on_player_created(e)
+  local player = game.get_player(e.player_index)
+  if not player then return end
+  if storage.tt_start == "scenario" then
+    for _, stack in ipairs(map.START_ITEMS) do player.insert(stack) end
+  elseif storage.tt_start == "freeplay" then
+    player.print({ "tt-notify.started-from-freeplay" })
+  end
 end
 
 function M.remote_interface()
@@ -117,6 +153,16 @@ function M.remote_interface()
     end,
     start_clear = function() return M.START_CLEAR end,
     setup_freeplay = function() M.setup_freeplay() end,
+    --- Tests: run the player-created step as if the game had started `how` ("scenario",
+    --- "freeplay"), then restore.
+    player_created_as = function(how, player_index)
+      local was = storage.tt_start
+      storage.tt_start = how
+      local ok, err = pcall(M.on_player_created, { name = defines.events.on_player_created, tick = game.tick, player_index = player_index })
+      storage.tt_start = was
+      if not ok then error(err, 0) end
+    end,
+    is_own_scenario = function() return M.is_own_scenario() end,
     --- Enemies removed from chunks generated after prepare (0 if the generator places none).
     removed_later = function(surface_name)
       local s = assert(game.get_surface(surface_name))

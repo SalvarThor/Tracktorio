@@ -4,6 +4,27 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: Tracktorio is its own game (user, playtest 2.8.9)
+- Starting through "Freeplay (Space Age)" was misleading: its description is of another
+  game, and a mod can't change it. Tracktorio's own scenario is now the way to play.
+  "Tracktorio" under Mod scenarios has its own title and description, and sets up
+  procedural Nauvis. It has no pre-built map, like Sandbox and Rocket rush, so it should
+  get the map settings screen (seed, preview); the 2.8.11 playtest checks that. The mod
+  detects the scenario with `script.level` (mod "tracktorio", level "tracktorio") in its
+  on_init. It gives the 20 coal fuel itself and charts 200 tiles around spawn, as
+  freeplay does.
+- Freeplay with the mod on still sets up the same game, so nothing breaks (normal
+  Freeplay can't work with furnaces and assemblers removed). A message says this is
+  Tracktorio and where to start it properly. Rejected: only a warning, which leaves an
+  unplayable game.
+- The fixed hand-made map is no longer a playable scenario. The tests still build it
+  through the tt-map remote interface, and old saves on it keep working. Rejected:
+  keeping it as a second "classic" scenario, one more thing to keep up to date.
+- The scenario's locale used the key "tracktorio=" instead of "scenario-name=", so the
+  menu showed the raw "Tracktorio/tracktorio".
+- run-tests.ps1 smoke-runs both the Tracktorio scenario and Freeplay, and checks each
+  lays out Nauvis with every city.
+
 ## 2026-11-20: playtest 2.8.7 findings
 - All four coal power cities landed near the start, because they all have depth 1. Now
   only the first copy of a city type plans at its own depth, and each further copy plans

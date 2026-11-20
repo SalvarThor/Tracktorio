@@ -101,7 +101,9 @@ Default order, open to change:
 6. More power cities and the nuclear power city (moved ahead of elevated rails, user
    decision 2026-11-20).
 7. Elevated rails.
-8. Procedural map generation.
+8. Procedural map generation. Played as its own game: New Game -> Mod scenarios ->
+   Tracktorio, on Nauvis terrain with cities far apart. (User decisions 2026-11-20; detail
+   in DECISIONS.md.)
 9. Water city: water comes only from water cities and must be shipped (by fluid wagon) to
    where it is used, such as the power city. Offshore pumps are removed from the player.
    (User request, playtest 1.10.)

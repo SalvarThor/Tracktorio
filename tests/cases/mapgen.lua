@@ -225,6 +225,21 @@ return {
     end,
   },
   {
+    -- 2.8.10
+    name = "mapgen: the Tracktorio scenario gives the starting coal fuel; freeplay gives its own items",
+    fn = function()
+      assert_.falsy(remote.call("tt-nauvis", "is_own_scenario"), "the test scenario taken for Tracktorio")
+      local p = assert(game.players[1])
+      local inv = assert(p.get_main_inventory())
+      inv.clear()
+      remote.call("tt-nauvis", "player_created_as", "scenario", p.index)
+      assert_.equals(inv.get_item_count("tt-coal-fuel"), 20, "coal fuel in the scenario")
+      inv.clear()
+      remote.call("tt-nauvis", "player_created_as", "freeplay", p.index)
+      assert_.equals(inv.get_item_count(), 0, "items given in freeplay (freeplay gives its own)")
+    end,
+  },
+  {
     name = "mapgen: a New Game turns off the crash site and the intro and starts with coal fuel only",
     fn = function()
       local calls = {}
