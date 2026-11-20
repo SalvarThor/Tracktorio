@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.6.2 uranium patch; hidden techs no longer cut the tree
+- Uranium patch at (310, 275), radius 10, ~470k ore (a T1 uranium city uses ~1.4/s).
+  Vanilla mining applies: Uranium mining (red, green, blue) turns on mining with fluid, an
+  electric mining drill on uranium needs sulfuric acid, and mining it completes Uranium
+  processing's trigger (now in the gating test's met list).
+- Found: Concrete, and so Uranium mining, was unreachable. Restrictions hide a tech whose
+  only unlocks are banned (Advanced material processing: steel furnace; Automation 2:
+  assembler 2), which cut every tech behind it. Now a hidden tech's dependents take its
+  prerequisites instead (transitively). Planet and platform techs are left as they were.
+  Newly reachable besides Concrete: Low density structure (tech), Research speed 1 (speeds
+  up the research complex, as vanilla labs), Production science pack (useless: the complex
+  takes no purple), Tank and Portable solar panel (their recipes aren't free, so the
+  player still can't make anything from them). Rejected: keeping the empty techs
+  researchable (research for nothing), unhiding them.
+
 ## 2026-11-20: 2.6.1 power city spots and the second lake (mod 0.6.0)
 - Three more coal power cities: East (450, 110), West (-460, -120), South (-280, 280). The
   first keeps the label "Power city". Each sits on a different route: the West one has the

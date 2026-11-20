@@ -87,3 +87,36 @@ for name, tech in pairs(data.raw.technology) do
     tech.enabled = false
   end
 end
+
+-- A tech hidden for having nothing left to give must not cut the tree (2.6.2: Advanced
+-- material processing only gave the steel furnace, and Concrete, so Uranium mining, sat
+-- behind it). Its dependents take its prerequisites instead, transitively. Pattern-hidden
+-- techs (planets, platforms) are left as they are: what sits behind them stays locked.
+local function pattern_hidden(name)
+  for _, pattern in ipairs(config.HIDDEN_TECH_PATTERNS) do
+    if string.find(name, pattern) then return true end
+  end
+  return false
+end
+local function spliced(name, seen)
+  local tech = data.raw.technology[name]
+  if not (tech and tech.hidden and not pattern_hidden(name)) then return { name } end
+  if seen[name] then return {} end
+  seen[name] = true
+  local out = {}
+  for _, pre in ipairs(tech.prerequisites or {}) do
+    for _, p in ipairs(spliced(pre, seen)) do out[#out + 1] = p end
+  end
+  return out
+end
+for _, tech in pairs(data.raw.technology) do
+  if tech.prerequisites and not tech.hidden then
+    local list, have = {}, {}
+    for _, pre in ipairs(tech.prerequisites) do
+      for _, p in ipairs(spliced(pre, {})) do
+        if not have[p] then have[p] = true; list[#list + 1] = p end
+      end
+    end
+    tech.prerequisites = list
+  end
+end

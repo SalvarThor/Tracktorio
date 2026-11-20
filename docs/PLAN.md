@@ -430,9 +430,10 @@ Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 c
       own route); map tags; older saves get them. Check whether coal needs a second patch.
       (East (450, 110), West (-460, -120), South (-280, 280); lake 2 at (-330, 90); no second
       coal patch; mod 0.6.0.)
-- [ ] 2.6.2 Uranium ore patch, far from the cities. Check in 2.1: Uranium mining is
+- [x] 2.6.2 Uranium ore patch, far from the cities. Check in 2.1: Uranium mining is
       reachable in the red/green/blue zone (its Concrete prerequisite included), and an
-      electric mining drill on uranium takes sulfuric acid. Gating test.
+      electric mining drill on uranium takes sulfuric acid. Gating test. (Patch at
+      (310, 275). Concrete was unreachable: fixed by splicing hidden techs out of the tree.)
 - [ ] 2.6.3 Uranium city (ore + iron -> uranium fuel cells), tiers x1/x2/x4.
 - [ ] 2.6.4 Nuclear power city (fuel cells + water -> electricity on the pole network),
       20 / 40 / 80 MW, window shows fuel and water use. Prefer a vanilla reactor/heat

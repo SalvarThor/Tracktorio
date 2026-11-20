@@ -60,6 +60,9 @@ M.PATCHES = {
   -- yield (15 crude oil/s per pumpjack), 6 wells = 90/s, over two tier 1 refinery cities' worth.
   { name = "crude-oil", x = -400, y = -230, radius = 8, amount = 450000,
     wells = { { -6, -3 }, { 0, -3 }, { 6, -3 }, { -6, 3 }, { 0, 3 }, { 6, 3 } } },
+  -- 2.6.2: uranium for the nuclear power city. Small: a tier 1 uranium city eats ~1.4 ore/s,
+  -- so ~470k lasts days. Mining it needs sulfuric acid at the drill (vanilla).
+  { name = "uranium-ore", x = 310, y = 275, radius = 10, amount = 2000 },
 }
 
 -- Lakes (deep water in the middle). 2.6.1 added the second.

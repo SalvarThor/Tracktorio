@@ -120,4 +120,24 @@ return {
       end
     end,
   },
+  {
+    -- 2.6.2: hiding a tech whose only unlocks were banned cut everything behind it
+    name = "restrictions: a tech hidden for giving only banned things doesn't cut the tree",
+    fn = function()
+      local amp = prototypes.technology["advanced-material-processing"]
+      assert_.truthy(amp.hidden, "advanced material processing should be hidden (steel furnace only)")
+      local planet = { "^planet%-discovery%-", "^space%-platform", "^rocket%-silo$" }
+      for name, t in pairs(prototypes.technology) do
+        if not t.hidden then
+          for pre, p in pairs(t.prerequisites) do
+            local by_pattern = false
+            for _, pat in ipairs(planet) do if string.find(pre, pat) then by_pattern = true end end
+            assert_.truthy(not p.hidden or by_pattern, name .. " needs hidden " .. pre)
+          end
+        end
+      end
+      local concrete = prototypes.technology["concrete"]
+      assert_.truthy(concrete.prerequisites["steel-processing"], "concrete did not inherit steel processing")
+    end,
+  },
 }

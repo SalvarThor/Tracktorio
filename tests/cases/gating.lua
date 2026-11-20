@@ -14,6 +14,7 @@ local ZONE = complex_packs()
 local MET = {
   ["oil-processing"] = "a pumpjack on the oil field (oil test)",
   ["steel-axe"] = "50 steel from a steel city (chain test)",
+  ["uranium-processing"] = "a drill mining uranium ore with sulfuric acid (nuclear test)",
 }
 -- Trigger techs inside the zone that still wait for later content.
 local WAITING = {}
@@ -56,7 +57,9 @@ return {
       for _, tech in ipairs({ "automation", "fast-inserter", "logistics-2", "circuit-network",
         "steel-processing", "logistic-science-pack", "toolbelt", "lamp",
         -- blue (2.5.5)
-        "chemical-science-pack", "bulk-inserter", "electric-energy-distribution-2" }) do
+        "chemical-science-pack", "bulk-inserter", "electric-energy-distribution-2",
+        -- uranium (2.6.2)
+        "concrete", "uranium-mining", "uranium-processing" }) do
         assert_.truthy(reach[tech], tech .. " is not reachable")
       end
     end,
