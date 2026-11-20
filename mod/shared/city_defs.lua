@@ -10,6 +10,11 @@ local M = {}
 
 M.PREFIX = "tt-city-"
 M.POWER_STEAM_TEMP = 165 -- steam at 165 C carries 30 kJ/unit (0.2 kJ/C above 15 C)
+M.NUCLEAR_STEAM_TEMP = 500 -- 97 kJ/unit, as from vanilla heat exchangers (2.6.4)
+
+--- Energy in one unit of steam at `temp` C (water heat capacity 0.2 kJ/C, from 15 C).
+---@param temp number
+function M.steam_joules(temp) return (temp - 15) * 200 end
 
 local function item(name, amount) return { type = "item", name = name, amount = amount } end
 local function cost(list) return list end
@@ -163,6 +168,22 @@ local uranium_recipe = { energy_required = 100,
   ingredients = { item("uranium-ore", 143), item("iron-plate", 1) },
   results = { item("uranium-fuel-cell", 1) } }
 
+-- Nuclear power (2.6.4): uranium fuel cells burn in the city's burner (8 GJ each) while it
+-- turns water into 500 C steam for a hidden generator, like reactor + heat exchangers +
+-- turbines. 20 MW at T1 = 206.2 steam/s (vanilla's 2 heat exchangers) and 1 cell per
+-- 400 s. A burner only burns while crafting, so with no power demand the steam backs up
+-- and the fuel lasts. No depleted cells (user): the fuel cell's burnt result is removed.
+local NUCLEAR_W = 20e6
+local nuclear_steam_per_s = NUCLEAR_W / M.steam_joules(M.NUCLEAR_STEAM_TEMP)
+local nuclear_recipe = { energy_required = 1,
+  ingredients = { fluid("water", 100) },
+  results = { { type = "fluid", name = "steam", amount = 100, temperature = M.NUCLEAR_STEAM_TEMP } } }
+local function nuclear_tier(f, tier_cost)
+  return { crafting_speed = nuclear_steam_per_s / 100 * f, recipe = nuclear_recipe,
+    burner_power = string.format("%gMW", NUCLEAR_W / 1e6 * f),
+    generator_usage = nuclear_steam_per_s / 60 * f, cost = tier_cost }
+end
+
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
@@ -212,6 +233,23 @@ M.list = {
       { crafting_speed = 1.2, recipe = power_recipe, generator_usage = 3 },
       { crafting_speed = 2.4, recipe = power_recipe, generator_usage = 6, cost = both_plates(1000) },
       { crafting_speed = 4.8, recipe = power_recipe, generator_usage = 12, cost = with_circuits(2000, 1000) },
+    },
+  },
+  {
+    name = "nuclear-power",
+    graphics = { type = "reactor", name = "nuclear-reactor" },
+    map_color = { r = 0.35, g = 0.85, b = 0.3 },
+    generator = "tt-nuclear-generator",
+    steam_temp = M.NUCLEAR_STEAM_TEMP,
+    burner = { fuel_categories = { "nuclear" }, fuel = "uranium-fuel-cell" },
+    fluid_boxes = {
+      { production_type = "input", position = { 0, 4 }, direction = defines.direction.south, filter = "water" },
+      { production_type = "output", linked_id = 1, filter = "steam" },
+    },
+    tiers = {
+      nuclear_tier(1),
+      nuclear_tier(2, with_circuits(2000, 1000)),
+      nuclear_tier(4, with_circuits(4000, 2000)),
     },
   },
   assembler_city("circuits", { type = "assembling-machine", name = "electromagnetic-plant" },
@@ -298,10 +336,13 @@ function M.entity_name(name, tier)
   return tier == 1 and (M.PREFIX .. name) or (M.PREFIX .. name .. "-t" .. tier)
 end
 
---- Hidden generator of a power city tier (tier 1 keeps the MVP name).
+--- Hidden generator of a power city tier (tier 1 keeps the MVP name). Cities with their
+--- own generator (`def.generator`, the nuclear city) use that as the base name.
 ---@param tier integer
-function M.generator_name(tier)
-  return tier == 1 and "tt-power-generator" or ("tt-power-generator-t" .. tier)
+---@param def table? city definition (default: the coal power city)
+function M.generator_name(tier, def)
+  local base = def and def.generator or "tt-power-generator"
+  return tier == 1 and base or (base .. "-t" .. tier)
 end
 
 -- entity name -> { def = city definition, tier = n, max_tier = n }

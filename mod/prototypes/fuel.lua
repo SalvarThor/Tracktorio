@@ -45,3 +45,8 @@ for _, name in ipairs(config.LOCOMOTIVE_FUELS) do
     item.fuel_categories = cats
   end
 end
+
+-- 2.6.4: uranium fuel cells burn in the nuclear power city and leave nothing behind (user:
+-- no depleted cells to drain; reprocessing needs production science, which isn't in play).
+-- A burner with no burnt-result slot would refuse fuel that has a burnt result.
+data.raw.item["uranium-fuel-cell"].burnt_result = nil

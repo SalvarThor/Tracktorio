@@ -38,6 +38,13 @@ local function input_fluid(entity, name)
   return entity.get_fluid_count(name)
 end
 
+--- Fuel item of a burner city (the nuclear city), or nil.
+---@param entity LuaEntity
+local function burner_fuel(entity)
+  local info = city_defs.by_entity[entity.name]
+  return info and info.def.burner and info.def.burner.fuel or nil
+end
+
 --- Ingredients the city is short of (names). Inputs that are completely absent are named
 --- first; only if none are absent, the ones below one cycle's worth.
 ---@param entity LuaEntity
@@ -55,6 +62,12 @@ local function missing_inputs(entity, recipe)
     if have <= 0 then absent[#absent + 1] = ing.name
     elseif have < ing.amount then short[#short + 1] = ing.name end
   end
+  -- Burner cities (nuclear, 2.6.4): out of fuel when nothing is burning or waiting.
+  local fuel = burner_fuel(entity)
+  if fuel and entity.burner and (entity.burner.remaining_burning_fuel or 0) <= 0
+    and entity.get_fuel_inventory().get_item_count(fuel) == 0 then
+    absent[#absent + 1] = fuel
+  end
   return #absent > 0 and absent or short
 end
 
@@ -62,6 +75,7 @@ local STARVED = {
   [defines.entity_status.item_ingredient_shortage] = true,
   [defines.entity_status.fluid_ingredient_shortage] = true,
   [defines.entity_status.no_ingredients] = true,
+  [defines.entity_status.no_fuel] = true,
 }
 
 local LAB_STATUS = {
@@ -169,6 +183,17 @@ function M.info(entity)
     local have = ing.type == "fluid" and input_fluid(entity, ing.name) or (input_inv and input_inv.get_item_count(ing.name) or 0)
     out.recipe.ingredients[#out.recipe.ingredients + 1] = {
       type = ing.type, name = ing.name, amount = ing.amount, per_min_max = ing.amount * crafts_per_min_max, have = have }
+  end
+
+  -- Burner cities list their fuel as an input: per_min_max at full output.
+  local fuel = burner_fuel(entity)
+  if fuel then
+    local watts = entity.prototype.get_max_energy_usage() * 60
+    local fuel_inv = entity.get_fuel_inventory()
+    out.recipe.ingredients[#out.recipe.ingredients + 1] = {
+      type = "item", name = fuel, amount = 1, fuel = true,
+      per_min_max = watts * 60 / prototypes.item[fuel].fuel_value,
+      have = fuel_inv and fuel_inv.get_item_count(fuel) or 0 }
   end
 
   -- measured crafts per minute over the sample window

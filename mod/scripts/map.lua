@@ -49,6 +49,8 @@ M.CITIES = {
   { name = config.CITY.power, x = -280, y = 280, label = "South power city", tag_icon = "small-electric-pole" },
   -- 2.6.3: nuclear fuel
   { name = "tt-city-uranium", x = 160, y = 0, label = "Uranium city", tag_icon = "uranium-fuel-cell" },
+  -- 2.6.4: thirsty (206 water/s per 20 MW), so 100 tiles from the first lake
+  { name = "tt-city-nuclear-power", x = -40, y = 170, label = "Nuclear power city", tag_icon = "nuclear-reactor" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).

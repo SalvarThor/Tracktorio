@@ -211,7 +211,12 @@ local function fill_city(body, entity)
   add_status(body, entity, info)
   body.add({ type = "label", caption = { "tt-gui.city-inputs" }, style = "caption_label" })
   for _, ing in ipairs(info.recipe.ingredients) do
-    add_line(body, ing, { "tt-gui.city-input-line", fmt(ing.amount), fmt(ing.per_min_max), fmt(ing.have or 0) })
+    if ing.fuel then
+      -- burner fuel (nuclear): one item lasts this long at full output
+      add_line(body, ing, { "tt-gui.city-fuel-line", fmt(60 / ing.per_min_max), fmt(ing.have or 0) })
+    else
+      add_line(body, ing, { "tt-gui.city-input-line", fmt(ing.amount), fmt(ing.per_min_max), fmt(ing.have or 0) })
+    end
   end
   body.add({ type = "label", caption = { "tt-gui.city-outputs" }, style = "caption_label" })
   for _, p in ipairs(info.recipe.products) do

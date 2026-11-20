@@ -17,6 +17,8 @@
 --                   or linked_id = n for a hidden linked connection; optional filter, volume }
 --   power           optional electric draw at full output, e.g. "840kW" (SPEC: cities whose
 --                   vanilla equivalent is electric draw that power). Omitted = no power.
+--   burner          optional { fuel_categories, power }: the city burns fuel put in by
+--                   inserter at `power` while crafting (the nuclear city, 2.6.4).
 --   map_color       optional color
 --   extra           optional table merged into the entity prototype
 
@@ -78,7 +80,8 @@ function M.make_city(def)
   local src_size = math.max(1, math.floor(src.collision_box[2][1] - src.collision_box[1][1] + 0.6))
   local factor = size / src_size
 
-  local graphics_set = table.deepcopy(src.graphics_set)
+  -- Sources without a graphics_set (the nuclear reactor) lend their static picture.
+  local graphics_set = table.deepcopy(src.graphics_set or (src.picture and { animation = src.picture }))
   if graphics_set then
     graphics_set.frozen_patch = nil
     graphics_set.water_reflection = nil
@@ -136,8 +139,11 @@ function M.make_city(def)
     crafting_speed = def.crafting_speed or 1,
     -- Electric cities: the engine draws energy_usage while crafting, slows down on low power
     -- and stops with none; idle drain is the engine default (1/30 of energy_usage).
-    energy_source = def.power and { type = "electric", usage_priority = "secondary-input" } or { type = "void" },
-    energy_usage = def.power or "1W",
+    energy_source = def.burner and {
+      type = "burner", fuel_categories = def.burner.fuel_categories, effectivity = 1,
+      fuel_inventory_size = 1, burnt_inventory_size = 0,
+    } or def.power and { type = "electric", usage_priority = "secondary-input" } or { type = "void" },
+    energy_usage = def.burner and def.burner.power or def.power or "1W",
     module_slots = 0,
     allowed_effects = {},
     fluid_boxes = make_fluid_boxes(def.fluid_boxes, src.fluid_boxes and src or data.raw["assembling-machine"]["assembling-machine-2"]),

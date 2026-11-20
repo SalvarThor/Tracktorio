@@ -76,7 +76,7 @@ for _, def in ipairs(city_defs.list) do
   for tier, t in ipairs(def.tiers) do
     if t.generator_usage then
       M.CITY_COMPANIONS[city_defs.entity_name(def.name, tier)] = {
-        entity = city_defs.generator_name(tier), city_link_id = 1, companion_link_id = 1 }
+        entity = city_defs.generator_name(tier, def), city_link_id = 1, companion_link_id = 1 }
     end
   end
 end

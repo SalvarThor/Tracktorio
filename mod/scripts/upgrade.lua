@@ -40,6 +40,11 @@ function M.upgrade(record)
   local in_id = old.type == "lab" and defines.inventory.lab_input or defines.inventory.crafter_input
   local inputs = contents(old.get_inventory(in_id))
   local outputs = old.type == "lab" and {} or contents(old.get_inventory(defines.inventory.crafter_output))
+  -- Burner cities (nuclear, 2.6.4): the fuel and what is left of the cell burning now.
+  local fuel = contents(old.get_fuel_inventory())
+  local burner = old.burner
+  local burning = burner and burner.currently_burning
+  local burning_left = burner and burner.remaining_burning_fuel or 0
 
   -- Forget the old record first, so on_object_destroyed does not tear down the new parts.
   storage.tt_cities[old_unit] = nil
@@ -70,6 +75,20 @@ function M.upgrade(record)
       surface.spill_item_stack({ position = port_pos, stack = { name = stack.name, count = stack.count - inserted, quality = stack.quality },
         enable_looted = true, allow_belts = false })
     end
+  end
+
+  local fuel_inv = city.get_fuel_inventory()
+  for _, stack in ipairs(fuel) do
+    local inserted = fuel_inv and fuel_inv.insert(stack) or 0
+    if inserted < stack.count then
+      surface.spill_item_stack({ position = port_pos, stack = { name = stack.name, count = stack.count - inserted, quality = stack.quality },
+        enable_looted = true, allow_belts = false })
+    end
+  end
+  if burning and city.burner and burning_left > 0 then
+    -- 2.1: writing currently_burning needs remaining_burning_fuel set right after
+    city.burner.currently_burning = burning
+    city.burner.remaining_burning_fuel = burning_left
   end
 
   -- Open windows on the city or its old port follow the new city.

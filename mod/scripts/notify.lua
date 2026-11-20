@@ -22,7 +22,11 @@ local function gps(entity)
 end
 
 --- Steam per tick -> watts (165 C steam: 30 kJ/unit).
-local function generator_watts(usage) return usage * 60 * 30000 end
+---@param usage number steam per tick
+---@param temp number? steam temperature (default: the coal power city's)
+local function generator_watts(usage, temp)
+  return usage * 60 * city_defs.steam_joules(temp or city_defs.POWER_STEAM_TEMP)
+end
 
 --- What a city tier does: { per_min, product, draw (W)?, output (W)?, coal = bool }.
 ---@param entity_name string
@@ -48,7 +52,7 @@ function M.tier_facts(entity_name)
   end
   if proto.electric_energy_source_prototype then facts.draw = proto.get_max_energy_usage() * 60 end
   local t = info.def.tiers[info.tier]
-  if t.generator_usage then facts.output = generator_watts(t.generator_usage) end
+  if t.generator_usage then facts.output = generator_watts(t.generator_usage, info.def.steam_temp) end
   return facts
 end
 

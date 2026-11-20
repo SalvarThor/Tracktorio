@@ -4,6 +4,26 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.6.4 nuclear power city
+- Built like the coal power city (assembling machine + linked hidden generator), with a
+  burner instead of a coal ingredient: uranium fuel cells go into its fuel slot by
+  inserter and burn at 20 / 40 / 80 MW while it turns water into 500 C steam (97 kJ/unit,
+  206.2/s per 20 MW, vanilla's heat exchanger figure). The hidden generator
+  (tt-nuclear-generator[-tN]) burns that steam at the same rate. A burner only burns while
+  crafting, so with no demand the steam backs up and the cell lasts (tested).
+- Why not a real reactor + heat exchangers + turbines inside: heat connections, three
+  hidden entity types and neighbour bonuses for the same result. Why not a coal-style
+  ingredient: one 8 GJ cell would need ~82,000 water per craft and give power in 400 s
+  bursts.
+- The vanilla fuel cell's burnt result is removed (no depleted cells, user); a burner with
+  no burnt slot refuses fuel that has one.
+- Window: fuel cells listed as an input ("1 lasts 400 s"); no fuel = starved, naming them.
+  Upgrades carry the fuel slot and the cell burning now.
+- Upgrade costs (tuning): T2 2000 plates each + 1000 circuits, T3 4000 + 2000.
+- Map spot (-40, 170), 100 tiles west of the first lake (it is the thirstiest city).
+- Placeholder art: the reactor's picture, scaled. The uranium city and the coal power city
+  both use the centrifuge look for now; the recipe icon and map colour tell them apart.
+
 ## 2026-11-20: 2.6.3 uranium city
 - One recipe: 143 uranium ore + 1 iron plate -> 1 uranium fuel cell in 100 s at speed 1
   (0.01 cells/s), 600 kW, centrifuge graphics. Vanilla ratio without Kovarex; the spare

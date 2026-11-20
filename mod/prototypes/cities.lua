@@ -22,6 +22,7 @@ for _, def in ipairs(defs.list) do
       graphics = def.graphics,
       crafting_speed = t.crafting_speed,
       power = t.power,
+      burner = def.burner and { fuel_categories = def.burner.fuel_categories, power = t.burner_power },
       recipe = t.recipe,
       fluid_boxes = def.fluid_boxes,
       map_color = def.map_color,
@@ -46,8 +47,8 @@ for _, def in ipairs(defs.list) do
       data:extend({
         {
           type = "generator",
-          name = defs.generator_name(tier),
-          localised_name = { "entity-name.tt-power-generator" },
+          name = defs.generator_name(tier, def),
+          localised_name = { "entity-name." .. defs.generator_name(1, def) },
           icon = "__base__/graphics/icons/steam-engine.png",
           hidden = true,
           flags = { "placeable-off-grid", "not-on-map", "not-blueprintable", "not-deconstructable",
@@ -59,7 +60,7 @@ for _, def in ipairs(defs.list) do
           collision_mask = { layers = {} },
           effectivity = 1,
           fluid_usage_per_tick = t.generator_usage,
-          maximum_temperature = defs.POWER_STEAM_TEMP,
+          maximum_temperature = def.steam_temp or defs.POWER_STEAM_TEMP,
           fluid_box = {
             volume = 200 * t.generator_usage / 3,
             filter = "steam",
