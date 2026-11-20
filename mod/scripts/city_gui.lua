@@ -107,6 +107,9 @@ local function add_status(body, entity, info)
   end
   add_text(body, status, true, "status")
   if hint then add_text(body, hint, false, "hint") end
+  if info.power_use and info.status == "running" then
+    add_text(body, { "tt-gui.city-power-use", tostring(math.floor(info.power_use * 100 + 0.5)) }, false, "power_use")
+  end
   if info.also_missing and #info.also_missing > 0 then
     add_text(body, { "tt-gui.city-also-missing", icon_list(info.also_missing) }, false, "also_missing")
   end

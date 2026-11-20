@@ -56,6 +56,15 @@ function M.tier_facts(entity_name)
   return facts
 end
 
+--- A per-minute rate for text: whole numbers from 10 up, one decimal below (playtest 2.6.6:
+--- the uranium city's 0.6 and 1.2 cells/min both read "1").
+---@param per_min number
+function M.format_rate(per_min)
+  if per_min >= 10 then return tostring(math.floor(per_min + 0.5)) end
+  local s = string.format("%.1f", per_min)
+  return (string.gsub(s, "%.0$", ""))
+end
+
 --- Localised description of a tier: "makes up to 1800 [item]/min, draws up to 8.6 MW, ..."
 ---@param entity_name string
 ---@param previous string? entity name of the previous tier (to mention "no longer uses coal")
@@ -69,7 +78,7 @@ function M.describe(entity_name, previous)
     parts[#parts + 1] = { "tt-notify.power-out", mw(f.output) }
   elseif f.per_min then
     local icon = (f.product_type == "fluid" and "[fluid=" or "[item=") .. f.product .. "]"
-    parts[#parts + 1] = { "tt-notify.rate", tostring(math.floor(f.per_min + 0.5)), icon }
+    parts[#parts + 1] = { "tt-notify.rate", M.format_rate(f.per_min), icon }
   end
   if f.draw then parts[#parts + 1] = { "tt-notify.power-draw", mw(f.draw) } end
   if previous and M.tier_facts(previous).coal and not f.coal then parts[#parts + 1] = { "tt-notify.no-coal" } end

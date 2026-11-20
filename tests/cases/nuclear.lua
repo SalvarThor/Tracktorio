@@ -215,16 +215,38 @@ return {
     end,
   },
   {
-    name = "nuclear: with no power demand it waits and its fuel lasts",
+    -- playtest 2.6.6 (user): like a vanilla reactor it can't throttle
+    name = "nuclear: with no power demand it still burns at full rate and vents the steam",
     fn = function(ctx)
       local city = nuclear_rig(X + 200, nil, 1)
       ctx:wait(60 * 10, function()
         local left = fuel_left(city)
         ctx:wait(60 * 20, function()
-          assert_.truthy(left - fuel_left(city) < 1e6, "burned " .. (left - fuel_left(city)) .. " J with no demand")
+          local burned = left - fuel_left(city)
+          -- 20 s at 20 MW = 400 MJ
+          assert_.truthy(burned > 0.9 * 400e6 and burned < 1.1 * 400e6, "burned " .. burned .. " J in 20 s with no demand")
           local i = remote.call("tt-city", "info", city)
-          assert_.equals(i.status, "output_full")
+          assert_.equals(i.status, "running")
+          assert_.truthy(i.power_use and i.power_use < 0.01, "power use " .. tostring(i.power_use))
+          assert_.truthy(city.get_fluid_count("steam") <= 1000 + 206 * 1.1, "steam not vented: " .. city.get_fluid_count("steam"))
         end)
+      end)
+    end,
+  },
+  {
+    name = "nuclear: the window says how much of its output is used (5 of 20 MW = 25%)",
+    fn = function(ctx)
+      local city = nuclear_rig(X + 320, 5e6, 1)
+      ctx:wait(60 * 10, function()
+        local i = remote.call("tt-city", "info", city)
+        assert_.truthy(i.power_use and math.abs(i.power_use - 0.25) < 0.03, "power use " .. tostring(i.power_use))
+        local p = assert(game.players[1])
+        remote.call("tt-city", "open_gui", p.index, city)
+        local body = assert(p.gui.screen["tt_city_frame"], "window not open")["body"]
+        local line = assert(body["power_use"], "no power use line")
+        assert_.equals(line.caption[1], "tt-gui.city-power-use")
+        assert_.equals(line.caption[2], "25")
+        p.opened = nil
       end)
     end,
   },

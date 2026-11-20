@@ -442,4 +442,11 @@ Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 c
 - [x] 2.6.5 Power-budget test: the total demand of every electric city per tier against
       the coal-only and the nuclear supply, so a retune can't silently break the balance.
       (Demand 17.9 / 49.0 / 94.1 MW; coal 21.6 / 43.2 / 86.4; nuclear 20 / 40 / 80.)
-- [ ] 2.6.6 `/playtest` round: the new power cities, uranium mining with acid, nuclear.
+- [x] 2.6.6 `/playtest` round: the new power cities, uranium mining with acid, nuclear.
+      Playtest 2026-11-20: all passed. Findings: slow rates read "1/min" for both 0.6 and
+      1.2 (2.6.7); the user wants nuclear to behave like a vanilla reactor (2.6.8).
+- [x] 2.6.7 Rates under 10/min keep one decimal in tier lines and messages (tested).
+- [x] 2.6.8 Nuclear runs flat out (user): with fuel in it burns at its full rate whatever
+      the demand; unused steam is vented; the window says what share of its output the
+      network uses. Idea for later (user): a circuit signal for fuel control (README).
+- [ ] 2.6.9 Short `/playtest`: flat-out nuclear (fuel use and the usage line), decimals.

@@ -123,4 +123,28 @@ return {
       end)
     end,
   },
+  {
+    -- playtest 2.6.6: 0.6 and 1.2 fuel cells/min both read "1"
+    name = "upgrade ui: slow rates keep a decimal in the tier lines (uranium city 0.6 then 1.2/min)",
+    fn = function()
+      h.clear_area({ { 4400, 40 }, { 4422, 64 } })
+      local city = h.place_city("tt-city-uranium", { 4410.5, 50.5 })
+      local p, body = open(city)
+      local function rate_of(caption)
+        if type(caption) ~= "table" then return nil end
+        if caption[1] == "tt-notify.rate" then return caption[2] end
+        for i = 2, #caption do
+          local r = rate_of(caption[i])
+          if r then return r end
+        end
+      end
+      assert_.equals(rate_of(body["tier"].caption), "0.6")
+      local next_line
+      for _, c in ipairs(body.children) do
+        if c.type == "label" and type(c.caption) == "table" and c.caption[1] == "tt-gui.tier-next" then next_line = c end
+      end
+      assert_.equals(rate_of(assert(next_line, "no next tier line").caption), "1.2")
+      p.opened = nil
+    end,
+  },
 }

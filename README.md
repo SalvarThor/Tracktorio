@@ -110,6 +110,8 @@ Open ideas that aren't scheduled yet:
 - Real art instead of the scaled vanilla stand-ins (Factorissimo, once its license is
   confirmed).
 - Maybe drop the "city" naming.
+- Nuclear fuel control: the nuclear power city puts out a circuit signal (its steam level)
+  so players can wire the fuel inserter to save fuel, as in vanilla nuclear setups.
 
 ## Development
 

@@ -4,6 +4,7 @@ local config = require("shared.config")
 local cities = require("scripts.cities")
 local city_defs = require("shared.city_defs")
 local silo = require("scripts.silo")
+local nuclear = require("scripts.nuclear")
 
 local M = {}
 
@@ -211,6 +212,9 @@ function M.info(entity)
       per_min = amount * crafts_per_min,
     }
   end
+
+  -- Nuclear: how much of its flat-out output is used (the rest is vented).
+  if nuclear.is_flat_out(entity.name) then out.power_use = nuclear.power_use(record) end
 
   local status = entity.status
   if status == defines.entity_status.working then

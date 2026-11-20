@@ -16,6 +16,7 @@ local tier_marks = require("scripts.tier_marks")
 local reliability = require("scripts.reliability")
 local service = require("scripts.service")
 local silo = require("scripts.silo")
+local nuclear = require("scripts.nuclear")
 local debug_cmds = require("scripts.debug")
 
 debug_cmds.register()
@@ -44,6 +45,7 @@ city_remote.service_status = function(entity) return service.status(entity) end
 city_remote.service_tick = function(seconds) service.tick(seconds) end
 city_remote.silo_status = function(entity) return silo.status(entity) end
 city_remote.silo_tick = function() silo.tick() end
+city_remote.nuclear_tick = function() return nuclear.tick() end
 city_remote.silo_fill = function(entity, parts)
   assert(silo.is_silo(entity), "not a rocket silo city")
   entity.rocket_parts = math.max(0, math.min(entity.prototype.rocket_parts_required - 1, math.floor(parts)))
@@ -157,6 +159,7 @@ script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   ports.tick()
   service.tick()
   silo.tick()
+  nuclear.tick()
   goal_gui.update_all()
   city_info.sample()
   city_gui.update_all()

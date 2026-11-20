@@ -171,8 +171,9 @@ local uranium_recipe = { energy_required = 100,
 -- Nuclear power (2.6.4): uranium fuel cells burn in the city's burner (8 GJ each) while it
 -- turns water into 500 C steam for a hidden generator, like reactor + heat exchangers +
 -- turbines. 20 MW at T1 = 206.2 steam/s (vanilla's 2 heat exchangers) and 1 cell per
--- 400 s. A burner only burns while crafting, so with no power demand the steam backs up
--- and the fuel lasts. No depleted cells (user): the fuel cell's burnt result is removed.
+-- 400 s. It runs flat out like a vanilla reactor (playtest 2.6.6, user): unused steam is
+-- vented by scripts/nuclear.lua so it keeps burning. No depleted cells (user): the fuel
+-- cell's burnt result is removed.
 local NUCLEAR_W = 20e6
 local nuclear_steam_per_s = NUCLEAR_W / M.steam_joules(M.NUCLEAR_STEAM_TEMP)
 local nuclear_recipe = { energy_required = 1,
@@ -244,7 +245,8 @@ M.list = {
     burner = { fuel_categories = { "nuclear" }, fuel = "uranium-fuel-cell" },
     fluid_boxes = {
       { production_type = "input", position = { 0, 4 }, direction = defines.direction.south, filter = "water" },
-      { production_type = "output", linked_id = 1, filter = "steam" },
+      -- room for the steam of a tier 3 city between vents (scripts/nuclear.lua)
+      { production_type = "output", linked_id = 1, filter = "steam", volume = 4000 },
     },
     tiers = {
       nuclear_tier(1),

@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.6.6 playtest: nuclear runs flat out
+- User decision: the nuclear power city can't throttle, like a vanilla reactor. With fuel
+  in it burns at its full rate (one cell per 400 s at T1) whatever the demand. Unused steam
+  is vented every second (scripts/nuclear.lua; steam output enlarged to 4000 so a T3 city
+  never backs up between vents). The window adds "your network uses N% of its output; the
+  rest is wasted".
+- Rejected for now: load-following (nuclear becomes coal power with cheaper fuel). Noted as
+  a future idea (user): a circuit signal of the city's steam level so players can control
+  the fuel inserter, as in vanilla nuclear builds.
+- Rates under 10/min now show one decimal (the uranium city's 0.6 and 1.2 cells/min both
+  read "1").
+- 2.1 surprise: `LuaEntity.remove_fluid(index, amount)` takes a fluid storage index and
+  returns a Fluid; the 2.0 table form crashes. The static check missed it on an untyped
+  `record.entity`; annotated now. Added to .claude/rules/factorio-lua.md.
+
 ## 2026-11-20: 2.6.5 power budget test
 - Measured from the prototypes of every city on the map, at full output with the silo at
   its 4 MW launch peak and engine drain included: demand 17.9 / 49.0 / 94.1 MW at tier

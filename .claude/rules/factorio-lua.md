@@ -18,7 +18,8 @@ reflect 2.0 knowledge; if 2.1 differs, follow the docs and note it in DECISIONS.
 - Burner: writing `currently_burning` needs `remaining_burning_fuel` set too.
 - Fluids: `LuaEntity.fluidbox` and `LuaFluidBox` are gone. Use `entity.get_fluid(i)`,
   `get_fluid_count(name)`, `get_fluid_box_prototype(i)`, `fluids_count` and the other
-  `*_fluid*` methods on LuaEntity.
+  `*_fluid*` methods on LuaEntity. `remove_fluid(index, amount)` takes a storage index and
+  returns the Fluid removed (not a `{name, amount}` table).
 
 ## Static check blind spot
 - An untyped parameter is `any` to the language server, so wrong API fields on it are not
