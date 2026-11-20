@@ -142,6 +142,57 @@ function M.port_spot(city, name, flow)
   error("no " .. flow .. " port for " .. name .. " on " .. city.name)
 end
 
+--- Every port for `name` flowing `flow` at the city's tier (tier 3 smelting has two):
+--- list of { pos, dir } with `pos` the tile just outside the wall and `dir` out of the city.
+---@param city LuaEntity
+---@param name string
+---@param flow "input"|"output"
+function M.port_spots(city, name, flow)
+  local info = assert(city_defs.by_entity[city.name], "not a city: " .. city.name)
+  local out = {}
+  for _, p in ipairs(port_layout.ports(info.def)) do
+    if p.name == name and p.flow == flow and p.tiers[info.tier] then
+      local spot = port_layout.spot(p, M.city_size(city.name))
+      out[#out + 1] = { pos = { city.position.x + spot.outside[1], city.position.y + spot.outside[2] }, dir = spot.direction }
+    end
+  end
+  return out
+end
+
+local STEP = {
+  [defines.direction.north] = { 0, -1 }, [defines.direction.south] = { 0, 1 },
+  [defines.direction.east] = { 1, 0 }, [defines.direction.west] = { -1, 0 },
+}
+local BACK = {
+  [defines.direction.north] = defines.direction.south, [defines.direction.south] = defines.direction.north,
+  [defines.direction.east] = defines.direction.west, [defines.direction.west] = defines.direction.east,
+}
+
+--- A belt run on every port for `name`: inputs are fed from an infinity chest, outputs
+--- drained into one. Two tiles of `belt` outside the wall, a fast loader (the port
+--- prototype), then the chest.
+---@param city LuaEntity
+---@param name string
+---@param flow "input"|"output"
+---@param belt string? default "transport-belt"
+function M.belt_to_port(city, name, flow, belt)
+  for _, s in ipairs(M.port_spots(city, name, flow)) do
+    local d = STEP[s.dir]
+    local function at(k) return { s.pos[1] + d[1] * k, s.pos[2] + d[2] * k } end
+    local belt_dir = flow == "input" and BACK[s.dir] or s.dir
+    M.create(belt or "transport-belt", at(0), { direction = belt_dir })
+    M.create(belt or "transport-belt", at(1), { direction = belt_dir })
+    -- the loader moves items away from the chest on inputs, towards it on outputs
+    M.create("tt-belt-port", at(2), { direction = belt_dir, type = flow == "input" and "output" or "input" })
+    local chest = M.create("infinity-chest", at(3))
+    if flow == "input" then
+      chest.set_infinity_container_filter(1, { name = name, count = 100, mode = "exactly" })
+    else
+      chest.remove_unfiltered_items = true
+    end
+  end
+end
+
 --- An infinity pipe at a city's fluid port: a supply (`fill` true) or a drain.
 ---@param city LuaEntity
 ---@param fluid string

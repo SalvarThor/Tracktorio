@@ -89,6 +89,75 @@ return {
     end,
   },
   {
+    -- 2.10.4
+    name = "belt ports: every tier of every city has a filtered port under its wall for each item",
+    fn = function(ctx)
+      local placed, i = {}, 0
+      for _, def in ipairs(city_defs.list) do
+        for tier = 1, #def.tiers do
+          local name = city_defs.entity_name(def.name, tier)
+          local x = X + 1000 + i * 24
+          i = i + 1
+          h.clear_area({ { x - 10, -10 }, { x + 11, 11 } })
+          local city = h.place_city(name, { x + 0.5, 0.5 })
+          local loaders = h.surface().find_entities_filtered({ name = "tt-belt-port", area = city.bounding_box })
+          local want = 0
+          for _, p in ipairs(port_layout.ports(def)) do
+            if p.kind == "item" and p.tiers[tier] then want = want + 1 end
+          end
+          assert_.equals(#loaders, want, name .. " ports")
+          placed[#placed + 1] = { name = name, loaders = loaders }
+        end
+      end
+      ctx:wait(2, function() -- a loader finds what it feeds a tick after it is built
+        for _, c in ipairs(placed) do
+          for _, l in ipairs(c.loaders) do
+            assert_.truthy(l.get_filter(1), c.name .. ": unfiltered port")
+            assert_.equals(target(l), c.name, c.name .. ": port not connected to the city")
+          end
+        end
+      end)
+    end,
+  },
+  {
+    name = "belt ports: one yellow belt per item runs a tier 1 smelting city at its full 15/s",
+    fn = function(ctx)
+      local x = X + 700
+      h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
+      local city = h.place_city("tt-city-iron-smelting", { x + 0.5, 0.5 })
+      h.belt_to_port(city, "iron-ore", "input")
+      h.belt_to_port(city, "coal", "input")
+      h.belt_to_port(city, "iron-plate", "output")
+      ctx:wait(300, function() -- settle
+        local start = city.products_finished
+        ctx:wait(600, function()
+          local plates = (city.products_finished - start) * 10
+          assert_.truthy(plates >= 140, "plates in 10 s: " .. plates .. " (want 150)")
+        end)
+      end)
+    end,
+  },
+  {
+    name = "belt ports: tier 3 smelting has two ports per item; two blue belts each way run it at 60/s",
+    fn = function(ctx)
+      local x = X + 760
+      h.clear_area({ { x - 16, -16 }, { x + 18, 18 } })
+      local city = h.place_city("tt-city-iron-smelting-t3", { x + 0.5, 0.5 })
+      assert_.equals(#h.port_spots(city, "iron-ore", "input"), 2, "ore ports")
+      assert_.equals(#h.port_spots(city, "iron-plate", "output"), 2, "plate ports")
+      h.belt_to_port(city, "iron-ore", "input", "express-transport-belt")
+      h.belt_to_port(city, "iron-plate", "output", "express-transport-belt")
+      h.test_power({ h.edges(city).right + 1.5, 0 }, 20e6)
+      ctx:wait(300, function()
+        local start = city.products_finished
+        ctx:wait(600, function()
+          local plates = (city.products_finished - start) * 10
+          assert_.truthy(plates >= 560, "plates in 10 s: " .. plates .. " (want 600)")
+        end)
+      end)
+    end,
+  },
+  {
     -- 2.10.1: 2.1 loaders only connect to entities flagged "player-creation"
     name = "belt ports: a loader at the wall connects to every kind of city",
     fn = function(ctx)

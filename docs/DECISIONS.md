@@ -4,6 +4,22 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.4 belt ports
+- A port is a hidden loader (`tt-belt-port`, from loader-1x1) under the wall tile, filtered
+  to its item, input loaders facing in and output loaders facing out. The player's belt
+  ends on the tile just outside and runs into it, as in Factorissimo.
+- Speed 0.125 (turbo, 60/s), so the player's belt is always the limit. Measured: one
+  yellow belt per item runs tier 1 smelting at its full 15 plates/s; tier 3 smelting's two
+  blue belts per item run it at 60/s.
+- 2.1 requires a loader's collision mask to collide with belts: it has the transport_belt
+  layer only, so it sits inside the building without colliding with it. No structure
+  sprite; the building covers it.
+- Markers: an arrow on the ground outside each port (in or out) and the item's or
+  fluid's icon on the wall. They are drawn on the city, so they go with it. Hovering the
+  port shows "City port".
+- A loader finds what it feeds a tick after it is built.
+- Inserters still reach cities until 2.10.5; one dropping next to a port puts items on
+  the port's belt. The end-to-end train test now feeds the city by belt.
 ## 2026-11-20: 2.10.2-2.10.3 building art and sizes
 - Cities draw the Factorissimo building of their tier (8x8, 12x12, 16x16) at its own
   scale and shift. The research complex too. The rocket silo keeps the vanilla silo (9x9,

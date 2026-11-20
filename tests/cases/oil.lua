@@ -116,9 +116,9 @@ return {
       assert_.truthy(assert(remote.call("tt-city", "service_status", city)).port, "no service port")
       h.pipe_at(city, "light-oil", "input", true)
       h.test_power({ x + 8.5, 0.5 }, 2e6)
+      -- (the output port takes the fuel out of the city, so count crafts)
       ctx:wait_until(function() return city.products_finished >= 5 end, 60 * 20, function()
-        local inv = assert(city.get_inventory(defines.inventory.crafter_output))
-        assert_.truthy(inv.get_item_count("solid-fuel") >= 5, "no solid fuel")
+        assert_.equals(remote.call("tt-city", "info", city).recipe.products[1].name, "solid-fuel")
       end)
     end,
   },

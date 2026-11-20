@@ -649,7 +649,7 @@ south wall has the door in the middle on every building):
       them at 8/12/16 tiles by tier instead of the scaled vanilla stand-ins.
 - [x] 2.10.3 Sizes: city prototypes become 8x8 / 12x12 / 16x16 by tier (even sizes, so
       centres sit on a tile corner; placement, sites and the layout adjust).
-- [ ] 2.10.4 Belt ports: each item in and out gets a port at a fixed spot on the wall,
+- [x] 2.10.4 Belt ports: each item in and out gets a port at a fixed spot on the wall,
       Tier 3 smelting gets two per item. Every port is clearly marked: its item's icon and
       an in or out arrow drawn on the ground at the port, and named in the tooltip (user:
       which spots are used matters little as long as each port is clearly marked).

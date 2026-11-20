@@ -3,6 +3,7 @@
 -- its new generator.
 local cities = require("scripts.cities")
 local ports = require("scripts.ports")
+local belt_ports = require("scripts.belt_ports")
 
 local M = {}
 
@@ -51,6 +52,7 @@ function M.upgrade(record)
   for _, key in ipairs({ "companion", "port" }) do
     if record[key] and record[key].valid then record[key].destroy() end
   end
+  belt_ports.detach(record)
   old.destroy()
 
   local city = cities.place(target, surface, position, force)

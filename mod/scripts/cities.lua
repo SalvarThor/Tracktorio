@@ -115,6 +115,9 @@ local function on_object_destroyed(e)
       for _, key in ipairs({ "companion", "port", "service_port" }) do
         if record[key] and record[key].valid then record[key].destroy() end
       end
+      for _, loader in ipairs(record.belt_ports or {}) do -- 2.10.4
+        if loader.valid then loader.destroy() end
+      end
     end
     storage.tt_cities[e.useful_id] = nil
   end

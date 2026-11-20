@@ -10,6 +10,7 @@ local city_gui = require("scripts.city_gui")
 local limp = require("scripts.limp")
 local map = require("scripts.map")
 local ports = require("scripts.ports")
+local belt_ports = require("scripts.belt_ports") -- 2.10.4: registers its placement hook
 local upgrade = require("scripts.upgrade")
 local notify = require("scripts.notify")
 local tier_marks = require("scripts.tier_marks")
