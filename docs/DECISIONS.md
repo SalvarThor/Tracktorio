@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: procedural maps (phase 2.8), user decisions
+- New games start from the normal New Game screen on Nauvis, with vanilla terrain (lakes,
+  trees, cliffs) and vanilla resource patches, and no resources near spawn. The scenario
+  stays as the fixed hand-made map that the tests use. Rejected: a scenario that makes
+  random maps of its own; flat grass with scripted features; scripted patches only.
+- Cities take no account of resources ("cities shouldn't even know where their raw
+  resources are located").
+- At least 1,000 tiles between cities, starting value: the user wants it as near the
+  upper limit as is playable. "Everything is free so it's much easier than in vanilla."
+  A startup setting scales it from 0.5x to 3x. Rejected: 200, 300 or 500 tiles.
+- Deeper cities in the production chain are more likely to be far from spawn, but at
+  random. Rejected: purely random positions; strict rings by depth.
+- Biters are forced off. The layout is not charted up front: the player finds cities by
+  uncovering the map, and a city's tag appears when its chunk is first charted.
+
 ## 2026-11-20: playtest 2.7.5, keep vanilla behaviour out of playtests
 - The user checked research gating, free items, ramps and elevated track, and skipped the
   water, limp and breakdown steps as standard Factorio behaviour. Those are covered by the

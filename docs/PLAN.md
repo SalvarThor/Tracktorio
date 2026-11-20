@@ -474,3 +474,50 @@ Decided with the user (DECISIONS.md, 2026-11-20):
       elevated train stops, so servicing stays on the ground). (Limp and breakdown tested
       on elevated track; servicing needs a stop, so it is unchanged.)
 - [x] 2.7.5 `/playtest` round: research, building up and over, trains on elevated track. (Research, items, ramps and elevated track checked by hand; water, limp and breakdown left to the automated tests, as vanilla behaviour.)
+
+### Phase 2.8: procedural maps (approved by the user 2026-11-20)
+
+Decided with the user (DECISIONS.md, 2026-11-20):
+- New Game on Nauvis: the mod works from the normal New Game screen and its map settings
+  (seed, preview, resource sliders). The scenario stays as the fixed, hand-made map, which
+  the tests use.
+- Vanilla Nauvis terrain: lakes, trees, cliffs, rocks. Vanilla ore, coal, oil and uranium
+  patches, with no resources near spawn.
+- Cities take no account of where resources are.
+- Biters are forced off, whatever the map settings say.
+- The player finds the cities by uncovering the map; the layout is not shown up front.
+- Cities are far apart: at least 1,000 tiles between any two (a starting value; the user
+  wants it as close to the upper limit as is playable). A startup setting, "City spacing",
+  scales it from 0.5x to 3x.
+- Cities later in the production chain are more likely to be far from spawn, but at
+  random, not in fixed rings.
+
+At 1,000 tiles, 28 cities fill a disc of roughly 3,600 tiles' radius around spawn.
+
+- [ ] 2.8.1 Chain depth of every city type, worked out from the city recipes (raw inputs
+      are 0, a city is one more than its deepest input). Test: the coal fuel depot and
+      the coal power city are shallow and the rocket silo is the deepest. A new city type
+      gets a depth with no extra code.
+- [ ] 2.8.2 Layout planner: pure Lua, seeded by the map seed. Places one of each layout
+      city (the 28 of today's map), with the coal fuel depot near spawn and the others at
+      least the spacing apart. Distance from spawn is drawn at random, weighted by depth.
+      Startup setting "City spacing" (0.5x to 3x, default 1x = 1,000 tiles). Tests: the
+      same seed gives the same layout, different seeds differ, spacing is never broken,
+      the multiplier scales it, and deeper cities sit further out on average.
+- [ ] 2.8.3 Sites on real terrain: a planned spot moves to the nearest land that fits
+      the city and a margin (no water, no cliffs), and trees, rocks and cliffs on the
+      footprint are cleared. Only the chunks around each city are generated, not the
+      whole disc. Tests on a surface with vanilla terrain: every city stands on land, is
+      not on an island, and nothing overlaps.
+- [ ] 2.8.4 Nauvis start: on a New Game, the mod sets up Nauvis instead of its own
+      surface. Biters forced off (no enemy bases, peaceful). No resources within 300 tiles of spawn (tuning); spawn and the depot are
+      on land. Freeplay extras are replaced: no crash site, and starting items limited to
+      the coal fuel of today's scenario. The scenario keeps its fixed map, and old saves
+      are unchanged.
+- [ ] 2.8.5 Finding cities: nothing is charted up front. A city gets its map tag when
+      the player first charts its chunk (walking, trains, radar), so the layout is
+      discovered. Test: no tag before charting, tag after.
+- [ ] 2.8.6 Start-up time: creating the map stays fast (target under 10 s at 3x spacing,
+      tested).
+- [ ] 2.8.7 `/playtest` round: a New Game from the menu with the map preview, the spacing
+      setting, the layout on the map, and the first routes on real terrain.
