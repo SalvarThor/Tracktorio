@@ -30,8 +30,9 @@ Starting Freeplay with the mod on gives the same game, with a note saying so.
 - **Logistics are free.** Rails, signals, stops, trains, inserters, belts, chests, pipes,
   pumps, poles, circuit entities, miners and pumpjacks cost nothing to craft. Research
   still unlocks them.
-- **Cities are hands-off.** Items go in and out only through inserters and pumps. The
-  player places nothing by hand.
+- **Cities are hands-off.** Items go in and out only through belt ports in their walls,
+  and fluids through pipes; inserters can't reach a city. The player places nothing by
+  hand.
 - **Locomotive fuel comes only from depots.** Vanilla coal doesn't fuel a locomotive.
 - **Everything else is vanilla:** signals, schedules, interrupts, circuits, ore patches,
   the tech tree.
@@ -57,11 +58,17 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 - Each city runs at the rate of its slowest input and stops when its output is full.
 - Electric cities draw what the equivalent vanilla buildings would. They slow down on low
   power and stop without it.
-- **Tiers:** most cities have 3 tiers (x1, x2, x4). Upgrade a city by delivering
-  materials to its **construction port**. You get a heads-up message at 90%, then the
-  city upgrades in place. Pips on the city show its tier.
-- **Windows:** click a city to see its recipe and rates, what it holds and what it's
-  missing, where its pipes connect, and what the next tier costs.
+- **Buildings and ports:** cities are Factorissimo buildings. Run a belt straight into a
+  port in the wall; each port shows its item and an in or out arrow. One yellow belt per
+  item is enough at tier 1, red at tier 2, blue at tier 3 (tier 3 smelting has two ports
+  per item).
+- **Tiers:** most cities have 3 tiers (x1, x2, x4). Upgrade a city by belting materials
+  into its **construction port** (the green arrow). You get a heads-up message at 90%,
+  then the city upgrades in place and grows: 8x8, 12x12, 16x16. The dashed outline shows
+  how big it gets; whatever you built inside it comes back to you, and belts into the
+  ports still reach them. Pips on the city show its tier.
+- **Windows:** click a city or a port to see its recipe and rates, what it holds and
+  what it's missing, its ports and the belt each needs, and what the next tier costs.
 
 **Trains**
 - **Limp mode:** a locomotive that runs out of fuel crawls instead of stopping dead.

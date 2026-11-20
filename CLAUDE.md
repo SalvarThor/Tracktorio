@@ -36,8 +36,8 @@ The design spec is authoritative:
   inside black boxes. The player gets no furnaces, assemblers, refineries, chemical plants,
   boilers, steam engines or solar.
 - Transportation means trains. No cars, tanks, spidertrons or robots.
-- Black boxes are hands-off: items go in and out only through inserters and pumps, never
-  the player's inventory.
+- Black boxes are hands-off: items go in and out only through belt ports in their walls and
+  fluids through pipes, never inserters or the player's inventory.
 - Locomotive fuel comes only from depot cities (`tt-coal-fuel` in MVP). Vanilla coal is not
   a locomotive fuel. Hand-fueling is allowed; no fueling location is enforced.
 - Train infrastructure, station logistics and extraction entities are free (no ingredients),

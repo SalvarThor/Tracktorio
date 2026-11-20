@@ -9,7 +9,7 @@ Cities chain across the map the same way a factory does, and the train network i
 ## Rules
 
 - **Transformation belongs to cities only.** Furnaces, assemblers, refineries, chemical plants, boilers and steam engines are removed from the player.
-- **Transportation means trains, and only trains.** Cars, tanks, spidertrons and logistic and construction robots are removed. Belts, pipes and inserters are station-local logistics for loading, unloading and feeding cities, not the intended way to move cargo between locations.
+- **Transportation means trains, and only trains.** Cars, tanks, spidertrons and logistic and construction robots are removed. Belts, pipes and inserters are station-local logistics for loading, unloading and feeding cities (through their belt ports), not the intended way to move cargo between locations.
   - Decided: no rule against long belt or pipe runs between locations. A player who wants miles of belts can build them; trains are simply the better tool.
 - **Train infrastructure, station logistics and extraction are free**, gated by research. That covers rails, signals, stops, trains, inserters, belts, chests (not logistic chests), pipes, pumps, tanks, poles, circuit entities, miners and pumpjacks. Default: extraction counts as free, since sourcing and mining ores is the player's job. Offshore pumps are removed: water comes only from water cities (post-MVP item 9).
 - **Everything else stays vanilla.** Trains, fuel, signals, schedules, interrupts, loading and unloading, circuits, ore patches.
@@ -40,7 +40,8 @@ Shared behaviour:
 - A full output stalls the box and an empty input starves it, so backpressure works like a backed-up belt.
 - Tier upgrades happen by delivering construction materials to the box.
 - Placement is fixed by the world, never by the player, so every link in the chain is a real route.
-- Black boxes accept and give items only through inserters and pumps, never by hand. The player cannot hand-feed a city or take its output by hand.
+- Black boxes accept and give items only through belt ports in their walls, and fluids only through pipes: a belt runs straight into a port, as in Factorissimo. Inserters can't reach a city, and the player cannot hand-feed a city or take its output by hand. Construction materials and a depot's repair packs come in through ports too. Each port is clearly marked with its item and direction. (User decision 2026-11-20, phase 2.10; before that, inserters and pumps.)
+- Cities grow with tier: 8x8, 12x12 and 16x16 buildings. A port keeps its line through upgrades, so a belt built against a smaller city still meets it. One port per item; tier 3 smelting (60/s) gets two. (User decisions 2026-11-20.)
 
 ## Reliability and depots
 
@@ -52,12 +53,7 @@ Shared behaviour:
 
 ## Black box visuals: Factorissimo
 
-Factorissimo buildings fit visually, with two caveats:
-
-- The license for the Factorissimo 2 (notnotmelon fork) graphics is unconfirmed. Before copying any of its sprites, check the license on its GitHub or mod portal page.
-- Declaring it as a dependency instead loads the whole mod: enterable factories, extra surfaces, recipes and tech. All of those would have to be hidden.
-
-Decided: no other mod is involved yet. The MVP uses a scaled vanilla sprite as a placeholder. Factorissimo art is evaluated once the license is confirmed.
+Decided (user, 2026-11-20, phase 2.10): cities use the Factorissimo 3 building art, copied into the mod under its MIT license (checked in the 3.11.19 package; no separate license for the art) with the license notice beside it. No mod dependency and no Factorissimo code: a dependency would load the whole mod (enterable factories, extra surfaces, recipes and tech). The rocket silo keeps the vanilla silo.
 
 ## Free buildings: implementation
 
@@ -107,3 +103,5 @@ Default order, open to change:
 9. Water city: water comes only from water cities and must be shipped (by fluid wagon) to
    where it is used, such as the power city. Offshore pumps are removed from the player.
    (User request, playtest 1.10.)
+10. Factorissimo buildings and belt ports: the art, cities growing with tier, belt ports
+    instead of inserters. (User decisions 2026-11-20.)

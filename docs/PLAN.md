@@ -668,6 +668,6 @@ south wall has the door in the middle on every building):
 - [x] 2.10.10 Tests: helpers feed cities by belt instead of inserter; rate tests per tier
       (tier 1 at one yellow belt per item, tier 3 smelting at two blue belts); upgrade
       keeps a belt connected.
-- [ ] 2.10.11 SPEC, README and DECISIONS updated.
+- [x] 2.10.11 SPEC, README and DECISIONS updated.
 - [ ] 2.10.12 `/playtest`: building a station on belt ports, an upgrade growing a city with
       its belts still connected, the new art at all three tiers.
