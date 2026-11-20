@@ -386,6 +386,32 @@ function M.place_procedural(surface, seed, spacing)
   return placed, missing
 end
 
+--- on_chunk_charted (2.8.5): on a procedural map the cities are found by uncovering the
+--- map. Nothing is charted up front; a city's tag appears when its chunk is first charted
+--- (walking, a train, a radar).
+---@param e EventData.on_chunk_charted
+function M.on_chunk_charted(e)
+  local surface = game.get_surface(e.surface_index)
+  if not surface then return end
+  local placed = storage.tt_layout and storage.tt_layout[surface.name]
+  if not placed then return end
+  local lt, rb = e.area.left_top, e.area.right_bottom
+  for _, c in ipairs(placed) do
+    local x, y = c.x + 0.5, c.y + 0.5
+    if not (c.tagged and c.tagged[e.force.index]) and x >= lt.x and x < rb.x and y >= lt.y and y < rb.y then
+      local city = surface.find_entities_filtered({ position = { x, y }, radius = 1 })[1]
+      local info = city and city_defs.by_entity[city.name]
+      local text = c.label
+      if info and info.tier > 1 then text = text .. " (tier " .. info.tier .. ")" end
+      local tag = e.force.add_chart_tag(surface, { position = { x = x, y = y }, icon = { type = "item", name = c.tag_icon }, text = text })
+      if tag then
+        c.tagged = c.tagged or {}
+        c.tagged[e.force.index] = true
+      end
+    end
+  end
+end
+
 --- Move a player to the map and give the starting items (once).
 ---@param player LuaPlayer
 function M.setup_player(player)

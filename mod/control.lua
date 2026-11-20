@@ -118,6 +118,7 @@ script.on_init(function()
 end)
 
 script.on_event(defines.events.on_chunk_generated, nauvis.on_chunk_generated)
+script.on_event(defines.events.on_chunk_charted, map.on_chunk_charted)
 script.on_event(defines.events.on_surface_deleted, function(e)
   if storage.tt_nauvis then storage.tt_nauvis[e.surface_index] = nil end
   if storage.tt_layout then

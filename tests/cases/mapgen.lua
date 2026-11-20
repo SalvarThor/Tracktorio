@@ -237,4 +237,31 @@ return {
       end)
     end,
   },
+  {
+    -- 2.8.5
+    name = "mapgen: nothing is charted up front; a city's tag appears when its chunk is charted",
+    fn = function(ctx)
+      local mgs = game.surfaces["nauvis"].map_gen_settings
+      mgs.seed = 161803
+      local s = game.create_surface("tt-mapgen-discover", mgs)
+      local result = remote.call("tt-nauvis", "prepare", s.name, 161803, 1000)
+      local force = game.forces["player"]
+      assert_.equals(#force.find_chart_tags(s), 0, "tags before charting")
+      local c = result.placed[#result.placed] -- the last placed: far from spawn
+      assert_.falsy(force.is_chunk_charted(s, { math.floor(c.x / 32), math.floor(c.y / 32) }), c.label .. " charted up front")
+      force.chart(s, { { c.x - 8, c.y - 8 }, { c.x + 8, c.y + 8 } })
+      ctx:wait_until(function() return #force.find_chart_tags(s) > 0 end, 600, function()
+        local tags = force.find_chart_tags(s)
+        assert_.equals(#tags, 1, "tags after charting one city")
+        assert_.equals(tags[1].text, c.label, "tag text")
+        assert_.truthy(math.abs(tags[1].position.x - (c.x + 0.5)) < 1 and math.abs(tags[1].position.y - (c.y + 0.5)) < 1, "tag position")
+        -- charting it again adds nothing
+        force.chart(s, { { c.x - 8, c.y - 8 }, { c.x + 8, c.y + 8 } })
+        ctx:wait(60, function()
+          assert_.equals(#force.find_chart_tags(s), 1, "tags after charting again")
+          game.delete_surface(s)
+        end)
+      end)
+    end,
+  },
 }

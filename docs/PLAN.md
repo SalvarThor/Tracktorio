@@ -514,7 +514,7 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       on land. Freeplay extras are replaced: no crash site, and starting items limited to
       the coal fuel of today's scenario. The scenario keeps its fixed map, and old saves
       are unchanged.
-- [ ] 2.8.5 Finding cities: nothing is charted up front. A city gets its map tag when
+- [x] 2.8.5 Finding cities: nothing is charted up front. A city gets its map tag when
       the player first charts its chunk (walking, trains, radar), so the layout is
       discovered. Test: no tag before charting, tag after.
 - [ ] 2.8.6 Start-up time: creating the map stays fast (target under 10 s at 3x spacing,
