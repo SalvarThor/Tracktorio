@@ -59,7 +59,9 @@ return {
         -- blue (2.5.5)
         "chemical-science-pack", "bulk-inserter", "electric-energy-distribution-2",
         -- uranium (2.6.2)
-        "concrete", "uranium-mining", "uranium-processing" }) do
+        "concrete", "uranium-mining", "uranium-processing",
+        -- elevated rails (2.7.1)
+        "elevated-rail" }) do
         assert_.truthy(reach[tech], tech .. " is not reachable")
       end
     end,
@@ -113,6 +115,32 @@ return {
         for _, name in ipairs(changed) do force.technologies[name].researched = false end
         city.destroy()
       end)
+    end,
+  },
+  {
+    -- 2.7.1: Space Age wants production science; the complex takes red, green and blue
+    name = "gating: Elevated rail costs 500 x red + green + blue after Concrete and Chemical science pack",
+    fn = function()
+      local t = prototypes.technology["elevated-rail"]
+      local packs = {}
+      for _, i in ipairs(t.research_unit_ingredients) do packs[#packs + 1] = i.name .. "=" .. i.amount end
+      table.sort(packs)
+      assert_.equals(table.concat(packs, ","), "automation-science-pack=1,chemical-science-pack=1,logistic-science-pack=1")
+      assert_.equals(t.research_unit_count, 500)
+      assert_.equals(t.research_unit_energy, 30 * 60)
+      local pre = {}
+      for name in pairs(t.prerequisites) do pre[#pre + 1] = name end
+      table.sort(pre)
+      assert_.equals(table.concat(pre, ","), "chemical-science-pack,concrete")
+      local unlocks, planner = {}, false
+      for _, e in ipairs(t.effects) do
+        if e.type == "unlock-recipe" then unlocks[#unlocks + 1] = e.recipe end
+        if e.type == "rail-planner-allow-elevated-rails" then planner = true end
+      end
+      table.sort(unlocks)
+      assert_.equals(table.concat(unlocks, ","), "rail-ramp,rail-support")
+      assert_.truthy(planner, "no longer allows elevated rails")
+      assert_.falsy(game.forces["player"].technologies["elevated-rail"].researched, "researched at the start")
     end,
   },
 }

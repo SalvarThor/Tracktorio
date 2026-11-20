@@ -463,8 +463,9 @@ Decided with the user (DECISIONS.md, 2026-11-20):
 - No map change in this phase; terrain that rewards elevated rails comes with procedural
   maps.
 
-- [ ] 2.7.1 Retune the Elevated rail tech (red + green + blue, 500 units, after Concrete
+- [x] 2.7.1 Retune the Elevated rail tech (red + green + blue, 500 units, after Concrete
       and Chemical science pack). Gating test: reachable, and nothing else changed.
+      (mod/prototypes/technology.lua, data-final-fixes.)
 - [ ] 2.7.2 Ramps, supports, elevated rails and signals: free once researched, locked
       before (restrictions test). Check rail supports on water (the lakes become
       crossable) and note what 2.1 allows.
