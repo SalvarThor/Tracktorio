@@ -494,7 +494,7 @@ Decided with the user (DECISIONS.md, 2026-11-20):
 
 At 1,000 tiles, 28 cities fill a disc of roughly 3,600 tiles' radius around spawn.
 
-- [ ] 2.8.1 Chain depth of every city type, worked out from the city recipes (raw inputs
+- [x] 2.8.1 Chain depth of every city type, worked out from the city recipes (raw inputs
       are 0, a city is one more than its deepest input). Test: the coal fuel depot and
       the coal power city are shallow and the rocket silo is the deepest. A new city type
       gets a depth with no extra code.

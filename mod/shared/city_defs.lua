@@ -355,6 +355,59 @@ for _, def in ipairs(M.list) do
   end
 end
 
+--- Everything a city consumes (any tier): recipe ingredients, burner fuel, lab inputs.
+---@return string[]
+local function inputs_of(def)
+  local names, seen = {}, {}
+  local function add(n) if not seen[n] then seen[n] = true; names[#names + 1] = n end end
+  for _, tier in ipairs(def.tiers) do
+    for _, ing in ipairs(tier.recipe and tier.recipe.ingredients or {}) do add(ing.name) end
+  end
+  if def.burner then add(def.burner.fuel) end
+  for _, n in ipairs(def.inputs or {}) do add(n) end
+  return names
+end
+
+-- product name -> city definitions that make it
+local producers = {}
+for _, def in ipairs(M.list) do
+  for _, tier in ipairs(def.tiers) do
+    for _, r in ipairs(tier.recipe and tier.recipe.results or {}) do
+      producers[r.name] = producers[r.name] or {}
+      producers[r.name][def.name] = def
+    end
+  end
+end
+
+--- Chain depth of every city definition (2.8.1): a city is one deeper than its deepest
+--- input, and an input no city makes (ore, coal, water, crude oil) is depth 0. Several
+--- producers of one input: the shallowest counts. Worked out from the recipes, so a new
+--- city type gets its depth for free. def name -> depth (1 = fed by raw resources only).
+M.depth = {}
+do
+  local visiting = {}
+  local function depth_of(def)
+    if M.depth[def.name] then return M.depth[def.name] end
+    if visiting[def.name] then return 0 end -- a loop: don't count it
+    visiting[def.name] = true
+    local deepest = 0
+    for _, input in ipairs(inputs_of(def)) do
+      local best
+      for _, p in pairs(producers[input] or {}) do
+        if p ~= def then
+          local d = depth_of(p)
+          if not best or d < best then best = d end
+        end
+      end
+      deepest = math.max(deepest, best or 0)
+    end
+    visiting[def.name] = nil
+    M.depth[def.name] = deepest + 1
+    return deepest + 1
+  end
+  for _, def in ipairs(M.list) do depth_of(def) end
+end
+
 --- Does this city entity feed a hidden generator (a power city of any tier)?
 ---@param entity_name string
 function M.is_power(entity_name)
