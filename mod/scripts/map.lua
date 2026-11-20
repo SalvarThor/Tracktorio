@@ -5,6 +5,7 @@ local config = require("shared.config")
 local cities = require("scripts.cities")
 local city_defs = require("shared.city_defs")
 local layout = require("scripts.layout")
+local sites = require("scripts.sites")
 
 local M = {}
 
@@ -330,6 +331,49 @@ function M.retry_blocked()
   end
 end
 
+-- 2.8.3: a site may move up to sites.SEARCH from its planned spot; cities stay at least
+-- this share of the spacing apart.
+M.MIN_APART = 0.8
+
+--- Place a procedural layout on a surface with real terrain (2.8.3): plan it from the
+--- seed, move each city to the nearest usable land, clear it and place the city. The
+--- placed layout is kept in storage.tt_layout[surface name] (for tags, 2.8.5). Returns the
+--- placed entries and the labels of any city that found no site.
+---@param surface LuaSurface
+---@param seed integer
+---@param spacing number
+function M.place_procedural(surface, seed, spacing)
+  local placed, missing = {}, {}
+  for _, c in ipairs(layout.plan(M.CITIES, seed, spacing)) do
+    local site = sites.find(surface, c.x, c.y, placed, spacing * M.MIN_APART)
+    if site then
+      sites.clear(surface, site.x, site.y)
+      local pos = { site.x + 0.5, site.y + 0.5 }
+      if surface.can_place_entity({ name = c.name, position = pos, force = "player" }) then
+        cities.place(c.name, surface, pos, "player")
+        c.planned = { x = c.x, y = c.y }
+        c.x, c.y = site.x, site.y
+        placed[#placed + 1] = c
+      else
+        missing[#missing + 1] = c.label
+        local what = {}
+        for _, e in pairs(surface.find_entities_filtered({ area = { { pos[1] - 5, pos[2] - 5 }, { pos[1] + 5, pos[2] + 5 } } })) do
+          what[#what + 1] = e.name .. "/" .. e.type
+        end
+        local tiles = {}
+        for _, tl in pairs(surface.find_tiles_filtered({ area = { { pos[1] - 5, pos[2] - 5 }, { pos[1] + 5, pos[2] + 5 } } })) do tiles[tl.name] = true end
+        log("tracktorio: site for " .. c.label .. " at " .. site.x .. "," .. site.y .. " is blocked by " .. serpent.line(what) .. " tiles " .. serpent.line(tiles))
+      end
+    else
+      missing[#missing + 1] = c.label
+    end
+  end
+  for _, label in ipairs(missing) do log("tracktorio: no site for " .. label) end
+  storage.tt_layout = storage.tt_layout or {}
+  storage.tt_layout[surface.name] = placed
+  return placed, missing
+end
+
 --- Move a player to the map and give the starting items (once).
 ---@param player LuaPlayer
 function M.setup_player(player)
@@ -354,6 +398,12 @@ function M.remote_interface()
     -- 2.8.2: procedural layout for a seed (spacing defaults to the startup setting)
     plan = function(seed, spacing) return layout.plan(M.CITIES, seed, spacing or layout.spacing()) end,
     spacing = function() return layout.spacing() end,
+    place_procedural = function(surface_name, seed, spacing)
+      local placed, missing = M.place_procedural(assert(game.get_surface(surface_name)), seed, spacing or layout.spacing())
+      return { placed = placed, missing = missing }
+    end,
+    mainland = function(surface_name, x, y) return sites.mainland(assert(game.get_surface(surface_name)), x, y) end,
+    find_site = function(surface_name, x, y) return sites.find(assert(game.get_surface(surface_name)), x, y) end,
     layout = function()
       return { width = M.WIDTH, height = M.HEIGHT, spawn = M.SPAWN, cities = M.CITIES,
         patches = M.PATCHES, lakes = M.LAKES }

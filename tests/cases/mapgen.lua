@@ -1,6 +1,7 @@
 -- 2.8: procedural maps.
 local assert_ = require("__tracktorio-tests__/assert")
 local city_defs = require("__tracktorio__/shared/city_defs")
+local h = require("__tracktorio-tests__/helpers")
 
 return {
   {
@@ -100,6 +101,74 @@ return {
       log("mapgen: mean distance by depth " .. serpent.line(mean))
       assert_.truthy(mean[5] > mean[1] * 1.3, "depth 5 " .. mean[5] .. " vs depth 1 " .. mean[1])
       assert_.truthy(mean[3] > mean[1], "depth 3 " .. mean[3] .. " vs depth 1 " .. mean[1])
+    end,
+  },
+  {
+    -- 2.8.3
+    name = "mapgen: a spot on an island is not mainland; open land and a lake shore are",
+    fn = function()
+      local s = h.surface()
+      local X, Y = 20000, 0
+      h.clear_area({ { X - 140, Y - 140 }, { X + 140, Y + 140 } })
+      local tiles = {}
+      for x = X - 130, X + 130 do
+        for y = Y - 130, Y + 130 do
+          local d = math.sqrt((x - X) ^ 2 + (y - Y) ^ 2)
+          if d > 30 and d < 120 then tiles[#tiles + 1] = { name = "water", position = { x, y } } end
+        end
+      end
+      s.set_tiles(tiles)
+      assert_.falsy(remote.call("tt-map", "mainland", s.name, X + 0.5, Y + 0.5), "island counted as mainland")
+      -- a shore: water on one side only
+      local fill = {}
+      for _, t in ipairs(tiles) do
+        if t.position[1] < X - 20 then fill[#fill + 1] = t else fill[#fill + 1] = { name = "grass-1", position = t.position } end
+      end
+      s.set_tiles(fill)
+      assert_.truthy(remote.call("tt-map", "mainland", s.name, X + 0.5, Y + 0.5), "lake shore not mainland")
+      local grass = {}
+      for _, t in ipairs(tiles) do grass[#grass + 1] = { name = "grass-1", position = t.position } end
+      s.set_tiles(grass)
+      assert_.truthy(remote.call("tt-map", "mainland", s.name, X + 0.5, Y + 0.5), "open land not mainland")
+    end,
+  },
+  {
+    name = "mapgen: on vanilla terrain every city gets a dry, clear mainland site near its planned spot",
+    fn = function()
+      -- 2.1: game.default_map_gen_settings mixes every planet (oil ocean, lava, ice); use
+      -- Nauvis's own
+      local mgs = game.surfaces["nauvis"].map_gen_settings
+      mgs.seed = 314159
+      mgs.no_enemies_mode = true
+      local s = game.create_surface("tt-mapgen-vanilla", mgs)
+      local spacing = 1000
+      local prof = helpers.create_profiler()
+      local result = remote.call("tt-map", "place_procedural", s.name, 314159, spacing)
+      prof.stop()
+      log({ "", "mapgen: placing the layout took ", prof }) ---@diagnostic disable-line: assign-type-mismatch
+      assert_.equals(#result.missing, 0, "no site for " .. serpent.line(result.missing))
+      assert_.equals(#result.placed, #remote.call("tt-map", "layout").cities, "placed")
+      local moved = 0
+      for i, c in ipairs(result.placed) do
+        local x, y = c.x + 0.5, c.y + 0.5
+        local area = { { x - 12.5, y - 12.5 }, { x + 12.5, y + 12.5 } }
+        assert_.equals(s.count_tiles_filtered({ area = area, collision_mask = "water_tile" }), 0, c.label .. " has water")
+        assert_.equals(s.count_entities_filtered({ area = area, type = { "cliff", "tree", "simple-entity" } }), 0,
+          c.label .. " has cliffs, trees or rocks")
+        local city = s.find_entities_filtered({ name = c.name, position = { x, y }, radius = 1 })
+        assert_.equals(#city, 1, c.label .. " not built")
+        assert_.truthy(remote.call("tt-map", "mainland", s.name, x, y), c.label .. " on an island")
+        local d = math.sqrt((c.x - c.planned.x) ^ 2 + (c.y - c.planned.y) ^ 2)
+        assert_.truthy(d <= 330, c.label .. " moved " .. d)
+        moved = math.max(moved, d)
+        for j = i + 1, #result.placed do
+          local o = result.placed[j]
+          local apart = math.sqrt((c.x - o.x) ^ 2 + (c.y - o.y) ^ 2)
+          assert_.truthy(apart >= 0.8 * spacing, c.label .. " and " .. o.label .. " " .. apart .. " apart")
+        end
+      end
+      log("mapgen: vanilla terrain, furthest move from the planned spot " .. math.floor(moved))
+      game.delete_surface(s)
     end,
   },
 }

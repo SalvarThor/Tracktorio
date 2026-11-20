@@ -504,7 +504,7 @@ At 1,000 tiles, 28 cities fill a disc of roughly 3,600 tiles' radius around spaw
       Startup setting "City spacing" (0.5x to 3x, default 1x = 1,000 tiles). Tests: the
       same seed gives the same layout, different seeds differ, spacing is never broken,
       the multiplier scales it, and deeper cities sit further out on average.
-- [ ] 2.8.3 Sites on real terrain: a planned spot moves to the nearest land that fits
+- [x] 2.8.3 Sites on real terrain: a planned spot moves to the nearest land that fits
       the city and a margin (no water, no cliffs), and trees, rocks and cliffs on the
       footprint are cleared. Only the chunks around each city are generated, not the
       whole disc. Tests on a surface with vanilla terrain: every city stands on land, is
