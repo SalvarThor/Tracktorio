@@ -469,7 +469,8 @@ Decided with the user (DECISIONS.md, 2026-11-20):
 - [x] 2.7.2 Ramps, supports, elevated rails and signals: free once researched, locked
       before (restrictions test). Check rail supports on water (the lakes become
       crossable) and note what 2.1 allows. (Supports stand on water and deep water.)
-- [ ] 2.7.3 End-to-end test: a train drives up a ramp, over a ground line, down to a stop.
-- [ ] 2.7.4 Limp mode, breakdowns and depot servicing for trains on elevated track (no
-      elevated train stops, so servicing stays on the ground).
+- [x] 2.7.3 End-to-end test: a train drives up a ramp, over a ground line, down to a stop.
+- [x] 2.7.4 Limp mode, breakdowns and depot servicing for trains on elevated track (no
+      elevated train stops, so servicing stays on the ground). (Limp and breakdown tested
+      on elevated track; servicing needs a stop, so it is unchanged.)
 - [ ] 2.7.5 `/playtest` round: research, building up and over, trains on elevated track.

@@ -4,6 +4,17 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.7.3-2.7.4 trains on elevated track
+- Tested on a scripted overpass (ground line, ramp up, elevated rails over a crossing
+  ground line, ramp down, ground stop): a fuelled train makes the trip; a fuel-empty train
+  limps over it under the limp speed cap and arrives; a train that breaks down on
+  elevated track limps and a repair to full health cures it. No mod code needed changing.
+- 2.1 notes: a script-created rail ramp is 16 tiles long; facing east, its ground end is
+  8 tiles west of its centre and its elevated end 8 east. `LuaEntity.rail_layer` works
+  only on rail signals; elevated rails are told apart by type ("elevated-...").
+- Servicing still needs a train stop near a depot. Elevated track has no stops, so a train
+  is serviced on the ground as before.
+
 ## 2026-11-20: 2.7.1-2.7.2 elevated rail research and items
 - Elevated rail retuned in mod/prototypes/technology.lua (data-final-fixes, before the
   restrictions pass): 500 x red/green/blue x 30 s after Concrete and Chemical science pack.
