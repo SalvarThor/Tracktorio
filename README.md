@@ -8,8 +8,8 @@ network, and design the stations that feed and drain the cities. Cities chain ac
 map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
 
-> Status: in development. Post-MVP phases 2.1 to 2.7 are built and playtested; 2.8
-> (procedural maps) is in its last playtest. Not on the mod portal yet.
+> Status: in development. Post-MVP phases 2.1 to 2.8 (procedural maps) are built and
+> playtested. Next: the water city. Not on the mod portal yet.
 
 ## How to play
 

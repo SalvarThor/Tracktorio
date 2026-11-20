@@ -550,4 +550,7 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       must be near the start (2.8.14).
 - [x] 2.8.14 Starter power city 200-350 tiles from spawn, by the depot (that pair is exempt
       from the minimum); power cities (coal and nuclear) keep 3x the minimum apart. Tested.
-- [ ] 2.8.15 `/playtest`: the starter power city and power city spread.
+- [x] 2.8.15 `/playtest`: the starter power city and power city spread. Playtest
+      2026-11-20: passed. Dump: started from the scenario, 26 cities; depot 81 tiles from
+      spawn, starter power city 334; other power cities 2,200-3,300 out, the closest two
+      1,901 apart.
