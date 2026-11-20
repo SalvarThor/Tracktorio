@@ -26,7 +26,7 @@ $writeData = $TT.WriteData -replace '\\', '/'
 read-data=__PATH__executable__/../../data
 write-data=$writeData
 [other]
-check-updates=false
+; 2.1 has no check-updates key: an unknown key makes the main menu offer to reset the file
 enable-new-mods=false
 [sound]
 master-volume=0
