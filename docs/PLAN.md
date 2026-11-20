@@ -600,3 +600,72 @@ Decided with the user (DECISIONS.md, 2026-11-20):
       2026-11-20: passed; the water train was skipped as vanilla behaviour, to be covered
       by a full run. Dump: 30 cities; the starter water city upgraded to tier 2, 59 tiles
       from the starter power city, which was producing.
+
+### Phase 2.10: Factorissimo buildings and belt ports (approved by the user 2026-11-20)
+
+Decided with the user (2026-11-20):
+- Cities use the Factorissimo 3 building art, copied in (MIT, (c) MagmaMcFry; the license
+  notice ships beside the files). No mod dependency, no Factorissimo code.
+- Cities grow with tier: tier 1 is the 8x8 building, tier 2 the 12x12, tier 3 the 16x16.
+- Items go in and out only through belt ports: a belt runs straight into a port on the
+  wall. Inserters can't reach a city. Fluids stay on pipes and pumps.
+- One port per item. Tier 1 needs at most one yellow belt per item (15/s ore into a
+  smelting city), tier 2 one red belt (30/s). Tier 3 smelting cities (60/s) get two
+  ports per item; every other tier 3 item fits one blue belt (45/s). A port runs at full
+  belt speed, so the player's belt is the limit.
+- This changes the spec: "black boxes accept items only through inserters and pumps" and
+  the fixed city size.
+- Port lines stay put across tiers: a port sits on a fixed line out from the centre, and
+  when the building grows its wall moves 2 tiles out along that line. The upgrade removes
+  whatever the player built inside the new footprint (returned to the player, like
+  mining it), so a belt that ran into the old port is now 2 tiles shorter and runs into
+  the new one. Stations keep working through an upgrade.
+- The 16x16 footprint is marked on the ground from the start.
+- No separate chests: construction materials and the depot's repair packs go in through
+  belt ports on the building like everything else. The construction and service port
+  chests are removed.
+
+Port spots follow the Factorissimo art (offsets along each wall from its centre; the
+south wall has the door in the middle on every building):
+- 8x8: +-1.5, +-2.5 (4 per wall). 12x12: +-2.5, +-3.5, +-4.5 (6 per wall). 16x16: +-2.5
+  to +-5.5 (8 per wall).
+- The +-2.5 lines exist at every tier, so tier 1 ports use only those: 8 spots, enough
+  for the busiest city (blue science: 4 in, 1 out, construction). The +-1.5 spots of the
+  8x8 building stay unused, since they'd vanish at tier 2. Tier 3 smelting's second ports
+  use lines that tier 3 adds.
+- Pipes connect at port spots too, as in Factorissimo.
+
+- [ ] 2.10.1 Spike: a hidden, indestructible loader-1x1 at a port spot fills a city's
+      inputs and empties its outputs at full belt speed, filtered to its item. Check every
+      city kind: the assembling-machine cities, the nuclear city's fuel slot, the rocket
+      silo. Also check how a port can take items the recipe doesn't use (construction
+      materials, repair packs): e.g. a loader into a hidden container inside the
+      building, counted by script. Record what 2.1 does in DECISIONS.md. Fallback if a
+      kind won't take a loader: script moves the items (to be discussed first).
+- [ ] 2.10.2 Art: copy the three building images and shadows (and the port marker dots)
+      into `mod/graphics/factorissimo/` with the LICENSE. Credit in README. Cities use
+      them at 8/12/16 tiles by tier instead of the scaled vanilla stand-ins.
+- [ ] 2.10.3 Sizes: city prototypes become 8x8 / 12x12 / 16x16 by tier (even sizes, so
+      centres sit on a tile corner; placement, sites and the layout adjust).
+- [ ] 2.10.4 Belt ports: each item in and out gets a port at a fixed spot on the wall,
+      Tier 3 smelting gets two per item. Every port is clearly marked: its item's icon and
+      an in or out arrow drawn on the ground at the port, and named in the tooltip (user:
+      which spots are used matters little as long as each port is clearly marked).
+- [ ] 2.10.5 No inserters on cities: an inserter whose pickup or drop target is a city is
+      refused when built, with a message pointing at the ports.
+- [ ] 2.10.6 Construction and service by port: a construction port on the building takes
+      the next tier's materials (filtered to what is still needed) and the depot's service
+      port takes repair packs. The chests and their scripts go.
+- [ ] 2.10.7 Growing: the upgrade swaps in the bigger building, clears the new footprint
+      (returning the player's entities), moves ports and pipe connections 2 tiles out
+      along their lines, and keeps everything in the city.
+- [ ] 2.10.8 Footprint: the 16x16 area is marked on the ground from the start; sites
+      reserve it (site search, layout, the fixed test map).
+- [ ] 2.10.9 City window: ports listed with item, direction and the belt needed at this
+      tier.
+- [ ] 2.10.10 Tests: helpers feed cities by belt instead of inserter; rate tests per tier
+      (tier 1 at one yellow belt per item, tier 3 smelting at two blue belts); upgrade
+      keeps a belt connected.
+- [ ] 2.10.11 SPEC, README and DECISIONS updated.
+- [ ] 2.10.12 `/playtest`: building a station on belt ports, an upgrade growing a city with
+      its belts still connected, the new art at all three tiers.

@@ -4,6 +4,24 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: phase 2.10, Factorissimo buildings and belt ports (user decisions)
+- Art: the Factorissimo 3 buildings (MIT, (c) MagmaMcFry, checked in the 3.11.19 package;
+  no separate art license), copied in with the license notice. No dependency, no code:
+  Factorissimo's belt connections link to an inside surface, which we don't have.
+- Size grows with tier: 8x8, 12x12, 16x16. Rejected: one size for every tier; size by
+  city type.
+- Items go in and out only by belt ports; inserters can't reach a city. Rejected: ports
+  alongside inserters. Fluids stay on pipes, at port spots.
+- One port per item. Tier 1 peaks at 15/s (one yellow belt), tier 2 at 30/s (red). Tier 3
+  smelting (60/s) gets two ports per item: turbo belts need Vulcanus research, unreachable
+  with planets off. Rejected: tier 3 smelting slowed to 45/s; turbo belts made
+  researchable.
+- Port lines stay put through upgrades: the upgrade clears the new footprint and a belt
+  into the old port runs into the new one. The 16x16 footprint is marked from the start.
+- The construction and service chests go: those items enter through ports on the
+  building too (user: conceptually they are part of the city).
+- Every port is clearly marked (item icon, in/out arrow); which spots are used matters
+  less (user).
 ## 2026-11-20: water stays plentiful
 - Water cities keep 600/1,200/2,400 water/s. Four tier 1 water cities supply 2,400/s
   against 979/1,958/3,916 demand at tiers 1-3, so supply is never the limit.
