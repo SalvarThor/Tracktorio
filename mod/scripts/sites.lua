@@ -160,11 +160,12 @@ end
 ---@param x integer
 ---@param y integer
 ---@param taken table[]?
----@param apart number?
+---@param apart (number|fun(t: table): number)? distance to keep from each taken site
 function M.find(surface, x, y, taken, apart)
   local function free(cx, cy)
     for _, t in ipairs(taken or {}) do
-      if (t.x - cx) ^ 2 + (t.y - cy) ^ 2 < (apart or 0) ^ 2 then return false end
+      local need = type(apart) == "function" and apart(t) or apart or 0
+      if (t.x - cx) ^ 2 + (t.y - cy) ^ 2 < need * need then return false end
     end
     return true
   end

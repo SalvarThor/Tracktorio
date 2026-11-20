@@ -545,4 +545,9 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       floor; each city draws its own elbow room (1x..4x, skewed low), and two cities keep
       the larger of their two apart. Nearest neighbour over 10 seeds: min 515, median
       974, 10% under 581, 10% over 1,852. Tested.
-- [ ] 2.8.13 `/playtest`: the varied layout (look at the map at the start).
+- [x] 2.8.13 `/playtest`: the varied layout (look at the map at the start). Playtest
+      2026-11-20: passed; findings: power cities need more room between them, and one
+      must be near the start (2.8.14).
+- [x] 2.8.14 Starter power city 200-350 tiles from spawn, by the depot (that pair is exempt
+      from the minimum); power cities (coal and nuclear) keep 3x the minimum apart. Tested.
+- [ ] 2.8.15 `/playtest`: the starter power city and power city spread.

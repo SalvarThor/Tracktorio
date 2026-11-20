@@ -3,6 +3,11 @@ local assert_ = require("__tracktorio-tests__/assert")
 local city_defs = require("__tracktorio__/shared/city_defs")
 local h = require("__tracktorio-tests__/helpers")
 
+--- The one pair allowed under the minimum: the coal fuel depot and the starter power city.
+local function exempt(a, b)
+  return (a.name == "tt-city-depot" and b.starter) or (b.name == "tt-city-depot" and a.starter)
+end
+
 return {
   {
     -- 2.8.1
@@ -47,7 +52,8 @@ return {
           for j = i + 1, #plan do
             local b = plan[j]
             local d = math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
-            assert_.truthy(d >= spacing, a.label .. " and " .. b.label .. " only " .. d .. " apart, seed " .. seed)
+            local need = remote.call("tt-map", "need", a, b, spacing)
+            assert_.truthy(d >= need, a.label .. " and " .. b.label .. " only " .. d .. " apart (need " .. need .. "), seed " .. seed)
           end
         end
         assert_.equals(depots, 1, "depots")
@@ -71,7 +77,9 @@ return {
         for i, a in ipairs(plan) do
           max_r = math.max(max_r, math.sqrt(a.x ^ 2 + a.y ^ 2))
           for j = i + 1, #plan do
-            min_pair = math.min(min_pair, math.sqrt((a.x - plan[j].x) ^ 2 + (a.y - plan[j].y) ^ 2))
+            if not exempt(a, plan[j]) then
+              min_pair = math.min(min_pair, math.sqrt((a.x - plan[j].x) ^ 2 + (a.y - plan[j].y) ^ 2))
+            end
           end
         end
         return min_pair, max_r
@@ -115,7 +123,7 @@ return {
         for i, a in ipairs(plan) do
           local nearest = math.huge
           for j, b in ipairs(plan) do
-            if i ~= j then nearest = math.min(nearest, math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)) end
+            if i ~= j and not exempt(a, b) then nearest = math.min(nearest, math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)) end
           end
           all[#all + 1] = nearest
         end
@@ -126,6 +134,32 @@ return {
       assert_.truthy(all[1] >= 500, "below the minimum: " .. all[1])
       assert_.truthy(p10 < 700, "few cities near the minimum: p10 " .. p10)
       assert_.truthy(p90 > 2 * p10, "too uniform: p90 " .. p90 .. " vs p10 " .. p10)
+    end,
+  },
+  {
+    -- playtest 2.8.13: one power city by the start; power cities far apart
+    name = "mapgen: a starter power city sits by the depot; power cities keep 3x the minimum apart",
+    fn = function()
+      for seed = 1, 10 do
+        local plan = remote.call("tt-map", "plan", seed, 500)
+        local starters, power = 0, {}
+        for _, c in ipairs(plan) do
+          if c.starter then
+            starters = starters + 1
+            local d = math.sqrt(c.x ^ 2 + c.y ^ 2)
+            assert_.truthy(d >= 180 and d <= 400, "starter power city " .. d .. " from spawn, seed " .. seed)
+          end
+          if c.name == "tt-city-power" or c.name == "tt-city-nuclear-power" then power[#power + 1] = c end
+        end
+        assert_.equals(starters, 1, "starter power cities, seed " .. seed)
+        for i, a in ipairs(power) do
+          for j = i + 1, #power do
+            local b = power[j]
+            local d = math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
+            assert_.truthy(d >= 1500, a.label .. " and " .. b.label .. " " .. d .. " apart, seed " .. seed)
+          end
+        end
+      end
     end,
   },
   {
@@ -232,7 +266,7 @@ return {
         for j = i + 1, #result.placed do
           local o = result.placed[j]
           local apart = math.sqrt((c.x - o.x) ^ 2 + (c.y - o.y) ^ 2)
-          assert_.truthy(apart >= spacing, c.label .. " and " .. o.label .. " " .. apart .. " apart")
+          assert_.truthy(apart >= remote.call("tt-map", "need", c, o, spacing), c.label .. " and " .. o.label .. " " .. apart .. " apart")
         end
       end
       log("mapgen: vanilla terrain, furthest move from the planned spot " .. math.floor(moved))

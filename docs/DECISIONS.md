@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.8.14 starter power city, power cities further apart (user, playtest 2.8.13)
+- User: "make sure one appears fairly close to the start. you really need power and fuel
+  to even start properly." The first coal power city is the starter. It plans 200-350
+  tiles from spawn, right after the depot, and the depot-starter pair is the one pair
+  exempt from the 500-tile minimum (they only keep 100 apart). The starter's elbow room is
+  the minimum, like the depot's.
+- Power cities (coal and nuclear) keep at least 3x the minimum apart: 1,500 tiles at 1x.
+- One function (layout.need) gives the distance any two cities must keep. The planner and
+  the site search on real terrain both use it, so moving a site can't break these rules.
+- Measured (10 seeds, 1x): starter 200-350 tiles from spawn; mean distance of the other
+  coal power cities 4,400 / 5,200 / 7,000; nearest neighbour otherwise min 527, median
+  956. All tuning.
+- Rejected: making the starter keep the full 500 from the depot (~550 tiles from spawn),
+  which is the walk the user wants to avoid.
+
 ## 2026-11-20: 2.8.12 varied city distances (user, playtest 2.8.11)
 - At 750 tiles the layout was "too uniform": every city kept the same distance, which
   packs them into an even grid. User: "I'd like the minimum distance to be as low as 500

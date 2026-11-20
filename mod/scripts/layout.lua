@@ -17,6 +17,27 @@ M.SPACING = 500
 -- apart, so some sit 500 tiles from a neighbour and others alone in open country.
 M.GAP_SPREAD, M.GAP_SKEW = 3, 2.5
 M.DEPOT_RADIUS = { 40, 80 } -- the coal fuel depot's distance from spawn
+-- The first coal power city is the starter: power and fuel are what the start needs
+-- (playtest 2.8.13), so it plans this far from spawn, next to the depot, and that one pair
+-- is exempt from the minimum (they only keep STARTER_APART).
+M.STARTER_RADIUS = { 200, 350 }
+M.STARTER_APART = 100
+-- Power cities (coal and nuclear) keep at least this many spacings apart (playtest 2.8.13).
+M.POWER_APART = 3
+
+local POWER = { [config.CITY.power] = true, ["tt-city-nuclear-power"] = true }
+
+--- Distance two planned cities must keep apart (entries with name, gap, starter).
+---@param a table
+---@param b table
+---@param spacing number
+function M.need(a, b, spacing)
+  local depot = config.CITY.depot
+  if (a.name == depot and b.starter) or (b.name == depot and a.starter) then return M.STARTER_APART end
+  local need = math.max(a.gap or spacing, b.gap or spacing)
+  if POWER[a.name] and POWER[b.name] then need = math.max(need, M.POWER_APART * spacing) end
+  return need
+end
 -- Distance from spawn, in spacings: MIN_R + SPREAD * (DEPTH_WEIGHT * depth share +
 -- (1 - DEPTH_WEIGHT) * random). Crowding pushes a city further out.
 M.MIN_R, M.SPREAD, M.DEPTH_WEIGHT = 1.5, 5, 0.4
@@ -63,32 +84,37 @@ function M.plan(cities, seed, spacing)
     e.copy = copies[c.name] or 0
     copies[c.name] = e.copy + 1
     e.depth = depth_of(c.name) + e.copy
+    e.starter = c.name == config.CITY.power and e.copy == 0 or nil
     e.order = rng()
     max_depth = math.max(max_depth, e.depth)
     todo[#todo + 1] = e
   end
-  -- the depot first, then shallow before deep (ties in random order)
+  -- the depot first, then the starter power city, then shallow before deep (ties random)
   table.sort(todo, function(a, b)
     local da, db = a.name == config.CITY.depot, b.name == config.CITY.depot
     if da ~= db then return da end
+    if (a.starter or false) ~= (b.starter or false) then return a.starter or false end
     if a.depth ~= b.depth then return a.depth < b.depth end
     return a.order < b.order
   end)
 
   local placed = {}
-  local function clear(x, y, gap)
+  local function clear(x, y, e)
     for _, p in ipairs(placed) do
-      local need = math.max(gap, p.gap)
+      local need = M.need(e, p, spacing)
       if (p.x - x) ^ 2 + (p.y - y) ^ 2 < need * need then return false end
     end
     return true
   end
   for _, e in ipairs(todo) do
-    -- (the depot by spawn keeps only the minimum, or it would push the early game away)
-    e.gap = e.name == config.CITY.depot and spacing or spacing * (1 + M.GAP_SPREAD * rng() ^ M.GAP_SKEW)
+    -- (the depot and the starter keep only the minimum, or they'd push the early game away)
+    local early = e.name == config.CITY.depot or e.starter
+    e.gap = early and spacing or spacing * (1 + M.GAP_SPREAD * rng() ^ M.GAP_SKEW)
     local r
     if e.name == config.CITY.depot then
       r = M.DEPOT_RADIUS[1] + rng() * (M.DEPOT_RADIUS[2] - M.DEPOT_RADIUS[1])
+    elseif e.starter then
+      r = M.STARTER_RADIUS[1] + rng() * (M.STARTER_RADIUS[2] - M.STARTER_RADIUS[1])
     else
       local share = max_depth > 1 and (e.depth - 1) / (max_depth - 1) or 0
       r = spacing * (M.MIN_R + M.SPREAD * (M.DEPTH_WEIGHT * share + (1 - M.DEPTH_WEIGHT) * rng()))
@@ -99,7 +125,7 @@ function M.plan(cities, seed, spacing)
         local a = rng() * 2 * math.pi
         local rr = r * (0.9 + 0.2 * rng())
         local x, y = math.floor(rr * math.cos(a)), math.floor(rr * math.sin(a))
-        if clear(x, y, e.gap) then
+        if clear(x, y, e) then
           e.x, e.y = x, y
           done = true
           break

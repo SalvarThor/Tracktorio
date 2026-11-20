@@ -372,7 +372,9 @@ end
 function M.place_procedural(surface, seed, spacing)
   local placed, missing = {}, {}
   for _, c in ipairs(layout.plan(M.CITIES, seed, spacing)) do
-    local site = sites.find(surface, c.x, c.y, placed, spacing * M.MIN_APART)
+    -- the same pair rules as the plan (starter by the depot, power cities further apart)
+    local function apart(t) return layout.need(c, t, spacing) * M.MIN_APART end
+    local site = sites.find(surface, c.x, c.y, placed, apart)
     -- no land near the planned spot (a big lake): same distance from spawn, turned around
     -- spawn in ALT_TURN steps, so the depth weighting holds
     local turn = 0
@@ -382,7 +384,7 @@ function M.place_procedural(surface, seed, spacing)
       local a = math.rad(M.ALT_TURN * math.ceil(turn / 2) * (turn % 2 == 1 and 1 or -1))
       local ca, sa = math.cos(a), math.sin(a)
       local ax, ay = math.floor(c.x * ca - c.y * sa), math.floor(c.x * sa + c.y * ca)
-      site = sites.find(surface, ax, ay, placed, spacing * M.MIN_APART)
+      site = sites.find(surface, ax, ay, placed, apart)
     end
     if site then
       sites.clear(surface, site.x, site.y)
@@ -470,6 +472,7 @@ function M.remote_interface()
     plan = function(seed, spacing) return layout.plan(M.CITIES, seed, spacing or layout.spacing()) end,
     spacing = function() return layout.spacing() end,
     compass_names = function(placed) M.compass_names(placed); return placed end,
+    need = function(a, b, spacing) return layout.need(a, b, spacing or layout.spacing()) end,
     place_procedural = function(surface_name, seed, spacing)
       local placed, missing = M.place_procedural(assert(game.get_surface(surface_name)), seed, spacing or layout.spacing())
       return { placed = placed, missing = missing }
