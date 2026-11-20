@@ -1,7 +1,7 @@
 -- 2.1.1: city tier prototypes (3 tiers, x1/x2/x4; electric smelting from tier 2).
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
-local defs = require("__train-tycoon__/shared/city_defs")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
+local defs = require("__tracktorio__/shared/city_defs")
 
 --- Max output per minute of a city prototype's first product (labs: research speed).
 local function max_per_min(entity_name)

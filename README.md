@@ -1,4 +1,4 @@
-# Train Tycoon
+# Tracktorio
 
 A Factorio 2.1 mod (with Space Age) where **trains are the whole game**.
 
@@ -135,7 +135,7 @@ Layout:
 
 ```
 mod/        the mod (prototypes, scripts, locale, scenario)
-tests/      test mod train-tycoon-tests: runner and test cases
+tests/      test mod tracktorio-tests: runner and test cases
 tools/      PowerShell scripts (dev instance, check, tests, playtest)
 docs/       SPEC, PLAN, DECISIONS, ENV
 ```

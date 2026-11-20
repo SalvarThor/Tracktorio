@@ -1,6 +1,6 @@
 -- 2.5.6: rocket silo city.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local SILO = "tt-city-rocket-silo"
 local X = 10000

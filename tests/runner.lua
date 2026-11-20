@@ -9,7 +9,7 @@
 -- This file runs in the scenario's Lua state, which is never saved or loaded in test mode,
 -- so plain locals are fine here. Do not copy this pattern into the mod.
 
-local index = require("__train-tycoon-tests__/cases/index")
+local index = require("__tracktorio-tests__/cases/index")
 
 local RESULTS_FILE = "tt-test-results.json"
 
@@ -159,7 +159,7 @@ end
 
 script.on_event(defines.events.on_tick, on_tick)
 -- Locale checks: tests call player.request_translation and read helpers.translations[id].
-local test_helpers = require("__train-tycoon-tests__/helpers")
+local test_helpers = require("__tracktorio-tests__/helpers")
 script.on_event(defines.events.on_string_translated, function(e)
   test_helpers.translations[e.id] = e
 end)

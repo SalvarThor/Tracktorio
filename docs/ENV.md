@@ -33,7 +33,7 @@ can run while the user plays.
 - Created and repaired by `tools\dev-instance.ps1` (idempotent).
 - Playtest instance: `<repo>\.factorio-play\`, same layout, created with
   `tools\dev-instance.ps1 -Instance play` and used by `tools\playtest.ps1`. It loads
-  train-tycoon only (no tests mod). It is separate so tests can run while a playtest is open
+  tracktorio only (no tests mod). It is separate so tests can run while a playtest is open
   (Factorio locks the write-data folder of a running game). Its log is
   `.factorio-play\data\factorio-current.log`; `/tt-dump` writes
   `.factorio-play\data\script-output\tt-dump.json`.

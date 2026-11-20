@@ -1,5 +1,5 @@
 -- Test-only prototypes, built with the mod's own city generator.
-local blackbox = require("__train-tycoon__/prototypes/blackbox")
+local blackbox = require("__tracktorio__/prototypes/blackbox")
 
 data:extend(blackbox.make_city({
   name = "test",

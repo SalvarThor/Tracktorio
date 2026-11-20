@@ -9,10 +9,10 @@
   The first launch uses default graphics settings (saved in .factorio-play\config\config.ini
   afterwards). The tests mod is not loaded here.
 .PARAMETER Scenario
-  [MOD/]NAME, default train-tycoon/train-tycoon (the MVP scenario, Phase 1.8).
+  [MOD/]NAME, default tracktorio/tracktorio (the MVP scenario, Phase 1.8).
 #>
 [CmdletBinding()]
-param([string]$Scenario = 'train-tycoon/train-tycoon')
+param([string]$Scenario = 'tracktorio/tracktorio')
 $ErrorActionPreference = 'Stop'
 $TTInstance = 'play'
 . "$PSScriptRoot\common.ps1"

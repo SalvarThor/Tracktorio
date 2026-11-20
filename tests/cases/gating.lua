@@ -1,7 +1,7 @@
 -- 2.2.4 / 2.5.5: research gating. The part of the tech tree that needs only the packs the
 -- research complex takes (red, green, blue) can be completed; trigger technologies the
 -- player can't meet yet are known and listed.
-local assert_ = require("__train-tycoon-tests__/assert")
+local assert_ = require("__tracktorio-tests__/assert")
 
 --- Packs the research complex takes (read from its prototype).
 local function complex_packs()

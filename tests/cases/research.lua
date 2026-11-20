@@ -1,6 +1,6 @@
 -- 2.2.3: the research complex, a lab-type city; the engine runs research.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local X = 5000
 local RED, GREEN = "automation-science-pack", "logistic-science-pack"

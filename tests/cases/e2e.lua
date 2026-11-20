@@ -5,8 +5,8 @@
 -- centre y = Y + 1. Train = loco(E) + cargo wagon + loco(W). An eastbound stop sits 2 tiles
 -- south of the rail centre and the wagon stops 10 tiles behind it; a westbound stop sits
 -- 2 tiles north and the wagon stops 10 tiles past it. The wagon spans x +-3 and y Y..Y+2.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local E, W, N, S = defines.direction.east, defines.direction.west, defines.direction.north, defines.direction.south
 local Y = 200

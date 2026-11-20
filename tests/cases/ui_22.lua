@@ -1,6 +1,6 @@
 -- 2.2.7: UI for the intermediate cities and the research complex.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local X = 5600
 

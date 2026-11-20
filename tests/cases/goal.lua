@@ -1,6 +1,6 @@
 -- 1.5: goal box, cumulative delivery count, win condition, progress panel.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local GOAL = "tt-city-goal"
 

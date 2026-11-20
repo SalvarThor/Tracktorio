@@ -1,7 +1,7 @@
 -- 2.2.2: circuit, red science and green science cities.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
-local defs = require("__train-tycoon__/shared/city_defs")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
+local defs = require("__tracktorio__/shared/city_defs")
 
 local function per_min(name)
   local p = prototypes.entity[name]

@@ -1,6 +1,6 @@
 -- 1.3: iron/copper smelting cities, depot city, coal fuel as the only locomotive fuel.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local function converts(city_name, x, inputs, output_item, powered)
   return function(ctx)

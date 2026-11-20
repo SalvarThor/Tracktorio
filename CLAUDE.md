@@ -1,4 +1,4 @@
-# Train Tycoon (Factorio 2.1 mod + scenario)
+# Tracktorio (Factorio 2.1 mod + scenario)
 
 A Factorio mod where trains are the whole game. Production is handled by fixed-location
 "black box" cities that convert inputs to outputs automatically. The player mines raw
@@ -49,7 +49,7 @@ The design spec is authoritative:
 - Quality, planets and space platforms are disabled.
 
 ## Technical conventions
-- Internal mod name `train-tycoon`. Prefix every prototype and storage key with `tt-`.
+- Internal mod name `tracktorio`. Prefix every prototype and storage key with `tt-`.
 - Lua rules for this codebase are in `.claude/rules/factorio-lua.md` (load automatically for
   .lua files).
 - Every prototype gets a locale entry in `mod/locale/en/`.
@@ -70,7 +70,7 @@ docs/ENV.md              machine paths and commands (created in Phase 0)
 .claude/skills/          /test and /playtest procedures
 mod/                     the mod (info.json, settings.lua, data.lua, control.lua, locale/, ...)
 mod/scenarios/           the MVP scenario ships inside the mod
-tests/                   mod `train-tycoon-tests`: test scenario, runner, test cases
+tests/                   mod `tracktorio-tests`: test scenario, runner, test cases
 tools/                   PowerShell helper scripts (launch server, run tests, read log)
 ```
 

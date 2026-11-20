@@ -1,6 +1,6 @@
 -- Deliberately failing tests. They run only with run-tests.ps1 -SelfTest and must all be
 -- reported as FAILED, while the passing one must still pass.
-local assert_ = require("__train-tycoon-tests__/assert")
+local assert_ = require("__tracktorio-tests__/assert")
 
 return {
   {

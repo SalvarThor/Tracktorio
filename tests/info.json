@@ -1,9 +1,9 @@
 {
-  "name": "train-tycoon-tests",
+  "name": "tracktorio-tests",
   "version": "0.0.1",
-  "title": "Train Tycoon: tests",
+  "title": "Tracktorio: tests",
   "author": "Salvar",
-  "description": "In-game automated tests for Train Tycoon. Dev instance only; never shipped.",
+  "description": "In-game automated tests for Tracktorio. Dev instance only; never shipped.",
   "factorio_version": "2.1",
-  "dependencies": ["train-tycoon"]
+  "dependencies": ["tracktorio"]
 }

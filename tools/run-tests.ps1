@@ -3,7 +3,7 @@
 .SYNOPSIS
   Run the in-game test suite headless in the dev instance and report the results.
 .DESCRIPTION
-  Uses Factorio 2.1.24's --test-scenario: the test scenario (train-tycoon-tests/tt-tests)
+  Uses Factorio 2.1.24's --test-scenario: the test scenario (tracktorio-tests/tt-tests)
   runs the tests, writes script-output\tt-test-results.json and calls
   script.finish_test(passed). A run counts as passed only if the game exits 0 AND a results
   file with this run's id reports failed=0, passed>0. (--test-ticks exits 0 on timeout, so
@@ -37,7 +37,7 @@ $runId = [guid]::NewGuid().ToString('N').Substring(0, 12)
 $testArg = "run=$runId;filter=$Filter;selftest=$(if ($SelfTest) { 1 } else { 0 })"
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $r = Invoke-TTFactorio -TimeoutSec $TimeoutSec -Arguments @(
-    '--test-scenario', 'train-tycoon-tests/tt-tests',
+    '--test-scenario', 'tracktorio-tests/tt-tests',
     '--test-arg', "`"$testArg`"",
     '--test-ticks', "$MaxTicks",
     '--disable-audio'
@@ -98,11 +98,11 @@ if ($r.ExitCode -ne 0 -or $results.failed -gt 0 -or $results.passed -eq 0) { exi
 # (--test-ticks exits 0 when the ticks run out, 1 on any error.)
 if (-not $Filter) {
     $s = Invoke-TTFactorio -TimeoutSec 180 -Arguments @(
-        '--test-scenario', 'train-tycoon/train-tycoon', '--test-ticks', '300', '--disable-audio')
+        '--test-scenario', 'tracktorio/tracktorio', '--test-ticks', '300', '--disable-audio')
     if ($s.TimedOut -or $s.ExitCode -ne 0) {
-        Write-Host "SCENARIO SMOKE FAILED: train-tycoon/train-tycoon (exit $($s.ExitCode))"
+        Write-Host "SCENARIO SMOKE FAILED: tracktorio/tracktorio (exit $($s.ExitCode))"
         Show-LogTail; exit 2
     }
-    Write-Host 'scenario smoke: train-tycoon/train-tycoon loads and runs 300 ticks'
+    Write-Host 'scenario smoke: tracktorio/tracktorio loads and runs 300 ticks'
 }
 exit 0

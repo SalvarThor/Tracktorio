@@ -35,7 +35,21 @@ master-volume=0
 # Junctions: <mods>\<name> -> repo folder. Recreate if pointing elsewhere.
 # The playtest instance gets the mod only, not the tests mod.
 $links = [ordered]@{}
-foreach ($k in $TT.Junctions.Keys) { if ($Instance -eq 'test' -or $k -ne 'train-tycoon-tests') { $links[$k] = $TT.Junctions[$k] } }
+foreach ($k in $TT.Junctions.Keys) { if ($Instance -eq 'test' -or $k -ne 'tracktorio-tests') { $links[$k] = $TT.Junctions[$k] } }
+# Stale junctions into this repo that are no longer wanted (a renamed mod, e.g. the
+# train-tycoon -> tracktorio rename; the tests mod in the playtest instance) would load a
+# second copy of the mod. Unlink them: non-recursive, removes the link only.
+if (Test-Path $TT.ModsDir) {
+    $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path.TrimEnd('\')
+    foreach ($item in Get-ChildItem $TT.ModsDir -Force -Directory -ErrorAction SilentlyContinue) {
+        if ($item.LinkType -ne 'Junction' -or $links.Contains($item.Name)) { continue }
+        $target = [string]$item.Target
+        if ($target.TrimEnd('\').StartsWith($repoRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+            [System.IO.Directory]::Delete($item.FullName)
+            Write-Host "removed stale junction $($item.Name)"
+        }
+    }
+}
 foreach ($link in $links.GetEnumerator()) {
     $path = Join-Path $TT.ModsDir $link.Key
     $target = $link.Value
@@ -52,7 +66,7 @@ foreach ($link in $links.GetEnumerator()) {
 
 $enabled = [ordered]@{}
 foreach ($m in @('base', 'elevated-rails', 'recycler', 'space-age')) { $enabled[$m] = $true }
-$enabled['quality'] = $false   # train-tycoon declares "! quality"
+$enabled['quality'] = $false   # tracktorio declares "! quality"
 foreach ($m in $links.Keys) { if (Test-Path $links[$m]) { $enabled[$m] = $true } }
 foreach ($m in $Disable) { $enabled[$m] = $false }
 $modList = @{ mods = @($enabled.GetEnumerator() | ForEach-Object { [ordered]@{ name = $_.Key; enabled = $_.Value } }) }

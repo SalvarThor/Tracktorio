@@ -1,7 +1,7 @@
 -- 2.5: cities of the rocket chain. Each case: tier 1 rates (per second), power, and a real
 -- run with infinity pipes (supply at the bottom, drain at the top) and items inserted.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local X = 9400
 

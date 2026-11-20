@@ -37,7 +37,7 @@ end
 function M.dump(player_index)
   local json = helpers.table_to_json({
     tick = game.tick,
-    mod_version = script.active_mods["train-tycoon"],
+    mod_version = script.active_mods["tracktorio"],
     storage = sanitize(storage, {}),
   })
   helpers.write_file(M.DUMP_FILE, json, false, player_index)
@@ -124,7 +124,7 @@ function M.register()
   commands.add_command("tt-silo-fill", "Set the rocket parts of the rocket silo under the cursor: /tt-silo-fill <parts> (playtest helper).", cmd_silo_fill)
   commands.add_command("tt-reliability", "Show or set the reliability of the locomotive under the cursor: /tt-reliability [percent] (playtest helper).", cmd_reliability)
   commands.add_command("tt-port-fill", "Set the upgrade progress of the city under the cursor: /tt-port-fill <percent> (playtest helper).", cmd_port_fill)
-  commands.add_command("tt-dump", "Write a JSON snapshot of Train Tycoon's storage to script-output/tt-dump.json.", cmd_dump)
+  commands.add_command("tt-dump", "Write a JSON snapshot of Tracktorio's storage to script-output/tt-dump.json.", cmd_dump)
   commands.add_command("tt-goal", "Show goal progress. /tt-goal <iron> <copper> sets the targets.", cmd_goal)
   remote.add_interface("tt-debug", {
     dump = function() return M.dump() end,

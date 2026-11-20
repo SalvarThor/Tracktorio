@@ -1,6 +1,6 @@
 -- 2.1.2: construction ports.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local IRON = "tt-city-iron-smelting"
 

@@ -1,7 +1,7 @@
 {
-  "name": "train-tycoon",
+  "name": "tracktorio",
   "version": "0.6.0",
-  "title": "Train Tycoon",
+  "title": "Tracktorio",
   "author": "Salvar",
   "description": "Trains are the whole game. Fixed-location cities do the production; you build the network that feeds them.",
   "factorio_version": "2.1",

@@ -7,7 +7,7 @@ local city_defs = require("shared.city_defs")
 
 local M = {}
 
-M.SURFACE = "train-tycoon"
+M.SURFACE = "tracktorio"
 
 -- Map is WIDTH x HEIGHT tiles centred on {0, 0}. 2.2.6 grew it from 640 x 400; existing
 -- surfaces are extended in place (M.extend).

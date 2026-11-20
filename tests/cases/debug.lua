@@ -1,5 +1,5 @@
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 return {
   {
@@ -16,7 +16,7 @@ return {
       local t = helpers.json_to_table(json)
       assert_.truthy(t, "dump is not valid JSON")
       ---@cast t table
-      assert_.equals(t.mod_version, script.active_mods["train-tycoon"])
+      assert_.equals(t.mod_version, script.active_mods["tracktorio"])
       assert_.equals(t.storage.tt_schema, 2, "storage.tt_schema")
     end,
   },

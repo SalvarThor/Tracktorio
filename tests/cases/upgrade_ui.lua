@@ -1,6 +1,6 @@
 -- 2.1.4: tier UI, port window, map tags and upgrade notifications.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 --- Does a localised string (nested tables) contain this key anywhere?
 local function mentions(ls, key)

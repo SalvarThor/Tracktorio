@@ -4,6 +4,20 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: Project renamed to Tracktorio
+- User decision: the project is called Tracktorio. Internal mod name `tracktorio` (was
+  `train-tycoon`), test mod `tracktorio-tests`, scenario `tracktorio/tracktorio`, map
+  surface `tracktorio`, locale files renamed. The `tt-` prefix of prototypes, storage keys,
+  commands and remote interfaces stays.
+- Older entries in this log, finished PLAN items and START.md keep the old name: they
+  record what was true then.
+- Saves made before the rename don't load the mod (Factorio sees a different mod). Only
+  playtest saves existed, so no migration.
+- tools/dev-instance.ps1 now removes junctions into the repo that it no longer manages, so
+  the old `train-tycoon` junction can't load a second copy of the mod.
+- Not renamed: the repo folder (`TrainTycoon`) and any GitHub repository; the user can do
+  that outside the session.
+
 ## 2026-11-20: Phase 2.7 elevated rails, gating
 - Found: in 2.1 Space Age, Elevated rail (unlocks rail ramp, rail support and building
   elevated rails) costs 100 x red/green/blue/purple after Concrete and Production science

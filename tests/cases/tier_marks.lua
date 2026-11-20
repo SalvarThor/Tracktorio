@@ -1,6 +1,6 @@
 -- 2.1.7: tier pips drawn on each tiered city.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local function marks(city) return remote.call("tt-city", "tier_marks", city) end
 
@@ -35,10 +35,10 @@ return {
     fn = function()
       h.clear_area({ { 4200, -12 }, { 4250, 12 } })
       local city = h.place_city("tt-city-copper-smelting", { 4210.5, 0.5 })
-      local before = #rendering.get_all_objects("train-tycoon")
+      local before = #rendering.get_all_objects("tracktorio")
       remote.call("tt-city", "migrate")
-      assert_.equals(#rendering.get_all_objects("train-tycoon"), before, "migration duplicated pips")
-      rendering.clear("train-tycoon")
+      assert_.equals(#rendering.get_all_objects("tracktorio"), before, "migration duplicated pips")
+      rendering.clear("tracktorio")
       assert_.equals(marks(city), nil)
       remote.call("tt-city", "migrate")
       assert_.equals(assert(marks(city), "pips not redrawn").filled, 1)
@@ -53,9 +53,9 @@ return {
       -- an older save drew one pip on the silo
       remote.call("tt-city", "add_legacy_pip", silo)
       assert_.equals(assert(marks(silo), "legacy pip not drawn").total, 1)
-      local before = #rendering.get_all_objects("train-tycoon")
+      local before = #rendering.get_all_objects("tracktorio")
       remote.call("tt-city", "migrate")
-      assert_.equals(#rendering.get_all_objects("train-tycoon"), before - 1, "legacy pip not destroyed")
+      assert_.equals(#rendering.get_all_objects("tracktorio"), before - 1, "legacy pip not destroyed")
       assert_.equals(marks(silo), nil, "migration drew silo pips")
     end,
   },

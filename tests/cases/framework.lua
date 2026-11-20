@@ -1,9 +1,9 @@
 -- 2.2.1: every city definition works from its data alone (no per-city code): each tier
--- exists, opens a window, has pips and (below max tier) a port, and every Train Tycoon
+-- exists, opens a window, has pips and (below max tier) a port, and every Tracktorio
 -- prototype has a locale name.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
-local defs = require("__train-tycoon__/shared/city_defs")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
+local defs = require("__tracktorio__/shared/city_defs")
 
 local X = 4400
 
@@ -62,7 +62,7 @@ return {
     end,
   },
   {
-    name = "framework: every Train Tycoon prototype has a locale name",
+    name = "framework: every Tracktorio prototype has a locale name",
     fn = function(ctx)
       local p = assert(game.players[1])
       local pending = {}

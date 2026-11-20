@@ -1,4 +1,4 @@
-# Train Tycoon: Design Spec
+# Tracktorio: Design Spec
 
 ## Thesis
 

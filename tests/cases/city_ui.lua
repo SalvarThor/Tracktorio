@@ -1,6 +1,6 @@
 -- 1.6: city UI data (recipe, rate, status) and the detail window.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local IRON = "tt-city-iron-smelting"
 

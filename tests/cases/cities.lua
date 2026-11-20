@@ -1,6 +1,6 @@
 -- 1.2: black box framework (placement, protection, hands-off, engine behaviour).
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local CITY = "tt-city-test" -- 5x5, iron-ore + coal -> iron-plate, 0.5 s, speed 1
 local N = defines.direction.north

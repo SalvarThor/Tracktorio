@@ -1,6 +1,6 @@
 -- 2.3.3: depot service port and servicing.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local E = defines.direction.east
 local X = 7400

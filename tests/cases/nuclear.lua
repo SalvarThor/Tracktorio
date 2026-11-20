@@ -1,6 +1,6 @@
 -- 2.6: uranium and the nuclear power city.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local X = 11000
 local NUCLEAR = "tt-city-nuclear-power"

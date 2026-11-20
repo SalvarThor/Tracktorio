@@ -22,8 +22,8 @@ $TT = [ordered]@{
     ScriptOutput = Join-Path $writeData 'script-output'
     # mod folder name in the instance -> repo folder
     Junctions    = [ordered]@{
-        'train-tycoon'       = Join-Path $repo 'mod'
-        'train-tycoon-tests' = Join-Path $repo 'tests'
+        'tracktorio'       = Join-Path $repo 'mod'
+        'tracktorio-tests' = Join-Path $repo 'tests'
     }
 }
 if ($env:TT_FACTORIO_EXE) { $TT.Exe = $env:TT_FACTORIO_EXE }

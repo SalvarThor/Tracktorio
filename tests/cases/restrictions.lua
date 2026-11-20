@@ -1,5 +1,5 @@
 -- 1.1: free logistics recipes, banned entities, hand-crafting restriction, start research.
-local assert_ = require("__train-tycoon-tests__/assert")
+local assert_ = require("__tracktorio-tests__/assert")
 
 local FREE = { "rail", "locomotive", "cargo-wagon", "fluid-wagon", "train-stop", "rail-signal",
   "inserter", "transport-belt", "iron-chest", "pipe", "pump", "offshore-pump",

@@ -1,6 +1,6 @@
 -- 2.4.1: solid fuel and rocket fuel in locomotives, with their vanilla stats.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local E = defines.direction.east
 local X = 7800

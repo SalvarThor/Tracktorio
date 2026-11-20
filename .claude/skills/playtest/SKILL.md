@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 1. Run `/test`. Do not start a playtest on a failing build.
 2. Run `./tools/dev-instance.ps1 -Instance play`. Playtests use their own instance,
-   `.factorio-play\` (mod junction, base + Space Age + train-tycoon only, no tests mod), so
+   `.factorio-play\` (mod junction, base + Space Age + tracktorio only, no tests mod), so
    `/test` still works while the game is open. Playtests never use the user's real
    `%APPDATA%\Factorio` mods or saves.
 3. Give the user a numbered checklist, short and concrete:

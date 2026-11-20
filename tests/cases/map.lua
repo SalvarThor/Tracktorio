@@ -1,5 +1,5 @@
 -- 1.8: scripted MVP map (built on a scratch surface with the same generator).
-local assert_ = require("__train-tycoon-tests__/assert")
+local assert_ = require("__tracktorio-tests__/assert")
 
 local SURFACE = "tt-map-test"
 
@@ -108,7 +108,7 @@ return {
       local p = assert(game.players[1])
       p.get_main_inventory().clear()
       remote.call("tt-map", "setup_player", p.index)
-      assert_.equals(p.surface.name, "train-tycoon")
+      assert_.equals(p.surface.name, "tracktorio")
       assert_.equals(p.get_item_count("tt-coal-fuel"), 20)
       -- move back so later tests keep using surface 1
       p.teleport({ 0, 0 }, game.surfaces[1])

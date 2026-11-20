@@ -1,6 +1,6 @@
 -- 2.4.3: refinery city (several fluid inputs and outputs, 2.4.2).
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local REFINERY = "tt-city-refinery"
 local X = 8600

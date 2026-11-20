@@ -1,6 +1,6 @@
 -- 2.1.3: upgrade in place when the construction port is complete.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local function status(city) return remote.call("tt-city", "upgrade_status", city) end
 

@@ -1,4 +1,4 @@
-local assert_ = require("__train-tycoon-tests__/assert")
+local assert_ = require("__tracktorio-tests__/assert")
 
 return {
   {
@@ -8,10 +8,10 @@ return {
     end,
   },
   {
-    name = "smoke: game is running with train-tycoon loaded",
+    name = "smoke: game is running with tracktorio loaded",
     fn = function()
       assert_.truthy(game.surfaces[1], "no surface")
-      assert_.truthy(script.active_mods["train-tycoon"], "train-tycoon not active")
+      assert_.truthy(script.active_mods["tracktorio"], "tracktorio not active")
       assert_.truthy(script.active_mods["space-age"], "space-age not active")
     end,
   },

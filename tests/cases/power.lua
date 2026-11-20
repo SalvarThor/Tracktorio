@@ -1,6 +1,6 @@
 -- 1.4: power city (coal + water -> steam -> hidden generator -> player's pole network).
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local CITY = "tt-city-power"
 

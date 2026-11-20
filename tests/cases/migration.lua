@@ -1,6 +1,6 @@
 -- 2.1.5: MVP (schema 1) saves gain ports and upgrades; blocked port tiles are handled.
-local assert_ = require("__train-tycoon-tests__/assert")
-local h = require("__train-tycoon-tests__/helpers")
+local assert_ = require("__tracktorio-tests__/assert")
+local h = require("__tracktorio-tests__/helpers")
 
 local function messages_since(tick)
   local out = {}
