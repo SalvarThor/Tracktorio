@@ -151,6 +151,40 @@ return {
     end,
   },
   {
+    -- 2.9.6: like the power budget, so a retune can't silently break the balance
+    name = "water budget: four water cities cover every city's water at the same tier",
+    fn = function()
+      local function per_s(name, fluid, products)
+        local p = prototypes.entity[name]
+        if not p or not p.fixed_recipe then return 0 end
+        local r = p.fixed_recipe
+        local n = 0
+        for _, x in ipairs(products and r.products or r.ingredients) do
+          if x.name == fluid then n = n + x.amount end
+        end
+        return n * p.get_crafting_speed() / r.energy
+      end
+      local cities = remote.call("tt-map", "layout").cities
+      local supply, demand = {}, {}
+      for tier = 1, 3 do
+        supply[tier], demand[tier] = 0, 0
+        for _, c in ipairs(cities) do
+          local name = tier == 1 and c.name or (c.name .. "-t" .. tier)
+          if not prototypes.entity[name] then name = c.name end -- single-tier cities
+          supply[tier] = supply[tier] + per_s(name, "water", true)
+          demand[tier] = demand[tier] + per_s(name, "water", false)
+        end
+      end
+      log(string.format("water budget: supply %d / %d / %d, demand %d / %d / %d per s",
+        supply[1], supply[2], supply[3], demand[1], demand[2], demand[3]))
+      for tier = 1, 3 do
+        assert_.truthy(supply[tier] >= demand[tier], "tier " .. tier .. ": supply " .. supply[tier] .. " < demand " .. demand[tier])
+      end
+      -- tier 3 demand can't be met by tier 1 water cities: upgrades matter
+      assert_.truthy(demand[3] > supply[1], "tier 3 demand " .. demand[3] .. " within tier 1 supply")
+    end,
+  },
+  {
     name = "water: plates delivered to its port upgrade it to tier 2 (1,200/s)",
     fn = function()
       local city = place(X + 120)

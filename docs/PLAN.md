@@ -590,9 +590,10 @@ Decided with the user (DECISIONS.md, 2026-11-20):
       (within a limit, tuning), and the starter power city stands 30-80 tiles from it, with
       the depot near spawn. If no lake is near enough, the starter water city stands by the
       starter power city without a shore. Tests over several seeds.
-- [ ] 2.9.6 Water budget test (like the power budget): supply of the four water cities per
+- [x] 2.9.6 Water budget test (like the power budget): supply of the four water cities per
       tier against the total demand of every water-using city per tier.
-- [ ] 2.9.7 The fixed test map gets water cities in place of its lakes' role. Tests that
-      relied on offshore pumps use the water city or scripted water.
+- [x] 2.9.7 The fixed test map gets water cities in place of its lakes' role. Tests that
+      relied on offshore pumps use the water city or scripted water. (Done with 2.9.4: four
+      water cities on the fixed map; no test used offshore pumps.)
 - [ ] 2.9.8 `/playtest`: the start (piping water from the starter water city to the power
       city), a water train to another city, water city windows and upgrades.
