@@ -8,8 +8,8 @@ network, and design the stations that feed and drain the cities. Cities chain ac
 map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
 
-> Status: in development. Post-MVP phases 2.1 to 2.8 (procedural maps) are built and
-> playtested. Next: the water city. Not on the mod portal yet.
+> Status: in development. Post-MVP phases 2.1 to 2.9 (procedural maps, water city) are
+> built and playtested. Not on the mod portal yet.
 
 ## How to play
 
@@ -40,11 +40,12 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 
 ## What's in the game now
 
-**24 city types**, each at a fixed place on the map (26 cities: four coal power cities):
+**25 city types**, each at a fixed place on the map (30 cities: four coal power cities and four water cities):
 
 | Group | Cities |
 |---|---|
 | Smelting | iron, copper, steel |
+| Water | four water cities on lake shores (no inputs, 600/1,200/2,400 water/s); the only water source, since offshore pumps are removed |
 | Power | four coal power cities (coal + water in, electricity out to your poles); a nuclear power city (uranium fuel cells + water in, 20/40/80 MW, burns flat out like a real reactor); a uranium city (uranium ore + iron in, fuel cells out) |
 | Fuel depots | coal fuel, solid fuel, rocket fuel |
 | Oil and chemistry | refinery (crude oil + water in, light oil + petroleum gas out), plastic, sulfur, sulfuric acid |
@@ -84,8 +85,9 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
   rocket fuel. It builds 50 rocket parts and launches on its own.
 - The first launch wins.
 
-**Map:** a hand-made 960x600 test map with all cities, ore and coal patches, a lake and an
-oil field. Older saves are upgraded in place when the mod updates.
+**Map:** a new Nauvis map each game with vanilla terrain and ore. Cities later in the chain
+tend to stand further out. A depot, a water city and a power city stand near spawn, close
+enough to pipe water from one to the other. The hand-made test map is kept for the tests.
 
 ## How it was built
 
@@ -104,13 +106,13 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 | 2.4 | Oil: refinery, solid and rocket fuel depots, fluid cities, oil field |
 | 2.5 | Full chain to the rocket: steel, plastic, sulfur, acid, advanced circuits, processing units, low density structure, blue science, rocket silo; the launch wins |
 | 2.6 | Power expansion: three more coal power cities, a second lake, uranium mining with acid, a uranium city, a nuclear power city; a power budget test |
+| 2.7 | Elevated rails as late research |
+| 2.8 | Procedural maps: Tracktorio as its own scenario on Nauvis, cities laid out by chain depth with varied spacing, biters off, cities tagged on the map |
+| 2.9 | Water city: water only from water cities on lake shores, offshore pumps removed, a starter pair near spawn; a water budget test |
 
 ## Next steps
 
-1. **Water city:** water would come only from water cities and be shipped by fluid wagon.
-   Offshore pumps would be removed.
-
-Open ideas that aren't scheduled yet:
+No phase is scheduled yet. Open ideas:
 - Tune breakdowns to be rarer for real play.
 - Revisit inserter throughput, which is often the bottleneck at stations.
 - Real art instead of the scaled vanilla stand-ins (Factorissimo, once its license is
