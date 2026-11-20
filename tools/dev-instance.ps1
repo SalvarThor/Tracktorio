@@ -21,12 +21,15 @@ $TTInstance = $Instance
 New-Item -ItemType Directory -Force $TT.ConfigDir, $TT.ModsDir, $TT.ScriptOutput | Out-Null
 
 $writeData = $TT.WriteData -replace '\\', '/'
+# The version line is the config format version (Factorio 2.1.24 writes 13). Without it the
+# main menu says "Configuration file has invalid contents" (playtest 2.8.7; scenario
+# launches skip the menu, so it went unseen). check-updates no longer exists in 2.1.
 @"
+; version=13
 [path]
 read-data=__PATH__executable__/../../data
 write-data=$writeData
 [other]
-; 2.1 has no check-updates key: an unknown key makes the main menu offer to reset the file
 enable-new-mods=false
 [sound]
 master-volume=0
