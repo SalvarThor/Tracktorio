@@ -595,5 +595,8 @@ Decided with the user (DECISIONS.md, 2026-11-20):
 - [x] 2.9.7 The fixed test map gets water cities in place of its lakes' role. Tests that
       relied on offshore pumps use the water city or scripted water. (Done with 2.9.4: four
       water cities on the fixed map; no test used offshore pumps.)
-- [ ] 2.9.8 `/playtest`: the start (piping water from the starter water city to the power
-      city), a water train to another city, water city windows and upgrades.
+- [x] 2.9.8 `/playtest`: the start (piping water from the starter water city to the power
+      city), a water train to another city, water city windows and upgrades. Playtest
+      2026-11-20: passed; the water train was skipped as vanilla behaviour, to be covered
+      by a full run. Dump: 30 cities; the starter water city upgraded to tier 2, 59 tiles
+      from the starter power city, which was producing.
