@@ -155,6 +155,14 @@ local blue_recipe = { energy_required = 24,
   ingredients = { item("steel-plate", 2), item("iron-plate", 8), item("advanced-circuit", 3), item("sulfur", 1) },
   results = { item("chemical-science-pack", 2) } }
 
+-- Uranium (2.6.3): vanilla centrifuging without Kovarex (10 ore -> 0.7% U-235) and fuel
+-- cells (10 iron + 1 U-235 + 19 U-238 -> 10 cells): ~143 ore + 1 iron per cell; spare
+-- U-238 stays inside. Speed 1 = 0.01 cells/s from 1.43 ore/s = 1.7 centrifuges (350 kW)
+-- + a sliver of an assembler = ~600 kW. One tier 1 city fuels a tier 3 nuclear city.
+local uranium_recipe = { energy_required = 100,
+  ingredients = { item("uranium-ore", 143), item("iron-plate", 1) },
+  results = { item("uranium-fuel-cell", 1) } }
+
 --- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
 --- middle of the south side.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
@@ -251,6 +259,8 @@ M.list = {
     { r = 0.75, g = 0.6, b = 0.45 }, 600, lds_recipe, 3, with_circuits(2000, 1000)),
   assembler_city("blue-science", { type = "assembling-machine", name = "assembling-machine-2" },
     { r = 0.3, g = 0.55, b = 0.95 }, 960, blue_recipe, 2.4, with_circuits(2000, 1000)),
+  assembler_city("uranium", { type = "assembling-machine", name = "centrifuge" },
+    { r = 0.4, g = 0.9, b = 0.3 }, 600, uranium_recipe, 1, with_circuits(2000, 1000)),
   fuel_depot("solid-fuel-depot", "chemical-plant", { r = 0.55, g = 0.45, b = 0.4 }, 420, solid_fuel_recipe, 2),
   fuel_depot("rocket-fuel-depot", "cryogenic-plant", { r = 0.9, g = 0.4, b = 0.2 }, 600, rocket_fuel_recipe, 3),
   {

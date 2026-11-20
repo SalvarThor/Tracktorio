@@ -4,6 +4,14 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.6.3 uranium city
+- One recipe: 143 uranium ore + 1 iron plate -> 1 uranium fuel cell in 100 s at speed 1
+  (0.01 cells/s), 600 kW, centrifuge graphics. Vanilla ratio without Kovarex; the spare
+  U-238 vanishes inside (no output to drain). Tiers x1/x2/x4, upgrade costs as the other
+  chain cities (plates, then circuits).
+- Map spot (160, 0), between the iron and copper smelting cities. In older saves that spot
+  may be under the player's rails; it is then reported and waits like any blocked city.
+
 ## 2026-11-20: 2.6.2 uranium patch; hidden techs no longer cut the tree
 - Uranium patch at (310, 275), radius 10, ~470k ore (a T1 uranium city uses ~1.4/s).
   Vanilla mining applies: Uranium mining (red, green, blue) turns on mining with fluid, an

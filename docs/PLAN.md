@@ -434,7 +434,7 @@ Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 c
       reachable in the red/green/blue zone (its Concrete prerequisite included), and an
       electric mining drill on uranium takes sulfuric acid. Gating test. (Patch at
       (310, 275). Concrete was unreachable: fixed by splicing hidden techs out of the tree.)
-- [ ] 2.6.3 Uranium city (ore + iron -> uranium fuel cells), tiers x1/x2/x4.
+- [x] 2.6.3 Uranium city (ore + iron -> uranium fuel cells), tiers x1/x2/x4. (At (160, 0).)
 - [ ] 2.6.4 Nuclear power city (fuel cells + water -> electricity on the pole network),
       20 / 40 / 80 MW, window shows fuel and water use. Prefer a vanilla reactor/heat
       chain inside the city over a scripted generator if 2.1 allows it; check first.

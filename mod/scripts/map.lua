@@ -47,6 +47,8 @@ M.CITIES = {
   { name = config.CITY.power, x = 450, y = 110, label = "East power city", tag_icon = "small-electric-pole" },
   { name = config.CITY.power, x = -460, y = -120, label = "West power city", tag_icon = "small-electric-pole" },
   { name = config.CITY.power, x = -280, y = 280, label = "South power city", tag_icon = "small-electric-pole" },
+  -- 2.6.3: nuclear fuel
+  { name = "tt-city-uranium", x = 160, y = 0, label = "Uranium city", tag_icon = "uranium-fuel-cell" },
 }
 
 -- Resource patches: centre, radius (tiles), amount at the centre (falls off to half at the edge).

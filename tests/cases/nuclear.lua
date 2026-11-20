@@ -76,4 +76,45 @@ return {
       end
     end,
   },
+  {
+    name = "nuclear: uranium city tier 1 takes 1.43 ore + 0.01 iron/s, makes 0.01 fuel cells/s at 0.6 MW",
+    fn = function()
+      local p = prototypes.entity["tt-city-uranium"]
+      local r = p.fixed_recipe
+      local per_s = p.get_crafting_speed() / r.energy
+      local got = {}
+      for _, i in ipairs(r.ingredients) do got[i.name] = i.amount * per_s end
+      for _, o in ipairs(r.products) do got[o.name] = o.amount * per_s end
+      assert_.truthy(math.abs(got["uranium-ore"] - 1.43) < 1e-6, "ore " .. tostring(got["uranium-ore"]))
+      assert_.truthy(math.abs(got["iron-plate"] - 0.01) < 1e-6, "iron " .. tostring(got["iron-plate"]))
+      assert_.truthy(math.abs(got["uranium-fuel-cell"] - 0.01) < 1e-6, "cells " .. tostring(got["uranium-fuel-cell"]))
+      assert_.equals(table_size(got), 3)
+      local w = p.get_max_energy_usage() * 60
+      assert_.truthy(math.abs(w - 600e3) < 1000, "draws " .. w)
+      for tier = 2, 3 do assert_.truthy(prototypes.entity["tt-city-uranium-t" .. tier], "tier " .. tier) end
+    end,
+  },
+  {
+    name = "nuclear: a powered uranium city (tier 3) turns ore and iron into a fuel cell",
+    fn = function(ctx)
+      local x = X + 60
+      h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
+      local city = h.place_city("tt-city-uranium-t3", { x + 0.5, 0.5 })
+      h.test_power({ x + 8.5, 0.5 }, 3e6)
+      city.insert({ name = "uranium-ore", count = 143 })
+      city.insert({ name = "iron-plate", count = 1 })
+      ctx:wait_until(function()
+        return city.get_output_inventory().get_item_count("uranium-fuel-cell") >= 1
+      end, 60 * 40, function()
+        assert_.equals(city.get_inventory(defines.inventory.crafter_input).get_item_count("uranium-ore"), 0, "ore left")
+      end)
+    end,
+  },
+  {
+    name = "nuclear: the generated map has the uranium city",
+    fn = function()
+      local surface = remote.call("tt-map", "generate", "tt-map-uranium")
+      assert_.equals(surface.count_entities_filtered({ name = "tt-city-uranium" }), 1)
+    end,
+  },
 }
