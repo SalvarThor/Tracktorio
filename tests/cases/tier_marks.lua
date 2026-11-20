@@ -44,4 +44,19 @@ return {
       assert_.equals(assert(marks(city), "pips not redrawn").filled, 1)
     end,
   },
+  {
+    name = "tier marks: the single-tier rocket silo has no pips, and migration removes old ones",
+    fn = function()
+      h.clear_area({ { 4200, -12 }, { 4250, 12 } })
+      local silo = h.place_city("tt-city-rocket-silo", { 4215.5, 0.5 })
+      assert_.equals(marks(silo), nil, "silo has pips")
+      -- an older save drew one pip on the silo
+      remote.call("tt-city", "add_legacy_pip", silo)
+      assert_.equals(assert(marks(silo), "legacy pip not drawn").total, 1)
+      local before = #rendering.get_all_objects("train-tycoon")
+      remote.call("tt-city", "migrate")
+      assert_.equals(#rendering.get_all_objects("train-tycoon"), before - 1, "legacy pip not destroyed")
+      assert_.equals(marks(silo), nil, "migration drew silo pips")
+    end,
+  },
 }

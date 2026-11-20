@@ -398,5 +398,9 @@ circuits (and later advanced circuits) at tier 3.
       panel shows rocket progress instead of plates.
 - [x] 2.5.8 Map: spots for the 9 new cities on the test map (no new resources needed);
       older saves get them; mod 0.5.0.
-- [ ] 2.5.9 `/playtest` round: chain overview, blue research, the silo and a launch
-      (helpers to skip ahead), numbers.
+- [x] 2.5.9 `/playtest` round: chain overview, blue research, the silo and a launch
+      (helpers to skip ahead), numbers. Playtest 2026-11-20: all passed. Found: the
+      single-tier silo drew one tier pip; fixed (no pips below 2 tiers, migration removes
+      the old one, mod 0.5.1, tested). Open design question for the user: the power
+      budget (T1 cities need ~13 MW against one 5.4 MW power city; all at T3 ~88 MW
+      against 21.6 MW). See DECISIONS 2026-11-20.

@@ -4,6 +4,17 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.5.9 playtest, silo pips, power budget (mod 0.5.1)
+- The rocket silo city has one tier, so it gets no tier pips (cities need at least 2 tiers
+  for pips). Mod 0.5.1 so the every-version migration removes the pip older saves drew.
+  The framework test had asserted the single pip; it now asserts none.
+- Power budget, measured from city_defs (full output, electric cities only): all 17
+  electric cities at T1 need ~13.3 MW (smelting is coal-fired at T1), one T1 power city
+  gives 5.4 MW. At T2: ~44 MW against 10.8 MW. At T3: ~88 MW (34.6 MW of it the two
+  electric smelting cities) against 21.6 MW. Plus the silo (250 kW crafting, ~4 MW while
+  launching) and the player's miners, pumps and inserters. Not decided yet; left to the
+  user (more power cities on the map, nuclear, or retuning).
+
 ## 2026-11-19: 2.5.7-2.5.8 win condition and map (mod 0.5.0)
 - The first on_rocket_launched from a silo city wins (victory screen, can continue). The
   goal box leaves the map layout; older saves keep theirs, still counting plates, with a

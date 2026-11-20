@@ -34,13 +34,14 @@ local function clear(record)
   record.tier_marks = nil
 end
 
---- Draw the pips for a city (replacing any it has). Cities without tiers get none.
+--- Draw the pips for a city (replacing any it has). Cities without tiers, or with only one
+--- (the rocket silo), get none.
 ---@param city LuaEntity
 ---@param record table
 function M.draw(city, record)
   clear(record)
   local info = city_defs.by_entity[record.name]
-  if not info then return end
+  if not (info and info.max_tier > 1) then return end
   local box, pos = city.bounding_box, city.position
   local x0 = box.left_top.x - pos.x + 1
   local y0 = box.left_top.y - pos.y + 0.9
@@ -60,10 +61,18 @@ end
 
 cities.on_any_placed(M.draw)
 
---- Every tiered city has its pips (migration of older saves; idempotent).
+--- Every tiered city has its pips, and single-tier cities have none (migration of older
+--- saves, where the rocket silo got one pip; idempotent).
 function M.ensure_all()
   for _, record in pairs(storage.tt_cities) do
-    if record.entity.valid and not has_marks(record) then M.draw(record.entity, record) end
+    if record.entity.valid then
+      local info = city_defs.by_entity[record.name]
+      if not (info and info.max_tier > 1) then
+        clear(record)
+      elseif not has_marks(record) then
+        M.draw(record.entity, record)
+      end
+    end
   end
 end
 

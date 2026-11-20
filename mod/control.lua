@@ -60,6 +60,12 @@ city_remote.set_upgrade_cost = function(entity, cost, delivered)
   local record = assert(storage.tt_cities[entity.unit_number])
   record.upgrade.cost, record.upgrade.delivered = cost, delivered
 end
+-- Tests: give a city the one pip a 0.5.0 save drew on the single-tier rocket silo.
+city_remote.add_legacy_pip = function(entity)
+  local record = assert(storage.tt_cities[entity.unit_number])
+  record.tier_marks = { rendering.draw_circle({ color = { 1, 1, 1 }, radius = 0.3, filled = true,
+    target = entity, surface = entity.surface }).id }
+end
 city_remote.strip_to_mvp = function(entity)
   local record = assert(storage.tt_cities[entity.unit_number])
   for _, key in ipairs({ "port", "service_port" }) do

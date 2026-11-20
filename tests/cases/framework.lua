@@ -11,7 +11,7 @@ local function info(city) return remote.call("tt-city", "info", city) end
 
 return {
   {
-    name = "framework: every tier of every city has a window, pips and a port below max tier",
+    name = "framework: every tier of every city has a window, pips (if it has tiers) and a port below max tier",
     fn = function()
       h.clear_area({ { X - 20, -30 }, { X + 20, 30 } })
       for _, def in ipairs(defs.list) do
@@ -19,9 +19,13 @@ return {
           local name = defs.entity_name(def.name, tier)
           local city = h.place_city(name, { X + 0.5, 0.5 })
           assert_.truthy(remote.call("tt-city", "has_window", city), name .. ": no window")
-          local m = assert(remote.call("tt-city", "tier_marks", city), name .. ": no pips")
-          assert_.equals(m.filled, tier, name .. " pips")
-          assert_.equals(m.total, #def.tiers, name .. " pips")
+          if #def.tiers > 1 then
+            local m = assert(remote.call("tt-city", "tier_marks", city), name .. ": no pips")
+            assert_.equals(m.filled, tier, name .. " pips")
+            assert_.equals(m.total, #def.tiers, name .. " pips")
+          else
+            assert_.equals(remote.call("tt-city", "tier_marks", city), nil, name .. ": single tier has pips")
+          end
           local s = assert(remote.call("tt-city", "upgrade_status", city))
           assert_.equals(s.tier, tier, name .. " tier")
           if tier < #def.tiers then
