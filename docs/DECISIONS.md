@@ -4,6 +4,12 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.8 footprint
+- Below its last tier a city shows a dashed grey outline on the ground (decal layer, under
+  belts) of the 16x16 building it grows to. Drawn on the city entity, so the next tier
+  redraws it and the last tier has none.
+- Sites already reserve 16x16 (2.10.3). On the fixed test map every city's 16x16 footprint
+  is clear of water, ore and other cities; nothing had to move.
 ## 2026-11-20: 2.10.7 growing on upgrade
 - Before the bigger building goes in, what the player built inside its footprint is mined
   (contents too, like a player mining it) and goes to the nearest connected player of the

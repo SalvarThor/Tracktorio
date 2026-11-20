@@ -661,7 +661,7 @@ south wall has the door in the middle on every building):
 - [x] 2.10.7 Growing: the upgrade swaps in the bigger building, clears the new footprint
       (returning the player's entities), moves ports and pipe connections 2 tiles out
       along their lines, and keeps everything in the city.
-- [ ] 2.10.8 Footprint: the 16x16 area is marked on the ground from the start; sites
+- [x] 2.10.8 Footprint: the 16x16 area is marked on the ground from the start; sites
       reserve it (site search, layout, the fixed test map).
 - [ ] 2.10.9 City window: ports listed with item, direction and the belt needed at this
       tier.

@@ -50,6 +50,26 @@ local function draw_marker(city, spot, sprite, inward)
   })
 end
 
+--- Dashed outline on the ground of the largest building a city grows to (2.10.8), while
+--- it is still smaller. Drawn on the city, so it goes with it.
+---@param city LuaEntity
+---@param def table
+---@param size integer
+local function draw_footprint(city, def, size)
+  local full = port_layout.size(def, #def.tiers)
+  if full <= size then return end
+  local h = full / 2
+  local corners = { { -h, -h }, { h, -h }, { h, h }, { -h, h } }
+  for i = 1, 4 do
+    local a, b = corners[i], corners[i % 4 + 1]
+    rendering.draw_line({
+      color = { r = 0.6, g = 0.6, b = 0.6, a = 0.5 }, width = 2, dash_length = 1, gap_length = 0.5,
+      from = { entity = city, offset = a }, to = { entity = city, offset = b },
+      surface = city.surface, render_layer = "decals",
+    })
+  end
+end
+
 --- Build the ports for a city's tier: loaders for items, markers for items and fluids.
 ---@param city LuaEntity
 ---@param record table
@@ -57,6 +77,7 @@ function M.attach(city, record)
   local info = city_defs.by_entity[city.name]
   if not info then return end
   local size = port_layout.size(info.def, info.tier)
+  draw_footprint(city, info.def, size)
   record.belt_ports = {}
   for _, p in ipairs(port_layout.ports(info.def)) do
     if p.tiers[info.tier] then

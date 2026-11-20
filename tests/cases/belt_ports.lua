@@ -275,6 +275,48 @@ return {
     end,
   },
   {
+    -- 2.10.8
+    name = "footprint: below max tier a city shows its 16x16 outline; at max tier it doesn't",
+    fn = function()
+      local x = X + 1160
+      h.clear_area({ { x - 12, -12 }, { x + 50, 12 } })
+      local t1 = h.place_city("tt-city-steel", { x + 0.5, 0.5 })
+      local t3 = h.place_city("tt-city-steel-t3", { x + 30.5, 0.5 })
+      local function lines(city)
+        local n = 0
+        for _, o in pairs(rendering.get_all_objects("tracktorio")) do
+          if o.type == "line" and o.surface == city.surface and o.from.entity == city then
+            n = n + 1
+            local off = assert(o.from.offset) --[[@as table]]
+            local ox, oy = off.x or off[1], off.y or off[2]
+            assert_.equals(math.max(math.abs(ox), math.abs(oy)), 8, "outline not at 16x16")
+          end
+        end
+        return n
+      end
+      assert_.equals(lines(t1), 4, "tier 1 outline")
+      assert_.equals(lines(t3), 0, "tier 3 outline")
+    end,
+  },
+  {
+    name = "footprint: on the fixed map every city's 16x16 footprint is clear of water, ore and other cities",
+    fn = function()
+      local surface = remote.call("tt-map", "generate", "tt-map-footprint")
+      for _, c in ipairs(remote.call("tt-map", "layout").cities) do
+        local x, y = c.x + 0.5, c.y + 0.5
+        local area = { { x - 8.5, y - 8.5 }, { x + 8.5, y + 8.5 } }
+        assert_.equals(surface.count_tiles_filtered({ area = area, collision_mask = "water_tile" }), 0, c.label .. ": water")
+        assert_.equals(surface.count_entities_filtered({ area = area, type = "resource" }), 0, c.label .. ": ore")
+        local cities = 0
+        for _, e in pairs(surface.find_entities_filtered({ area = area })) do
+          if string.sub(e.name, 1, 8) == "tt-city-" then cities = cities + 1 end
+        end
+        assert_.equals(cities, 1, c.label .. ": other cities in its footprint")
+      end
+      game.delete_surface(surface)
+    end,
+  },
+  {
     -- 2.10.1: 2.1 loaders only connect to entities flagged "player-creation"
     name = "belt ports: a loader at the wall connects to every kind of city",
     fn = function(ctx)
