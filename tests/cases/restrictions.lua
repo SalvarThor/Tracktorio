@@ -2,15 +2,16 @@
 local assert_ = require("__tracktorio-tests__/assert")
 
 local FREE = { "rail", "locomotive", "cargo-wagon", "fluid-wagon", "train-stop", "rail-signal",
-  "inserter", "transport-belt", "iron-chest", "pipe", "pump", "offshore-pump",
+  "inserter", "transport-belt", "iron-chest", "pipe", "pump",
   "small-electric-pole", "big-electric-pole", "electric-mining-drill", "decider-combinator" }
 local BANNED = { "stone-furnace", "assembling-machine-1", "oil-refinery", "chemical-plant", "boiler",
   "steam-engine", "solar-panel", "car", "tank", "spidertron", "construction-robot",
-  "logistic-robot", "roboport", "requester-chest", "lab", "rocket-silo", "foundry", "recycler" }
+  "logistic-robot", "roboport", "requester-chest", "lab", "rocket-silo", "foundry", "recycler",
+  "offshore-pump" } -- 2.9.2: water comes only from water cities
 -- Unlocked at start (SPEC MVP starting research).
 local START_ENABLED = { "rail", "locomotive", "cargo-wagon", "fluid-wagon", "train-stop", "rail-signal",
   "rail-chain-signal", "inserter", "burner-inserter", "transport-belt", "underground-belt",
-  "splitter", "pipe", "pipe-to-ground", "pump", "offshore-pump", "small-electric-pole",
+  "splitter", "pipe", "pipe-to-ground", "pump", "small-electric-pole",
   "medium-electric-pole", "big-electric-pole", "burner-mining-drill", "electric-mining-drill" }
 -- Free but research-gated: not unlocked at start.
 local GATED = { "arithmetic-combinator", "fast-inserter", "fast-transport-belt", "rail-ramp", "pumpjack" }

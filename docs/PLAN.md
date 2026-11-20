@@ -575,7 +575,7 @@ Decided with the user (DECISIONS.md, 2026-11-20):
       (600 / 1,200 / 2,400 per s), upgrade costs like the other tier 1 chain cities. Its
       window shows the output rate and "output full" when nothing drains it. Tests:
       rates, no power, backpressure, upgrade.
-- [ ] 2.9.2 Offshore pumps removed: no recipe, no research unlock, none in the crafting
+- [x] 2.9.2 Offshore pumps removed: no recipe, no research unlock, none in the crafting
       menu (restrictions and gating tests). The cities that take water name it when it's
       missing (as now).
 - [ ] 2.9.3 Lake-shore sites: a water city's site is dry land with a real lake (not a

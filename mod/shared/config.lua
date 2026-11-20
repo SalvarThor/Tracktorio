@@ -98,7 +98,7 @@ M.FREE_ITEMS = {
   -- chests (not logistic)
   "wooden-chest", "iron-chest", "steel-chest",
   -- fluids
-  "pipe", "pipe-to-ground", "pump", "storage-tank", "offshore-pump",
+  "pipe", "pipe-to-ground", "pump", "storage-tank",
   -- power distribution
   "small-electric-pole", "medium-electric-pole", "big-electric-pole", "substation",
   -- circuit entities
@@ -122,6 +122,8 @@ M.BANNED_ITEMS = {
   "boiler", "steam-engine", "steam-turbine", "solar-panel", "nuclear-reactor",
   "heat-exchanger", "heat-pipe", "heating-tower", "fusion-reactor", "fusion-generator",
   "lightning-collector", "lightning-rod",
+  -- water: only water cities make it (2.9.2)
+  "offshore-pump",
   -- vehicles
   "car", "tank", "spidertron",
   -- robots
@@ -146,7 +148,7 @@ M.START_TECHNOLOGIES = {
   "electronics",                    -- inserter, small electric pole
   "logistics",                      -- underground belt, splitter
   "electric-mining-drill",
-  "steam-power",                    -- pipe, pipe-to-ground, offshore pump (boiler/engine stripped)
+  "steam-power",                    -- pipe, pipe-to-ground (boiler, engine and offshore pump stripped)
   "fluid-handling",                 -- pump, storage tank
   "electric-energy-distribution-1", -- medium and big electric pole
 }
