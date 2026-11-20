@@ -485,7 +485,8 @@ Decided with the user (DECISIONS.md, 2026-11-20):
   patches, with no resources near spawn.
 - Cities take no account of where resources are.
 - Biters are forced off, whatever the map settings say.
-- The player finds the cities by uncovering the map; the layout is not shown up front.
+- Every city is on the map from the start (user, playtest 2.8.7; first decided the other
+  way, then changed: searching for cities without biters or other challenge isn't fun).
 - Cities are far apart: at least 1,000 tiles between any two (a starting value; the user
   wants it as close to the upper limit as is playable). A startup setting, "City spacing",
   scales it from 0.5x to 3x.
@@ -514,9 +515,9 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       on land. Freeplay extras are replaced: no crash site, and starting items limited to
       the coal fuel of today's scenario. The scenario keeps its fixed map, and old saves
       are unchanged.
-- [x] 2.8.5 Finding cities: nothing is charted up front. A city gets its map tag when
-      the player first charts its chunk (walking, trains, radar), so the layout is
-      discovered. Test: no tag before charting, tag after.
+- [x] 2.8.5 Finding cities: each city's surroundings are charted at the start, so every
+      city has its map tag from the first moment; the land between stays dark. (Changed
+      in playtest 2.8.7; first built as discover-by-charting.)
 - [x] 2.8.6 Start-up time: creating the map stays fast (target under 10 s at 3x spacing,
       tested). (2.4 s at 3x, 96 chunks; run-tests.ps1 checks TT-TIMING budgets.)
 - [ ] 2.8.7 `/playtest` round: a New Game from the menu with the map preview, the spacing

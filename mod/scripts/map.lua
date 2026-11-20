@@ -334,6 +334,7 @@ end
 -- 2.8.3: a site may move up to sites.SEARCH from its planned spot; cities stay at least
 -- this share of the spacing apart.
 M.MIN_APART = 0.8
+M.CHART_AROUND = 16 -- tiles charted around each city at the start (2.8.5)
 M.ALT_TURN = 15 -- degrees around spawn between alternative spots when a site finds no land
 
 --- Place a procedural layout on a surface with real terrain (2.8.3): plan it from the
@@ -383,12 +384,18 @@ function M.place_procedural(surface, seed, spacing)
   for _, label in ipairs(missing) do log("tracktorio: no site for " .. label) end
   storage.tt_layout = storage.tt_layout or {}
   storage.tt_layout[surface.name] = placed
+  -- 2.8.5 (user, playtest 2.8.7): every city is on the map from the start. Chart a little
+  -- around each one; on_chunk_charted then puts its tag on. The rest of the map stays dark.
+  local force = game.forces["player"]
+  for _, c in ipairs(placed) do
+    force.chart(surface, { { c.x - M.CHART_AROUND, c.y - M.CHART_AROUND }, { c.x + M.CHART_AROUND, c.y + M.CHART_AROUND } })
+  end
   return placed, missing
 end
 
---- on_chunk_charted (2.8.5): on a procedural map the cities are found by uncovering the
---- map. Nothing is charted up front; a city's tag appears when its chunk is first charted
---- (walking, a train, a radar).
+--- on_chunk_charted (2.8.5): on a procedural map a city's tag goes on when its chunk is
+--- first charted. place_procedural charts every city at the start, so all tags show from
+--- the start (user, playtest 2.8.7); this also re-tags a city for a force charting it later.
 ---@param e EventData.on_chunk_charted
 function M.on_chunk_charted(e)
   local surface = game.get_surface(e.surface_index)

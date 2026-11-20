@@ -4,6 +4,16 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: cities are on the map from the start (user, playtest 2.8.7)
+- Reverses the 2.8 plan decision that cities are found by uncovering the map. The user:
+  "Running around the map looking for the city you need without biters or any real
+  challenge isn't what's fun about this mod."
+- At the start, 16 tiles around each city are charted, so every city's tag shows from the
+  first moment. The land between cities stays dark. The on_chunk_charted tagging stays as
+  is: it puts the tags on when those small areas are charted.
+- Rejected: charting the whole layout area, which at 1x is ~7,000 tiles across and slow to
+  chart, and gives away the terrain for free.
+
 ## 2026-11-20: 2.8.4 New Game on Nauvis
 - A game counts as a New Game when the freeplay remote interface exists. Then the mod's
   on_init sets up Nauvis (scripts/nauvis.lua). Freeplay's own on_init runs first and waits
