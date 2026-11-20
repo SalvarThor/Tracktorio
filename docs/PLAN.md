@@ -578,7 +578,7 @@ Decided with the user (DECISIONS.md, 2026-11-20):
 - [x] 2.9.2 Offshore pumps removed: no recipe, no research unlock, none in the crafting
       menu (restrictions and gating tests). The cities that take water name it when it's
       missing (as now).
-- [ ] 2.9.3 Lake-shore sites: a water city's site is dry land with a real lake (not a
+- [x] 2.9.3 Lake-shore sites: a water city's site is dry land with a real lake (not a
       puddle) right at its edge. Found with the same elevation forecast as other sites.
       Tests on Nauvis terrain: every water city is on a shore of a lake of at least a
       minimum size.

@@ -65,6 +65,53 @@ return {
     end,
   },
   {
+    -- 2.9.3
+    name = "water: a shore site goes to a real lake, not a puddle nearer the planned spot",
+    fn = function()
+      local s = h.surface()
+      local cx, cy = X + 400, 0
+      local R = 230
+      s.request_to_generate_chunks({ cx, cy }, math.ceil(R / 32) + 1)
+      s.force_generate_chunk_requests()
+      h.clear_area({ { cx - R, cy - R }, { cx + R, cy + R } })
+      local tiles = {}
+      for x = cx - R, cx + R - 1 do
+        for y = cy - R, cy + R - 1 do
+          local lake = (x + 0.5 - (cx + 80)) ^ 2 + (y + 0.5 - cy) ^ 2 <= 18 * 18
+          local puddle = math.abs(x - (cx + 20)) <= 1 and math.abs(y - cy) <= 1
+          tiles[#tiles + 1] = { name = (lake or puddle) and "water" or "grass-1", position = { x, y } }
+        end
+      end
+      s.set_tiles(tiles)
+      local site = remote.call("tt-map", "find_shore", s.name, cx, cy, 120)
+      assert(site, "no shore site")
+      local d = math.sqrt((site.x + 0.5 - (cx + 80)) ^ 2 + (site.y + 0.5 - cy) ^ 2)
+      assert_.truthy(d > 18 + 12 and d < 18 + 30, "site " .. d .. " from the lake centre")
+    end,
+  },
+  {
+    name = "water: on Nauvis terrain a shore site is dry, with a lake at its edge",
+    fn = function()
+      local mgs = game.surfaces["nauvis"].map_gen_settings
+      mgs.seed = 314159
+      local s = game.create_surface("tt-water-shore", mgs)
+      local found = 0
+      for _, spot in ipairs({ { 0, 600 }, { -900, -300 }, { 1200, 400 } }) do
+        local site = remote.call("tt-map", "find_shore", s.name, spot[1], spot[2])
+        if site then
+          found = found + 1
+          local x, y = site.x + 0.5, site.y + 0.5
+          assert_.equals(s.count_tiles_filtered({ area = { { x - 12.5, y - 12.5 }, { x + 12.5, y + 12.5 } }, collision_mask = "water_tile" }), 0, "water on the site")
+          assert_.truthy(s.count_tiles_filtered({ area = { { x - 24.5, y - 24.5 }, { x + 24.5, y + 24.5 } }, collision_mask = "water_tile" }) > 0, "no water at the edge")
+          assert_.truthy(s.count_tiles_filtered({ position = { x, y }, radius = 40, collision_mask = "water_tile" }) >= 600, "lake too small")
+          log("water: shore site for " .. serpent.line(spot) .. " at " .. site.x .. "," .. site.y)
+        end
+      end
+      assert_.equals(found, 3, "shore sites found")
+      game.delete_surface(s)
+    end,
+  },
+  {
     name = "water: plates delivered to its port upgrade it to tier 2 (1,200/s)",
     fn = function()
       local city = place(X + 120)

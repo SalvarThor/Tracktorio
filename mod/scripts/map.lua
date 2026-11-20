@@ -479,6 +479,9 @@ function M.remote_interface()
     end,
     mainland = function(surface_name, x, y) return sites.mainland(assert(game.get_surface(surface_name)), x, y) end,
     find_site = function(surface_name, x, y) return sites.find(assert(game.get_surface(surface_name)), x, y) end,
+    find_shore = function(surface_name, x, y, search)
+      return sites.find_shore(assert(game.get_surface(surface_name)), x, y, nil, nil, search)
+    end,
     layout = function()
       return { width = M.WIDTH, height = M.HEIGHT, spawn = M.SPAWN, cities = M.CITIES,
         patches = M.PATCHES, lakes = M.LAKES }

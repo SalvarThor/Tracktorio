@@ -188,6 +188,80 @@ function M.find(surface, x, y, taken, apart)
   end
   return nil
 end
+-- Lake shores (2.9.3): water cities stand on the shore of a real lake.
+M.SHORE_RING = 12 -- water must be within this many tiles outside the city's box
+M.LAKE_RADIUS = 40 -- the lake is measured within this radius of the city
+M.LAKE_MIN = 600 -- tiles of water there, or it's a puddle (tuning)
+M.SHORE_SEARCH = 640 -- furthest a shore site moves from its planned spot
+
+--- Is there a real lake at the edge of the box around (x, y), on the forecast grid?
+local function shore_on(wet, x, y)
+  local inner, g = M.HALF + M.MARGIN, M.RAY_STEP
+  local outer = inner + M.SHORE_RING
+  local edge = false
+  for dx = -outer, outer, g do
+    for dy = -outer, outer, g do
+      if (math.abs(dx) > inner or math.abs(dy) > inner) and wet(x + dx, y + dy) then edge = true; break end
+    end
+    if edge then break end
+  end
+  if not edge then return false end
+  local n, r = 0, M.LAKE_RADIUS
+  for dx = -r, r, g do
+    for dy = -r, r, g do
+      if dx * dx + dy * dy <= r * r and wet(x + dx, y + dy) then n = n + 1 end
+    end
+  end
+  return n * g * g >= M.LAKE_MIN
+end
+
+--- The same on the real tiles.
+---@param surface LuaSurface
+local function shore_confirmed(surface, x, y)
+  local outer = M.HALF + M.MARGIN + M.SHORE_RING
+  local edge = surface.count_tiles_filtered({ area = { { x - outer, y - outer }, { x + outer, y + outer } },
+    collision_mask = "water_tile", limit = 1 })
+  if edge == 0 then return false end
+  return surface.count_tiles_filtered({ position = { x, y }, radius = M.LAKE_RADIUS, collision_mask = "water_tile" }) >= M.LAKE_MIN
+end
+
+--- Nearest lake-shore spot to (x, y) (see find; `search` defaults to SHORE_SEARCH), or nil.
+---@param surface LuaSurface
+---@param x integer
+---@param y integer
+---@param taken table[]?
+---@param apart (number|fun(t: table): number)?
+---@param search number?
+function M.find_shore(surface, x, y, taken, apart, search)
+  search = search or M.SHORE_SEARCH
+  local function free(cx, cy)
+    for _, t in ipairs(taken or {}) do
+      local need = type(apart) == "function" and apart(t) or apart or 0
+      if (t.x - cx) ^ 2 + (t.y - cy) ^ 2 < need * need then return false end
+    end
+    return true
+  end
+  local reach = math.max(M.RAY_LENGTH, M.LAKE_RADIUS, M.HALF + M.MARGIN + M.SHORE_RING)
+  local wet = grid(surface, x + 0.5, y + 0.5, search + reach + M.RAY_STEP)
+  for ring = 0, math.floor(search / M.STEP) do
+    local r = ring * M.STEP
+    local n = ring == 0 and 1 or ring * 6
+    for i = 0, n - 1 do
+      local a = i * 2 * math.pi / n
+      local cx, cy = math.floor(x + r * math.cos(a)), math.floor(y + r * math.sin(a))
+      local px, py = cx + 0.5, cy + 0.5
+      if free(cx, cy) and usable_on(wet, px, py) and shore_on(wet, px, py) then
+        -- generate the lake around it too, so the real check sees it
+        local reach_area = M.LAKE_RADIUS + 16
+        surface.request_to_generate_chunks({ px, py }, math.ceil(reach_area / 32))
+        surface.force_generate_chunk_requests()
+        if confirmed(surface, px, py) and shore_confirmed(surface, px, py) then return { x = cx, y = cy } end
+      end
+    end
+  end
+  return nil
+end
+
 --- Clear trees, rocks, cliffs and decoratives from the city's box around the centre tile.
 ---@param surface LuaSurface
 ---@param x integer
