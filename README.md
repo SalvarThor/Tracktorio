@@ -96,12 +96,12 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 
 ## Next steps
 
-1. **2.5.9 playtest:** the whole chain, blue research, and a rocket launch.
+1. **Power expansion (2.6):** three more coal power cities, a uranium city and a nuclear
+   power city, since the full chain needs about four times what one power city gives.
 2. **Elevated rails** (Space Age), as late research.
-3. **Nuclear power city.**
-4. **Procedural map generation**, and a map sized for a real network. The current map is
+3. **Procedural map generation**, and a map sized for a real network. The current map is
    kept small on purpose for testing.
-5. **Water city:** water would come only from water cities and be shipped by fluid wagon.
+4. **Water city:** water would come only from water cities and be shipped by fluid wagon.
    Offshore pumps would be removed.
 
 Open ideas that aren't scheduled yet:

@@ -14,6 +14,16 @@ decided during the build.
   electric smelting cities) against 21.6 MW. Plus the silo (250 kW crafting, ~4 MW while
   launching) and the player's miners, pumps and inserters. Not decided yet; left to the
   user (more power cities on the map, nuclear, or retuning).
+- User decision: both more coal power cities (3 more, 4 in all) and a nuclear option,
+  giving the player a choice of challenges. Nuclear is a separate city at 20 / 40 / 80
+  MW (half a vanilla reactor at T1, user's choice over 40 / 80 / 160: with no spent
+  cells or reprocessing, nuclear is simpler, so it shouldn't also be far stronger). No
+  depleted cell output. Natural gating via Uranium mining research. Phase 2.6, ahead of
+  elevated rails. Rejected: raising coal power city output (removes the shipping
+  problem); lowering city demand (breaks "same power as the vanilla buildings").
+- User note: demand has a ceiling (every city at T3), so power is eventually solved as
+  long as it stays supplied. Accepted for now; procedural maps with more cities could
+  raise it.
 
 ## 2026-11-19: 2.5.7-2.5.8 win condition and map (mod 0.5.0)
 - The first on_rocket_launched from a silo city wins (victory screen, can continue). The

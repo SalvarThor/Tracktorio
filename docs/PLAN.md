@@ -404,3 +404,37 @@ circuits (and later advanced circuits) at tier 3.
       the old one, mod 0.5.1, tested). Open design question for the user: the power
       budget (T1 cities need ~13 MW against one 5.4 MW power city; all at T3 ~88 MW
       against 21.6 MW). See DECISIONS 2026-11-20.
+
+### Phase 2.6: power expansion (approved by the user 2026-11-20)
+
+Decided with the user (DECISIONS.md, 2026-11-20):
+- The full chain needs ~13 MW at T1 and ~88 MW at T3 against one power city's 5.4 / 21.6
+  MW. Two answers, so the player picks a challenge: more coal power cities, or nuclear.
+- 3 more coal power cities (4 in all, ~86 MW at T3: coal alone just covers everything).
+- Nuclear is its own city, not a power city tier. 20 / 40 / 80 MW. No depleted cells
+  out. Gated naturally: uranium needs the vanilla Uranium mining research (red, green,
+  blue) and sulfuric acid at the miner.
+- Elevated rails moves to after this phase.
+
+Proposed numbers (tuning values):
+
+| City | In (per s) | Out | Power |
+|---|---|---|---|
+| Uranium (T1) | 1.43 uranium ore + 0.01 iron | 0.01 fuel cells/s (enough for a T3 nuclear city) | ~0.6 MW (1.7 centrifuges) |
+| Nuclear power (T1) | 0.0025 fuel cells (1 per 400 s) + ~206 water | 20 MW | - |
+
+Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 cells, so
+~143 ore per cell; spare U-238 stays inside.
+
+- [ ] 2.6.1 Three more coal power city spots and a second lake (spread out so each is its
+      own route); map tags; older saves get them. Check whether coal needs a second patch.
+- [ ] 2.6.2 Uranium ore patch, far from the cities. Check in 2.1: Uranium mining is
+      reachable in the red/green/blue zone (its Concrete prerequisite included), and an
+      electric mining drill on uranium takes sulfuric acid. Gating test.
+- [ ] 2.6.3 Uranium city (ore + iron -> uranium fuel cells), tiers x1/x2/x4.
+- [ ] 2.6.4 Nuclear power city (fuel cells + water -> electricity on the pole network),
+      20 / 40 / 80 MW, window shows fuel and water use. Prefer a vanilla reactor/heat
+      chain inside the city over a scripted generator if 2.1 allows it; check first.
+- [ ] 2.6.5 Power-budget test: the total demand of every electric city per tier against
+      the coal-only and the nuclear supply, so a retune can't silently break the balance.
+- [ ] 2.6.6 `/playtest` round: the new power cities, uranium mining with acid, nuclear.

@@ -20,7 +20,9 @@ Cities chain across the map the same way a factory does, and the train network i
 All black boxes are the same entity concept with different recipe profiles.
 
 - **Production cities** at middle-ground granularity: smelting, intermediates, science and rocket parts. Cities split at natural shipping boundaries, roughly 15-25 city types for a full rocket tree.
-- **Power city:** water + coal in, electricity out to the player's pole network. Upgrades to nuclear later.
+- **Power city:** water + coal in, electricity out to the player's pole network. Several
+  on the map. Later: a separate nuclear power city (fuel cells + water in), fed by a
+  uranium city (uranium ore + iron in, fuel cells out). (User decision, 2026-11-20.)
 - **Depot city:** coal in, coal fuel (`tt-coal-fuel`) out. The only source of locomotive fuel. Fixed location like every other box.
 - **Research complex:** science packs in, research progress out. Upgradable throughput.
 - **Repair pack city:** feeds depot servicing.
@@ -96,8 +98,9 @@ Default order, open to change:
 3. Reliability, depots and the repair pack city.
 4. Fuel progression cities (solid fuel, rocket fuel).
 5. Full chain to a rocket silo box.
-6. Elevated rails.
-7. Nuclear power city.
+6. More power cities and the nuclear power city (moved ahead of elevated rails, user
+   decision 2026-11-20).
+7. Elevated rails.
 8. Procedural map generation.
 9. Water city: water comes only from water cities and must be shipped (by fluid wagon) to
    where it is used, such as the power city. Offshore pumps are removed from the player.
