@@ -15,7 +15,8 @@ decided during the build.
   User's choice over numbering by distance or identical names. This applies to
   procedural maps only; the fixed scenario map keeps its names.
 - City spacing at 1x is 500 tiles, down from 1,000, so the next playtest can compare
-  ("1,000 tiles feels a bit much maybe").
+  ("1,000 tiles feels a bit much maybe"). Playtest 2.8.9: 500 is "too tight", so 1x is
+  now 750 tiles; the user will get a feel for it in the next playtest.
 - The goal box targets are no longer map settings: new maps have no goal box, and the
   settings only confused. They live in storage.tt_goal.targets with a default of 20,000;
   `/tt-goal <iron> <copper>` still sets them. A custom target set through the old

@@ -8,7 +8,7 @@ local city_defs = require("shared.city_defs")
 
 local M = {}
 
-M.SPACING = 500 -- tiles between any two cities at "City spacing" 1 (1000 until playtest 2.8.7: "a bit much"; 500 for comparison)
+M.SPACING = 750 -- tiles between any two cities at "City spacing" 1 (playtests: 1000 "a bit much", 500 "too tight")
 M.DEPOT_RADIUS = { 40, 80 } -- the coal fuel depot's distance from spawn
 -- Distance from spawn, in spacings: MIN_R + SPREAD * (DEPTH_WEIGHT * depth share +
 -- (1 - DEPTH_WEIGHT) * random). Crowding pushes a city further out.

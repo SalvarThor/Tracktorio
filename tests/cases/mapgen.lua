@@ -32,7 +32,7 @@ return {
     fn = function()
       local want = #remote.call("tt-map", "layout").cities
       local spacing = remote.call("tt-map", "spacing")
-      assert_.equals(spacing, 500, "default spacing (1x)")
+      assert_.equals(spacing, 750, "default spacing (1x)")
       for _, seed in ipairs({ 1, 42, 123456789, 4000000000 }) do
         local plan = remote.call("tt-map", "plan", seed)
         assert_.equals(#plan, want, "cities planned, seed " .. seed)

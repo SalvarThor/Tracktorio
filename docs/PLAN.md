@@ -529,5 +529,8 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       further copy one level deeper); repeated cities are named by compass direction from
       spawn; spacing at 1x is 500 tiles for comparison (was 1,000); the goal box targets
       move from map settings to storage (`/tt-goal` still sets them).
-- [ ] 2.8.9 Short `/playtest`: 500-tile spacing against 1,000, the power cities spread
-      out with compass names, no goal settings.
+- [x] 2.8.9 Short `/playtest`: 500-tile spacing against 1,000, the power cities spread
+      out with compass names, no goal settings. Playtest 2026-11-20: passed; 500 "too
+      tight", so 1x = 750 tiles (to be felt in the next playtest, no separate round). The
+      user finds starting Tracktorio from Freeplay (Space Age) misleading (its description
+      is of another game): 2.8.10.
