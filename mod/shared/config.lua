@@ -48,6 +48,7 @@ M.GOAL_CLOSED_ITEM = "tt-goal-closed"
 -- Construction port beside each upgradable city (PLAN 2.1.2).
 M.PORT = "tt-construction-port"
 M.BELT_PORT = "tt-belt-port" -- 2.10.4: hidden loader under a city wall
+M.BOX_PORT = "tt-belt-port-box" -- 2.10.6: the same, feeding the hidden chest two tiles in
 M.PORT_SLOTS = 4
 M.PORT_CLOSED_ITEM = "tt-port-closed"
 M.PORT_HEADS_UP = 0.9 -- progress fraction for the "upgrade coming" message (2.1.4)

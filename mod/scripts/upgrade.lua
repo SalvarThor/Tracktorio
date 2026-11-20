@@ -56,9 +56,8 @@ function M.upgrade(record)
   old.destroy()
 
   local city = cities.place(target, surface, position, force)
-  -- Keep the service pack credit and count. The bigger building (2.10) puts its service
-  -- port elsewhere: the packs move to the new port and the old one goes. (Until 2.10.6
-  -- moves service deliveries onto a port in the wall.)
+  -- Keep the service pack credit and count. The bigger building (2.10) has its hidden
+  -- service chest further out: the packs move to the new chest and the old one goes.
   local new_record = storage.tt_cities[city.unit_number]
   if record.service and new_record then new_record.service = record.service end
   local old_service = record.service_port

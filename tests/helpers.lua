@@ -144,6 +144,7 @@ end
 
 --- Every port for `name` flowing `flow` at the city's tier (tier 3 smelting has two):
 --- list of { pos, dir } with `pos` the tile just outside the wall and `dir` out of the city.
+--- `name` may also be "construction" or "service" (2.10.6).
 ---@param city LuaEntity
 ---@param name string
 ---@param flow "input"|"output"
@@ -151,7 +152,7 @@ function M.port_spots(city, name, flow)
   local info = assert(city_defs.by_entity[city.name], "not a city: " .. city.name)
   local out = {}
   for _, p in ipairs(port_layout.ports(info.def)) do
-    if p.name == name and p.flow == flow and p.tiers[info.tier] then
+    if (p.name == name or p.kind == name) and p.flow == flow and p.tiers[info.tier] then
       local spot = port_layout.spot(p, M.city_size(city.name))
       out[#out + 1] = { pos = { city.position.x + spot.outside[1], city.position.y + spot.outside[2] }, dir = spot.direction }
     end
@@ -185,12 +186,19 @@ function M.belt_to_port(city, name, flow, belt)
     -- the loader moves items away from the chest on inputs, towards it on outputs
     M.create("tt-belt-port", at(2), { direction = belt_dir, type = flow == "input" and "output" or "input" })
     local chest = M.create("infinity-chest", at(3))
-    if flow == "input" then
+    if flow == "input" and prototypes.item[name] then
       chest.set_infinity_container_filter(1, { name = name, count = 100, mode = "exactly" })
     else
       chest.remove_unfiltered_items = true
     end
   end
+end
+
+--- Where the hidden chest behind a city's construction or service port is (2.10.6).
+---@param city LuaEntity
+---@param kind "construction"|"service"
+function M.box_spot(city, kind)
+  return port_layout.box_position(city, kind, city_defs.by_entity)
 end
 
 --- An infinity pipe at a city's fluid port: a supply (`fill` true) or a drain.

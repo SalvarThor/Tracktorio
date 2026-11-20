@@ -127,13 +127,37 @@ function M.ports(def)
   return ports
 end
 
+--- The first port of `kind` ("construction", "service", ...) on a city, or nil.
+---@param def table
+---@param kind string
+function M.find(def, kind)
+  for _, p in ipairs(M.ports(def)) do
+    if p.kind == kind then return p end
+  end
+end
+
+--- World position of the hidden chest behind a city's construction or service port, or nil.
+--- `by_entity` is shared/city_defs.lua's table (passed in: that module requires this one).
+---@param city LuaEntity
+---@param kind "construction"|"service"
+---@param by_entity table
+function M.box_position(city, kind, by_entity)
+  local info = by_entity[city.name]
+  local p = info and M.find(info.def, kind)
+  if not (p and p.tiers[info.tier]) then return nil end
+  local spot = M.spot(p, M.size(info.def, info.tier))
+  return { x = city.position.x + spot.box[1], y = city.position.y + spot.box[2] }
+end
+
 local WALL = {
   north = { 0, -1 }, south = { 0, 1 }, west = { -1, 0 }, east = { 1, 0 },
 }
 
 --- Where a port sits on a city of `size` tiles, relative to the city's centre:
 --- `outside` is the tile just outside the wall (where the belt or pipe ends), `inside` the
---- building tile behind it, `direction` points out of the building.
+--- building tile behind it (the port's loader), `box` two tiles further in (the hidden
+--- chest of a construction or service port, clear of every item port's front tile),
+--- `direction` points out of the building.
 ---@param port table
 ---@param size integer
 function M.spot(port, size)
@@ -148,6 +172,7 @@ function M.spot(port, size)
   return {
     outside = at(half + 0.5),
     inside = at(half - 0.5),
+    box = at(half - 2.5),
     direction = defines.direction[port.wall],
   }
 end

@@ -11,13 +11,17 @@ local feed = h.feed_port
 
 return {
   {
-    name = "ports: a tiered city gets a protected port west of its top-left corner",
+    name = "ports: a tiered city gets a protected port chest inside the building, behind its construction port",
     fn = function()
       h.clear_area({ { 3490, -10 }, { 3512, 10 } })
-      local city = h.place_city(IRON, { 3500.5, 0.5 }) -- 9x9: x 3496..3505, y -4..5
+      local city = h.place_city(IRON, { 3500.5, 0.5 })
       local port = assert(port_of(city), "no port")
-      assert_.equals(port.position.x, 3495.5, "port x")
-      assert_.equals(port.position.y, -3.5, "port y")
+      local want = assert(h.box_spot(city, "construction"))
+      assert_.equals(port.position.x, want.x, "port x")
+      assert_.equals(port.position.y, want.y, "port y")
+      local box = city.bounding_box
+      assert_.truthy(port.position.x > box.left_top.x and port.position.x < box.right_bottom.x
+        and port.position.y > box.left_top.y and port.position.y < box.right_bottom.y, "port chest not inside the building")
       assert_.falsy(port.operable, "port operable")
       assert_.falsy(port.minable_flag, "port minable")
       assert_.falsy(port.destructible, "port destructible")
@@ -47,14 +51,21 @@ return {
     end,
   },
   {
-    name = "ports: inserter deliveries are counted and the port is emptied",
+    name = "ports: belt deliveries to the construction port are counted and the port is emptied",
     fn = function(ctx)
-      h.clear_area({ { 3600, -14 }, { 3622, 10 } })
+      h.clear_area({ { 3596, -14 }, { 3626, 16 } })
       local city = h.place_city(IRON, { 3610.5, 0.5 })
       local port = assert(port_of(city))
-      -- chest -> burner inserter -> port, from the north
-      h.feeder({ port.position.x, port.position.y - 2 }, { port.position.x, port.position.y - 1 },
-        defines.direction.north, { { name = "copper-plate", count = 20 } })
+      -- a belt into the construction port in the wall (2.10.6), 20 plates on it
+      local spot = h.port_spots(city, "construction", "input")[1]
+      local d = ({ [defines.direction.west] = { -1, 0 }, [defines.direction.east] = { 1, 0 },
+        [defines.direction.north] = { 0, -1 }, [defines.direction.south] = { 0, 1 } })[spot.dir]
+      local back = ({ [defines.direction.west] = defines.direction.east, [defines.direction.east] = defines.direction.west,
+        [defines.direction.north] = defines.direction.south, [defines.direction.south] = defines.direction.north })[spot.dir]
+      local chest = h.create("iron-chest", { spot.pos[1] + 2 * d[1], spot.pos[2] + 2 * d[2] })
+      chest.insert({ name = "copper-plate", count = 20 })
+      h.create("tt-belt-port", { spot.pos[1] + d[1], spot.pos[2] + d[2] }, { direction = back, type = "output" })
+      h.create("transport-belt", spot.pos, { direction = back })
       ctx:wait_until(function() return status(city).delivered["copper-plate"] >= 20 end, 60 * 60, function()
         assert_.equals(port.get_inventory(defines.inventory.chest).get_item_count(), 0, "port not emptied")
         assert_.falsy(status(city).complete, "complete after 20 of 2000")

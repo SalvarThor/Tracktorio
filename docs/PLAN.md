@@ -655,7 +655,7 @@ south wall has the door in the middle on every building):
       which spots are used matters little as long as each port is clearly marked).
 - [x] 2.10.5 No inserters on cities: an inserter whose pickup or drop target is a city is
       refused when built, with a message pointing at the ports.
-- [ ] 2.10.6 Construction and service by port: a construction port on the building takes
+- [x] 2.10.6 Construction and service by port: a construction port on the building takes
       the next tier's materials (filtered to what is still needed) and the depot's service
       port takes repair packs. The chests and their scripts go.
 - [ ] 2.10.7 Growing: the upgrade swaps in the bigger building, clears the new footprint

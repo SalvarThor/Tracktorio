@@ -4,6 +4,18 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.6 construction and service by port
+- The construction and service chests are hidden inside the building (no collision, not
+  selectable, no picture). Each is fed by a port in the wall like the item ports, marked
+  with a green upgrade arrow (construction) or a repair pack (service). The chests' slot
+  filters still decide what they take, so a wrong item jams the belt.
+- On the 8x8 building the item ports at the corners share their front tiles, so a chest
+  one tile behind a port could steal another port's items. These ports use a second
+  loader prototype, `tt-belt-port-box`, that reaches two tiles in (container_distance 2),
+  and the chest sits there, clear of every item port's front tile.
+- A hidden chest can't be blocked by the player, so the "port tile is blocked" messages
+  and their retry logic are gone.
+- Clicking any port opens its city's window.
 ## 2026-11-20: 2.10.5 no inserters on cities
 - Engine flags "no-automated-item-insertion/removal" were tried first: they block loaders
   too, so they can't be used. The rule is scripted instead.

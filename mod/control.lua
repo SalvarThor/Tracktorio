@@ -96,16 +96,14 @@ city_remote.strip_to_mvp = function(entity)
   for _, key in ipairs({ "port", "service_port" }) do
     if record[key] and record[key].valid then record[key].destroy() end
   end
-  record.port, record.upgrade, record.port_blocked_notified = nil, nil, nil
-  record.service_port, record.service, record.service_blocked_notified = nil, nil, nil
+  record.port, record.upgrade = nil, nil
+  record.service_port, record.service = nil, nil
 end
 remote.add_interface("tt-city", city_remote)
 
 upgrade.on_upgraded(notify.upgraded)
 upgrade.on_upgraded(function(_, city) map.retag(city) end)
 ports.on_heads_up(notify.heads_up)
-ports.on_blocked(notify.port_blocked)
-service.on_blocked(notify.service_port_blocked)
 silo.on_launched(goal.rocket_launched)
 map.on_city_blocked(notify.city_blocked)
 map.on_lake_blocked(notify.lake_blocked)

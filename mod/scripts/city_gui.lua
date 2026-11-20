@@ -248,6 +248,17 @@ local function city_of_port(port)
   return nil
 end
 
+--- The city a belt port belongs to.
+---@param port LuaEntity
+local function city_of_belt_port(port)
+  for _, record in pairs(storage.tt_cities) do
+    for _, loader in ipairs(record.belt_ports or {}) do
+      if loader == port and record.entity.valid then return record.entity end
+    end
+  end
+  return nil
+end
+
 ---@param body LuaGuiElement
 local function fill_goal(body)
   local s = goal.status()
@@ -339,6 +350,10 @@ local function on_open_input(e)
   local player = game.get_player(e.player_index)
   if not player then return end
   local selected = player.selected
+  -- a belt port (2.10) opens its city's window
+  if selected and (selected.name == config.BELT_PORT or selected.name == config.BOX_PORT) then
+    selected = city_of_belt_port(selected)
+  end
   if selected and M.has_window(selected) then
     M.open(player, selected)
   end

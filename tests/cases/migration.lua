@@ -1,14 +1,6 @@
--- 2.1.5: MVP (schema 1) saves gain ports and upgrades; blocked port tiles are handled.
+-- 2.1.5: MVP (schema 1) saves gain ports and upgrades.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
-
-local function messages_since(tick)
-  local out = {}
-  for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
-    if m.tick >= tick and type(m.message) == "table" and m.message[1] == "tt-notify.port-blocked" then out[#out + 1] = m end
-  end
-  return out
-end
 
 return {
   {
@@ -21,28 +13,11 @@ return {
       assert_.falsy(h.port_of(city), "still has a port after stripping")
       remote.call("tt-city", "migrate", 1)
       local port = assert(h.port_of(city), "migration did not add a port")
-      assert_.equals(port.position.x, 4205.5); assert_.equals(port.position.y, -3.5)
+      local want = assert(h.box_spot(city, "construction"))
+      assert_.equals(port.position.x, want.x); assert_.equals(port.position.y, want.y)
       assert_.equals(remote.call("tt-city", "upgrade_status", city).delivered["copper-plate"], 0)
       assert_.equals(h.feed_port(city, "copper-plate", 2000), 0)
       assert_.equals(assert(h.city_at(pos)).name, "tt-city-iron-smelting-t2")
-    end,
-  },
-  {
-    name = "migration: a blocked port tile is reported once and the port appears when cleared",
-    fn = function()
-      h.clear_area({ { 4240, -12 }, { 4262, 12 } })
-      local city = h.place_city("tt-city-copper-smelting", { 4250.5, 0.5 })
-      remote.call("tt-city", "strip_to_mvp", city)
-      local blocker = h.create("iron-chest", { 4245.5, -3.5 }) -- the player's chest on the port tile
-      local t0 = game.tick
-      remote.call("tt-city", "migrate", 1)
-      assert_.falsy(h.port_of(city), "port placed over the player's chest")
-      assert_.truthy(blocker.valid, "the player's chest was removed")
-      remote.call("tt-city", "port_tick"); remote.call("tt-city", "port_tick")
-      assert_.equals(#messages_since(t0), 1, "blocked message count")
-      blocker.destroy()
-      remote.call("tt-city", "port_tick")
-      assert_.truthy(h.port_of(city), "port did not appear after clearing the tile")
     end,
   },
   {

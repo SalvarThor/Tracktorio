@@ -27,4 +27,11 @@ port.structure = { direction_in = { sheet = empty }, direction_out = { sheet = e
 port.next_upgrade = nil
 port.fast_replaceable_group = nil
 
-data:extend({ port })
+-- The construction and service ports (2.10.6) feed a hidden chest two tiles in, clear of
+-- the tile in front of every item port (on the 8x8 building the item ports at the corners
+-- share their front tiles).
+local box_port = table.deepcopy(port)
+box_port.name = config.BOX_PORT
+box_port.container_distance = 2
+
+data:extend({ port, box_port })

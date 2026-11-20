@@ -8,12 +8,17 @@
 local config = require("shared.config")
 local city_defs = require("shared.city_defs")
 local cities = require("scripts.cities")
+local port_layout = require("shared.port_layout")
 
 local M = {}
 
---- Tile centre of the port for a city: west of the city's top-left tile.
+--- Tile centre of the port chest for a city: hidden inside the building behind its
+--- construction port in the wall (2.10.6). Cities without one (max tier): west of the
+--- top-left tile, as before, for messages only.
 ---@param city LuaEntity
 function M.port_position(city)
+  local pos = port_layout.box_position(city, "construction", city_defs.by_entity)
+  if pos then return pos end
   local box = city.bounding_box
   return { x = math.floor(box.left_top.x) - 0.5, y = math.floor(box.left_top.y) + 0.5 }
 end
@@ -58,9 +63,8 @@ local function set_filters(record)
   end
 end
 
---- Place the port for a city (if it has a next tier and no port yet). Returns true when the
---- city has its port. Never removes anything: if the tile is taken (e.g. an old save where
---- the player built there), it returns false and is retried every port tick.
+--- Place the port chest for a city (if it has a next tier and no port yet), hidden inside
+--- the building behind its construction port. Returns true when the city has its port.
 ---@param city LuaEntity
 ---@param record table
 function M.attach(city, record)
@@ -68,33 +72,23 @@ function M.attach(city, record)
   if not city_defs.next_tier(record.name) then return false end
   record.upgrade = record.upgrade or new_upgrade(record.name)
   local pos = M.port_position(city)
-  if not city.surface.can_place_entity({ name = config.PORT, position = pos, force = city.force }) then return false end
   local port = city.surface.create_entity({
     name = config.PORT, position = pos, force = city.force, create_build_effect_smoke = false })
   if not port then return false end
   cities.protect(port)
   record.port = port
-  record.port_blocked_notified = nil
   set_filters(record)
   return true
 end
 
 cities.on_any_placed(M.attach)
 
--- Called once per city whose port tile is blocked (message to the player).
-local on_blocked = nil
----@param fn fun(record: table, position: MapPosition)
-function M.on_blocked(fn) on_blocked = fn end
-
 --- Give every upgradable city its port (migration, and retried every port tick).
 function M.ensure_all()
   for _, record in pairs(storage.tt_cities) do
     local city = record.entity
     if city.valid and not (record.port and record.port.valid) and city_defs.next_tier(record.name) then
-      if not M.attach(city, record) and not record.port_blocked_notified then
-        record.port_blocked_notified = true
-        if on_blocked then on_blocked(record, M.port_position(city)) end
-      end
+      M.attach(city, record)
     end
   end
 end

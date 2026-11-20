@@ -10,6 +10,7 @@
 local config = require("shared.config")
 local city_defs = require("shared.city_defs")
 local cities = require("scripts.cities")
+local port_layout = require("shared.port_layout")
 
 local M = {}
 
@@ -19,9 +20,12 @@ function M.has_service(name)
   return info ~= nil and info.def.service == true
 end
 
---- Tile centre of the service port: east of the city's top-right tile.
+--- Tile centre of the service port chest: hidden inside the building behind its service
+--- port in the wall (2.10.6).
 ---@param city LuaEntity
 function M.port_position(city)
+  local pos = port_layout.box_position(city, "service", city_defs.by_entity)
+  if pos then return pos end
   local box = city.bounding_box
   return { x = math.ceil(box.right_bottom.x) + 0.5, y = math.floor(box.left_top.y) + 0.5 }
 end
@@ -35,8 +39,8 @@ local function set_filters(port)
   end
 end
 
---- Give a depot its service port (adopting one already on the tile, e.g. after an upgrade).
---- Returns true when it has one; false if the tile is taken by something else.
+--- Give a depot its service port: the hidden chest behind its service port in the wall.
+--- Returns true when it has one.
 ---@param city LuaEntity
 ---@param record table
 function M.attach(city, record)
@@ -46,34 +50,23 @@ function M.attach(city, record)
   local pos = M.port_position(city)
   local port = city.surface.find_entity(config.SERVICE_PORT, pos)
   if not port then
-    if not city.surface.can_place_entity({ name = config.SERVICE_PORT, position = pos, force = city.force }) then return false end
     port = city.surface.create_entity({ name = config.SERVICE_PORT, position = pos, force = city.force, create_build_effect_smoke = false })
     if not port then return false end
     cities.protect(port)
   end
   record.service_port = port
-  record.service_blocked_notified = nil
   set_filters(port)
   return true
 end
 
 cities.on_any_placed(M.attach)
 
--- Called once per depot whose service port tile is taken (message to the player).
-local on_blocked = nil
----@param fn fun(record: table, position: MapPosition)
-function M.on_blocked(fn) on_blocked = fn end
-
---- Give every depot its service port (migration; retried every second). Never removes what
---- the player built: a taken tile is reported once and retried.
+--- Give every depot its service port (migration; retried every second).
 function M.ensure_all()
   for _, record in pairs(storage.tt_cities) do
     local city = record.entity
     if city.valid and not (record.service_port and record.service_port.valid) and M.has_service(record.name) then
-      if not M.attach(city, record) and not record.service_blocked_notified then
-        record.service_blocked_notified = true
-        if on_blocked then on_blocked(record, M.port_position(city)) end
-      end
+      M.attach(city, record)
     end
   end
 end

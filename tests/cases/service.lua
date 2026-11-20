@@ -30,15 +30,15 @@ end
 
 return {
   {
-    name = "service: a depot gets a protected service port east of its top-right corner, repair packs only",
+    name = "service: a depot gets a protected service port chest inside the building, repair packs only",
     fn = function()
       h.clear_area({ { X - 10, -230 }, { X + 20, -210 } })
       local city = h.place_city(DEPOT, { X + 0.5, -219.5 })
       local s = assert(status(city), "no service status")
       local port = assert(s.port, "no service port")
-      local box = city.bounding_box
-      assert_.equals(port.position.x, math.ceil(box.right_bottom.x) + 0.5)
-      assert_.equals(port.position.y, math.floor(box.left_top.y) + 0.5)
+      local want = assert(h.box_spot(city, "service"))
+      assert_.equals(port.position.x, want.x)
+      assert_.equals(port.position.y, want.y)
       assert_.falsy(port.operable or port.destructible or port.minable_flag, "port not protected")
       assert_.equals(port.insert({ name = "iron-plate", count = 10 }), 0, "took iron plates")
       assert_.equals(port.insert({ name = "repair-pack", count = 10 }), 10, "refused repair packs")
@@ -139,29 +139,15 @@ return {
     end,
   },
   {
-    name = "service: an older depot gets its service port on migration; a blocked tile is reported once",
+    name = "service: an older depot gets its service port on migration",
     fn = function()
       h.clear_area({ { X + 80, -230 }, { X + 100, -210 } })
       local city = h.place_city(DEPOT, { X + 90.5, -219.5 })
       remote.call("tt-city", "strip_to_mvp", city)
       assert_.equals(status(city), nil)
-      local box = city.bounding_box
-      local tile = { math.ceil(box.right_bottom.x) + 0.5, math.floor(box.left_top.y) + 0.5 }
-      local blocker = h.create("iron-chest", tile)
-      local t0 = game.tick
       remote.call("tt-city", "migrate", 1)
-      remote.call("tt-city", "service_tick"); remote.call("tt-city", "service_tick")
-      assert_.truthy(blocker.valid, "the player's chest was removed")
-      local s = status(city)
-      assert_.truthy(s and not s.port, "service port placed over the player's chest")
-      local n = 0
-      for _, m in ipairs(remote.call("tt-city", "recent_messages")) do
-        if m.tick >= t0 and m.message[1] == "tt-notify.service-port-blocked" then n = n + 1 end
-      end
-      assert_.equals(n, 1, "blocked message count")
-      blocker.destroy()
       remote.call("tt-city", "service_tick")
-      assert_.truthy(assert(status(city)).port, "service port did not appear after clearing the tile")
+      assert_.truthy(assert(status(city)).port, "no service port after migration")
     end,
   },
   {
