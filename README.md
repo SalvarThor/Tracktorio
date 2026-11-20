@@ -30,12 +30,12 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 
 ## What's in the game now
 
-**22 city types**, each at a fixed place on the map:
+**24 city types**, each at a fixed place on the map (26 cities: four coal power cities):
 
 | Group | Cities |
 |---|---|
 | Smelting | iron, copper, steel |
-| Power | power city (coal + water in, electricity out to your poles) |
+| Power | four coal power cities (coal + water in, electricity out to your poles); a nuclear power city (uranium fuel cells + water in, 20/40/80 MW, burns flat out like a real reactor); a uranium city (uranium ore + iron in, fuel cells out) |
 | Fuel depots | coal fuel, solid fuel, rocket fuel |
 | Oil and chemistry | refinery (crude oil + water in, light oil + petroleum gas out), plastic, sulfur, sulfuric acid |
 | Intermediates | electronic circuits, advanced circuits, processing units, low density structure, repair packs |
@@ -93,15 +93,14 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 | 2.3 | Reliability, breakdowns, depot servicing, repair pack city |
 | 2.4 | Oil: refinery, solid and rocket fuel depots, fluid cities, oil field |
 | 2.5 | Full chain to the rocket: steel, plastic, sulfur, acid, advanced circuits, processing units, low density structure, blue science, rocket silo; the launch wins |
+| 2.6 | Power expansion: three more coal power cities, a second lake, uranium mining with acid, a uranium city, a nuclear power city; a power budget test |
 
 ## Next steps
 
-1. **Power expansion (2.6):** three more coal power cities, a uranium city and a nuclear
-   power city, since the full chain needs about four times what one power city gives.
-2. **Elevated rails** (Space Age), as late research.
-3. **Procedural map generation**, and a map sized for a real network. The current map is
+1. **Elevated rails** (Space Age), as late research.
+2. **Procedural map generation**, and a map sized for a real network. The current map is
    kept small on purpose for testing.
-4. **Water city:** water would come only from water cities and be shipped by fluid wagon.
+3. **Water city:** water would come only from water cities and be shipped by fluid wagon.
    Offshore pumps would be removed.
 
 Open ideas that aren't scheduled yet:

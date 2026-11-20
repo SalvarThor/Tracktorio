@@ -449,4 +449,5 @@ Uranium ratio is vanilla without Kovarex: 10 ore -> 0.7% U-235, 1 U-235 per 10 c
 - [x] 2.6.8 Nuclear runs flat out (user): with fuel in it burns at its full rate whatever
       the demand; unused steam is vented; the window says what share of its output the
       network uses. Idea for later (user): a circuit signal for fuel control (README).
-- [ ] 2.6.9 Short `/playtest`: flat-out nuclear (fuel use and the usage line), decimals.
+- [x] 2.6.9 Short `/playtest`: flat-out nuclear (fuel use and the usage line), decimals.
+      Playtest 2026-11-20: all passed.
