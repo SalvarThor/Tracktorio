@@ -337,6 +337,31 @@ M.MIN_APART = 0.8
 M.CHART_AROUND = 16 -- tiles charted around each city at the start (2.8.5)
 M.ALT_TURN = 15 -- degrees around spawn between alternative spots when a site finds no land
 
+M.COMPASS = { "East", "South-east", "South", "South-west", "West", "North-west", "North", "North-east" }
+
+--- Cities of a type that appears more than once (the coal power cities) are named for the
+--- direction they lie in from spawn, e.g. "North-east power city" (user, playtest 2.8.7);
+--- two in the same direction are numbered ("East power city 2"). Others keep their label.
+---@param placed table[] layout entries with name, label, x, y (spawn at 0, 0)
+function M.compass_names(placed)
+  local count, base = {}, {}
+  for _, c in ipairs(M.CITIES) do
+    count[c.name] = (count[c.name] or 0) + 1
+    base[c.name] = base[c.name] or c.label
+  end
+  local used = {}
+  for _, c in ipairs(placed) do
+    if count[c.name] > 1 then
+      -- screen y points south; 8 sectors of 45 degrees, sector 0 centred on east
+      local sector = math.floor((math.atan2(c.y, c.x) / (2 * math.pi) * 8 + 0.5)) % 8
+      local b = base[c.name]
+      local label = M.COMPASS[sector + 1] .. " " .. string.lower(string.sub(b, 1, 1)) .. string.sub(b, 2)
+      used[label] = (used[label] or 0) + 1
+      c.label = used[label] > 1 and (label .. " " .. used[label]) or label
+    end
+  end
+end
+
 --- Place a procedural layout on a surface with real terrain (2.8.3): plan it from the
 --- seed, move each city to the nearest usable land, clear it and place the city. The
 --- placed layout is kept in storage.tt_layout[surface name] (for tags, 2.8.5). Returns the
@@ -382,6 +407,7 @@ function M.place_procedural(surface, seed, spacing)
     end
   end
   for _, label in ipairs(missing) do log("tracktorio: no site for " .. label) end
+  M.compass_names(placed)
   storage.tt_layout = storage.tt_layout or {}
   storage.tt_layout[surface.name] = placed
   -- 2.8.5 (user, playtest 2.8.7): every city is on the map from the start. Chart a little
@@ -443,6 +469,7 @@ function M.remote_interface()
     -- 2.8.2: procedural layout for a seed (spacing defaults to the startup setting)
     plan = function(seed, spacing) return layout.plan(M.CITIES, seed, spacing or layout.spacing()) end,
     spacing = function() return layout.spacing() end,
+    compass_names = function(placed) M.compass_names(placed); return placed end,
     place_procedural = function(surface_name, seed, spacing)
       local placed, missing = M.place_procedural(assert(game.get_surface(surface_name)), seed, spacing or layout.spacing())
       return { placed = placed, missing = missing }

@@ -1,21 +1,6 @@
 -- Settings stage: mod setting prototypes only.
+-- (The goal box targets were map settings until playtest 2.8.7; they live in storage now.)
 data:extend({
-  {
-    type = "int-setting",
-    name = "tt-goal-iron",
-    setting_type = "runtime-global",
-    default_value = 20000,
-    minimum_value = 1,
-    order = "a",
-  },
-  {
-    type = "int-setting",
-    name = "tt-goal-copper",
-    setting_type = "runtime-global",
-    default_value = 20000,
-    minimum_value = 1,
-    order = "b",
-  },
   {
     -- 2.8.2: scales the minimum distance between cities on a procedural map
     type = "double-setting",

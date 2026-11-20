@@ -8,7 +8,7 @@ local city_defs = require("shared.city_defs")
 
 local M = {}
 
-M.SPACING = 1000 -- tiles between any two cities at "City spacing" 1
+M.SPACING = 500 -- tiles between any two cities at "City spacing" 1 (1000 until playtest 2.8.7: "a bit much"; 500 for comparison)
 M.DEPOT_RADIUS = { 40, 80 } -- the coal fuel depot's distance from spawn
 -- Distance from spawn, in spacings: MIN_R + SPREAD * (DEPTH_WEIGHT * depth share +
 -- (1 - DEPTH_WEIGHT) * random). Crowding pushes a city further out.
@@ -46,10 +46,16 @@ function M.plan(cities, seed, spacing)
   local rng = game.create_random_generator(M.mix_seed(seed))
   local max_depth = 1
   local todo = {}
+  -- Several cities of one type (the coal power cities): only the first plans at its own
+  -- depth; each further copy plans one deeper, so they spread outward instead of all
+  -- landing near spawn (playtest 2.8.7).
+  local copies = {}
   for _, c in ipairs(cities) do
     local e = {}
     for k, v in pairs(c) do e[k] = v end
-    e.depth = depth_of(c.name)
+    e.copy = copies[c.name] or 0
+    copies[c.name] = e.copy + 1
+    e.depth = depth_of(c.name) + e.copy
     e.order = rng()
     max_depth = math.max(max_depth, e.depth)
     todo[#todo + 1] = e

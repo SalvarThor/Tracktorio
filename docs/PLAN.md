@@ -520,5 +520,14 @@ At 1,000 tiles, 26 cities fill a disc of roughly 3,600 tiles' radius around spaw
       in playtest 2.8.7; first built as discover-by-charting.)
 - [x] 2.8.6 Start-up time: creating the map stays fast (target under 10 s at 3x spacing,
       tested). (2.4 s at 3x, 96 chunks; run-tests.ps1 checks TT-TIMING budgets.)
-- [ ] 2.8.7 `/playtest` round: a New Game from the menu with the map preview, the spacing
+- [x] 2.8.7 `/playtest` round: a New Game from the menu with the map preview, the spacing
       setting, the layout on the map, and the first routes on real terrain.
+      Playtest 2026-11-20: passed, with findings (2.8.8). Before it, the user changed
+      2.8.5 (cities shown from the start); the playtest copy's config.ini needed its
+      version line.
+- [x] 2.8.8 Playtest findings: only the first coal power city plans near the start (each
+      further copy one level deeper); repeated cities are named by compass direction from
+      spawn; spacing at 1x is 500 tiles for comparison (was 1,000); the goal box targets
+      move from map settings to storage (`/tt-goal` still sets them).
+- [ ] 2.8.9 Short `/playtest`: 500-tile spacing against 1,000, the power cities spread
+      out with compass names, no goal settings.

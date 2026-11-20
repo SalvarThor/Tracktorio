@@ -4,6 +4,28 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: playtest 2.8.7 findings
+- All four coal power cities landed near the start, because they all have depth 1. Now
+  only the first copy of a city type plans at its own depth, and each further copy plans
+  one level deeper. Over 10 seeds at 1,000 tiles, the mean distances of the four copies
+  are 1,875 / 2,235 / 2,700 / 3,217 tiles. Rejected: a fixed ring for copies, which goes
+  against the user's "at random" rule.
+- Repeated cities are named for their direction from spawn (8 compass sectors): "North
+  power city", "South-west power city", and "East power city 2" when two share a sector.
+  User's choice over numbering by distance or identical names. This applies to
+  procedural maps only; the fixed scenario map keeps its names.
+- City spacing at 1x is 500 tiles, down from 1,000, so the next playtest can compare
+  ("1,000 tiles feels a bit much maybe").
+- The goal box targets are no longer map settings: new maps have no goal box, and the
+  settings only confused. They live in storage.tt_goal.targets with a default of 20,000;
+  `/tt-goal <iron> <copper>` still sets them. A custom target set through the old
+  settings goes back to 20,000. No migration: the default applies when the field is
+  missing.
+- Playtest tooling: the playtest copy's config.ini needs "; version=13" first, or the main
+  menu says "Configuration file has invalid contents". Earlier playtests launched straight
+  into the scenario and never reached the menu. My first guess, an obsolete check-updates
+  key, was wrong.
+
 ## 2026-11-20: cities are on the map from the start (user, playtest 2.8.7)
 - Reverses the 2.8 plan decision that cities are found by uncovering the map. The user:
   "Running around the map looking for the city you need without biters or any real

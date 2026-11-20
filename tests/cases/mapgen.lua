@@ -31,7 +31,8 @@ return {
     name = "mapgen: the planner places every city once, the depot near spawn, all at least the spacing apart",
     fn = function()
       local want = #remote.call("tt-map", "layout").cities
-      assert_.equals(remote.call("tt-map", "spacing"), 1000, "default spacing")
+      local spacing = remote.call("tt-map", "spacing")
+      assert_.equals(spacing, 500, "default spacing (1x)")
       for _, seed in ipairs({ 1, 42, 123456789, 4000000000 }) do
         local plan = remote.call("tt-map", "plan", seed)
         assert_.equals(#plan, want, "cities planned, seed " .. seed)
@@ -46,7 +47,7 @@ return {
           for j = i + 1, #plan do
             local b = plan[j]
             local d = math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
-            assert_.truthy(d >= 1000, a.label .. " and " .. b.label .. " only " .. d .. " apart, seed " .. seed)
+            assert_.truthy(d >= spacing, a.label .. " and " .. b.label .. " only " .. d .. " apart, seed " .. seed)
           end
         end
         assert_.equals(depots, 1, "depots")
@@ -101,6 +102,46 @@ return {
       log("mapgen: mean distance by depth " .. serpent.line(mean))
       assert_.truthy(mean[5] > mean[1] * 1.3, "depth 5 " .. mean[5] .. " vs depth 1 " .. mean[1])
       assert_.truthy(mean[3] > mean[1], "depth 3 " .. mean[3] .. " vs depth 1 " .. mean[1])
+    end,
+  },
+  {
+    -- playtest 2.8.7: the four coal power cities spread out instead of all near spawn
+    name = "mapgen: only the first coal power city plans near the start; the others go further out",
+    fn = function()
+      local sum, n = {}, {}
+      for seed = 1, 10 do
+        local k = 0
+        for _, c in ipairs(remote.call("tt-map", "plan", seed, 1000)) do
+          if c.name == "tt-city-power" then
+            sum[c.copy] = (sum[c.copy] or 0) + math.sqrt(c.x ^ 2 + c.y ^ 2)
+            n[c.copy] = (n[c.copy] or 0) + 1
+            k = k + 1
+          end
+        end
+        assert_.equals(k, 4, "power cities, seed " .. seed)
+      end
+      local mean = {}
+      for i = 0, 3 do mean[i] = sum[i] / n[i] end
+      log("mapgen: power city mean distance by copy " .. serpent.line(mean))
+      for i = 1, 3 do
+        assert_.truthy(mean[i] > mean[i - 1], "copy " .. i .. " " .. mean[i] .. " not further out than copy " .. (i - 1) .. " " .. mean[i - 1])
+      end
+      assert_.truthy(mean[3] > mean[0] * 1.5, "last copy " .. mean[3] .. " vs first " .. mean[0])
+    end,
+  },
+  {
+    name = "mapgen: repeated cities are named for their direction from spawn; names are unique",
+    fn = function()
+      local placed = {
+        { name = "tt-city-power", label = "Power city", x = 0, y = -900 },
+        { name = "tt-city-power", label = "East power city", x = 800, y = 50 },
+        { name = "tt-city-power", label = "West power city", x = 900, y = -60 },
+        { name = "tt-city-power", label = "South power city", x = -700, y = 700 },
+        { name = "tt-city-depot", label = "Coal fuel depot", x = 50, y = 0 },
+      }
+      local named = remote.call("tt-map", "compass_names", placed)
+      local want = { "North power city", "East power city", "East power city 2", "South-west power city", "Coal fuel depot" }
+      for i, w in ipairs(want) do assert_.equals(named[i].label, w, "name " .. i) end
     end,
   },
   {

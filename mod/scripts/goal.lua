@@ -20,11 +20,13 @@ function M.init()
   }
 end
 
+-- Goal targets of the MVP goal box (old saves only; new maps have no goal box since 2.5.7).
+-- Kept in storage, not mod settings (user, playtest 2.8.7: the settings only confused).
+M.DEFAULT_TARGET = 20000
+
 function M.targets()
-  return {
-    iron = settings.global["tt-goal-iron"].value --[[@as integer]],
-    copper = settings.global["tt-goal-copper"].value --[[@as integer]],
-  }
+  local t = storage.tt_goal and storage.tt_goal.targets or {}
+  return { iron = t.iron or M.DEFAULT_TARGET, copper = t.copper or M.DEFAULT_TARGET }
 end
 
 --- Slot filters follow the totals: a metal whose target is met is filtered to a placeholder
@@ -108,12 +110,15 @@ function M.status()
   }
 end
 
---- Change the targets (runtime-global settings can only be written by this mod).
+--- Change the targets (/tt-goal, tests).
 ---@param iron integer?
 ---@param copper integer?
 function M.set_targets(iron, copper)
-  if iron then settings.global["tt-goal-iron"] = { value = math.max(1, math.floor(iron)) } end
-  if copper then settings.global["tt-goal-copper"] = { value = math.max(1, math.floor(copper)) } end
+  M.init()
+  local t = storage.tt_goal.targets or {}
+  storage.tt_goal.targets = t
+  if iron then t.iron = math.max(1, math.floor(iron)) end
+  if copper then t.copper = math.max(1, math.floor(copper)) end
   refresh_filters()
 end
 
