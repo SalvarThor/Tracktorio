@@ -4,6 +4,14 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: water stays plentiful
+- Water cities keep 600/1,200/2,400 water/s. Four tier 1 water cities supply 2,400/s
+  against 979/1,958/3,916 demand at tiers 1-3, so supply is never the limit.
+- Why: the user wants shipping water to be the challenge, not running short of it.
+- Rejected: 300/s at tier 1, which would make supply about equal to demand at each tier.
+- The spec's rules list no longer names offshore pumps as free; its MVP section notes
+  they were removed later.
+
 ## 2026-11-20: 2.9.4-2.9.5 water cities in the layout, the starter trio
 - Four water cities join the layout: 30 cities now. The first is the starter water city;
   the others spread like the coal power cities (each further copy one level deeper,

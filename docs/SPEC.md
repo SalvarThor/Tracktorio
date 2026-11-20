@@ -11,7 +11,7 @@ Cities chain across the map the same way a factory does, and the train network i
 - **Transformation belongs to cities only.** Furnaces, assemblers, refineries, chemical plants, boilers and steam engines are removed from the player.
 - **Transportation means trains, and only trains.** Cars, tanks, spidertrons and logistic and construction robots are removed. Belts, pipes and inserters are station-local logistics for loading, unloading and feeding cities, not the intended way to move cargo between locations.
   - Decided: no rule against long belt or pipe runs between locations. A player who wants miles of belts can build them; trains are simply the better tool.
-- **Train infrastructure, station logistics and extraction are free**, gated by research. That covers rails, signals, stops, trains, inserters, belts, chests (not logistic chests), pipes, pumps, tanks, poles, circuit entities, miners, pumpjacks and offshore pumps. Default: extraction counts as free, since sourcing and mining ores is the player's job.
+- **Train infrastructure, station logistics and extraction are free**, gated by research. That covers rails, signals, stops, trains, inserters, belts, chests (not logistic chests), pipes, pumps, tanks, poles, circuit entities, miners and pumpjacks. Default: extraction counts as free, since sourcing and mining ores is the player's job. Offshore pumps are removed: water comes only from water cities (post-MVP item 9).
 - **Everything else stays vanilla.** Trains, fuel, signals, schedules, interrupts, loading and unloading, circuits, ore patches.
 - Space Age is required for elevated rails, which come as late research. Quality, planets and platforms are off.
 
@@ -86,7 +86,7 @@ The MVP wins when the player delivers a cumulative total of X iron plates and Y 
 - Depots are fixed depot cities; the scenario guarantees one near the start. No fueling rule is enforced: only depot cities make fuel, so all fuel comes from a depot. Hand-fueling is allowed; it can't scale to a large network but helps at the start. Players may haul coal fuel by train to refuel stops they build anywhere: the depot city is the fuel source, not the only fueling point.
 - Limp mode in MVP applies to fuel-empty trains: a train with no fuel crawls instead of stopping dead. Getting it crawling to a depot is the player's job.
 - Fallback if limp mode proves complex: vanilla behaviour. An empty train stops dead until someone hand-fuels it.
-- Starting research unlocks basic rails, signals, stops, locomotive, cargo and fluid wagons, inserters, belts, miners, poles, pumps and offshore pumps.
+- Starting research unlocks basic rails, signals, stops, locomotive, cargo and fluid wagons, inserters, belts, miners, poles, pumps and offshore pumps. (Offshore pumps were removed later by the water city, post-MVP item 9.)
 - Out of MVP scope: research complex, reliability, tiers and city upgrades.
 
 ## Post-MVP order
