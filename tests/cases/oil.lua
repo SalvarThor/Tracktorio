@@ -12,19 +12,12 @@ local function contains(list, v)
   return false
 end
 
---- An infinity pipe at `pos` keeping `fluid` full (supply) or empty (drain).
-local function pipe(pos, fluid, supply)
-  local p = h.create("infinity-pipe", pos)
-  p.set_infinity_pipe_filter({ name = fluid, percentage = supply and 1 or 0, mode = "exactly" })
-  return p
-end
-
 --- A powered refinery city centred at (x + 0.5, 0.5) with crude oil and water supplied.
 local function rig(x)
   h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
   local city = h.place_city(REFINERY, { x + 0.5, 0.5 })
-  pipe({ x - 1.5, 5.5 }, "crude-oil", true)
-  pipe({ x + 2.5, 5.5 }, "water", true)
+  h.pipe_at(city, "crude-oil", "input", true)
+  h.pipe_at(city, "water", "input", true)
   h.test_power({ x + 8.5, 0.5 }, 4e6)
   return city
 end
@@ -48,7 +41,7 @@ return {
     end,
   },
   {
-    name = "oil: the window lists four pipe connections (crude and water in south, light and gas out north)",
+    name = "oil: the window lists four pipe connections (crude and water in north, light and gas out south)",
     fn = function()
       h.clear_area({ { X - 12, -40 }, { X + 12, -20 } })
       local city = h.place_city(REFINERY, { X + 0.5, -29.5 })
@@ -56,10 +49,11 @@ return {
       assert_.equals(#c, 4, serpent.line(c))
       local by = {}
       for _, x in ipairs(c) do by[x.fluid] = x end
-      assert_.equals(by["crude-oil"].side, "south"); assert_.equals(by["crude-oil"].offset, -2)
-      assert_.equals(by["water"].side, "south"); assert_.equals(by["water"].offset, 2)
-      assert_.equals(by["light-oil"].kind, "output"); assert_.equals(by["light-oil"].side, "north")
-      assert_.equals(by["petroleum-gas"].kind, "output"); assert_.equals(by["petroleum-gas"].offset, 2)
+      -- 2.10 port layout: inputs on the north wall, outputs on the south, 2.5 either side
+      assert_.equals(by["crude-oil"].side, "north"); assert_.equals(by["crude-oil"].offset, -2.5)
+      assert_.equals(by["water"].side, "north"); assert_.equals(by["water"].offset, 2.5)
+      assert_.equals(by["light-oil"].kind, "output"); assert_.equals(by["light-oil"].side, "south")
+      assert_.equals(by["petroleum-gas"].kind, "output"); assert_.equals(by["petroleum-gas"].offset, 2.5)
       local p = assert(game.players[1])
       remote.call("tt-city", "open_gui", p.index, city)
       assert_.truthy(assert(p.gui.screen["tt_city_frame"])["body"]["pipe-4"], "fourth pipe line missing")
@@ -70,8 +64,8 @@ return {
     name = "oil: refinery city runs on crude oil + water with both outputs drained",
     fn = function(ctx)
       local city = rig(X)
-      pipe({ X - 1.5, -4.5 }, "light-oil", false)
-      pipe({ X + 2.5, -4.5 }, "petroleum-gas", false)
+      h.pipe_at(city, "light-oil", "output", false)
+      h.pipe_at(city, "petroleum-gas", "output", false)
       ctx:wait_until(function() return city.products_finished >= 3 end, 60 * 20, function()
         assert_.equals(info(city).status, "running")
       end)
@@ -83,7 +77,7 @@ return {
       h.clear_area({ { X + 28, -12 }, { X + 54, 14 } })
       local x = X + 40
       local city = h.place_city(REFINERY, { x + 0.5, 0.5 })
-      pipe({ x - 1.5, 5.5 }, "crude-oil", true)
+      h.pipe_at(city, "crude-oil", "input", true)
       h.test_power({ x + 8.5, 0.5 }, 4e6)
       ctx:wait(120, function()
         local i = info(city)
@@ -120,7 +114,7 @@ return {
       h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
       local city = h.place_city("tt-city-solid-fuel-depot", { x + 0.5, 0.5 })
       assert_.truthy(assert(remote.call("tt-city", "service_status", city)).port, "no service port")
-      pipe({ x + 0.5, 5.5 }, "light-oil", true)
+      h.pipe_at(city, "light-oil", "input", true)
       h.test_power({ x + 8.5, 0.5 }, 2e6)
       ctx:wait_until(function() return city.products_finished >= 5 end, 60 * 20, function()
         local inv = assert(city.get_inventory(defines.inventory.crafter_output))
@@ -136,7 +130,7 @@ return {
       local city = h.place_city("tt-city-rocket-fuel-depot", { x + 0.5, 0.5 })
       assert_.truthy(assert(remote.call("tt-city", "service_status", city)).port, "no service port")
       city.insert({ name = "solid-fuel", count = 50 })
-      pipe({ x + 0.5, 5.5 }, "light-oil", true)
+      h.pipe_at(city, "light-oil", "input", true)
       h.test_power({ x + 8.5, 0.5 }, 2e6)
       ctx:wait_until(function() return city.products_finished >= 1 end, 60 * 15, function()
         assert_.equals(assert(city.get_inventory(defines.inventory.crafter_output)).get_item_count("rocket-fuel"), 1)
@@ -185,7 +179,7 @@ return {
       local x = X + 240
       h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
       local city = h.place_city(REFINERY, { x + 0.5, 0.5 })
-      pipe({ x - 1.5, 5.5 }, "crude-oil", true) -- crude oil, no water, no power
+      h.pipe_at(city, "crude-oil", "input", true) -- crude oil, no water, no power
       ctx:wait(120, function()
         local i = info(city)
         assert_.equals(i.status, "no_power")
@@ -207,7 +201,7 @@ return {
     name = "oil: an undrained gas output stalls it, and the status names petroleum gas",
     fn = function(ctx)
       local city = rig(X + 80)
-      pipe({ X + 80 - 1.5, -4.5 }, "light-oil", false) -- light oil drained, gas not
+      h.pipe_at(city, "light-oil", "output", false) -- light oil drained, gas not
       ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function()
         local full = info(city).full
         assert_.truthy(contains(full, "petroleum-gas"), serpent.line(full))

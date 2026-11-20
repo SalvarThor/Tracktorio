@@ -252,7 +252,7 @@ return {
       local moved = 0
       for i, c in ipairs(result.placed) do
         local x, y = c.x + 0.5, c.y + 0.5
-        local area = { { x - 12.5, y - 12.5 }, { x + 12.5, y + 12.5 } }
+        local area = { { x - 12, y - 12 }, { x + 12, y + 12 } } -- sites.HALF + MARGIN (2.10: 8 + 4)
         assert_.equals(s.count_tiles_filtered({ area = area, collision_mask = "water_tile" }), 0, c.label .. " has water")
         assert_.equals(s.count_entities_filtered({ area = area, type = { "cliff", "tree", "simple-entity" } }), 0,
           c.label .. " has cliffs, trees or rocks")

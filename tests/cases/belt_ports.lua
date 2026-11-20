@@ -2,6 +2,8 @@
 -- 2.1 loaders do with cities.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
+local port_layout = require("__tracktorio__/shared/port_layout")
+local city_defs = require("__tracktorio__/shared/city_defs")
 
 local X = 40000
 local D = defines.direction
@@ -27,13 +29,65 @@ local function city_at(name, x)
   local half = h.city_size(name) / 2
   h.clear_area({ { x - half - 6, 0.5 - half - 8 }, { x + half + 6, 0.5 + half + 8 } })
   local city = h.place_city(name, { x + 0.5, 0.5 })
-  return city, 0.5 - half - 0.5, 0.5 + half + 0.5
+  local e = h.edges(city)
+  return city, e.top, e.bottom
 end
 
 ---@param loader LuaEntity
 local function target(loader) return loader.loader_container and loader.loader_container.name end
 
 return {
+  {
+    -- 2.10.3
+    name = "buildings: 8x8 / 12x12 / 16x16 by tier (silo 9x9); ports keep one spot each at every tier",
+    fn = function()
+      for _, def in ipairs(city_defs.list) do
+        local spots = {}
+        for _, p in ipairs(port_layout.ports(def)) do
+          local key = p.wall .. p.offset
+          assert_.falsy(spots[key], def.name .. ": two ports on " .. key)
+          spots[key] = true
+          -- tier 1 ports only on lines every tier has
+          if p.tiers[1] then assert_.equals(math.abs(p.offset), 2.5, def.name .. " tier 1 port off the shared lines") end
+          assert_.truthy(math.abs(p.offset) <= 5.5, def.name .. " port beyond the 16x16 spots")
+        end
+        for tier = 1, #def.tiers do
+          local name = city_defs.entity_name(def.name, tier)
+          local want = def.kind == "silo" and 9 or ({ 8, 12, 16 })[tier]
+          assert_.equals(h.city_size(name), want, name .. " size")
+        end
+      end
+    end,
+  },
+  {
+    name = "buildings: a city's pipes connect at its fluid ports, at every tier",
+    fn = function(ctx)
+      local rigs = {}
+      for tier = 1, 3 do
+        local x = X - 200 + tier * 40
+        h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
+        local city = h.place_city(city_defs.entity_name("refinery", tier), { x + 0.5, 0.5 })
+        h.pipe_at(city, "crude-oil", "input", true)
+        h.pipe_at(city, "water", "input", true)
+        local out = {}
+        for _, fluid in ipairs({ "light-oil", "petroleum-gas" }) do
+          out[fluid] = h.create("pipe", (h.port_spot(city, fluid, "output")))
+        end
+        h.test_power({ h.edges(city).right + 1.5, 0 }, 20e6)
+        rigs[tier] = { city = city, out = out }
+      end
+      ctx:wait(300, function()
+        for _, r in ipairs(rigs) do
+          for _, fluid in ipairs({ "crude-oil", "water" }) do
+            assert_.truthy(r.city.get_fluid_count(fluid) > 0, r.city.name .. ": no " .. fluid .. " came in")
+          end
+          for fluid, pipe in pairs(r.out) do
+            assert_.truthy(pipe.get_fluid_count(fluid) > 0, r.city.name .. ": no " .. fluid .. " came out (" .. remote.call("tt-city", "info", r.city).status .. ", " .. r.city.products_finished .. " crafts)")
+          end
+        end
+      end)
+    end,
+  },
   {
     -- 2.10.1: 2.1 loaders only connect to entities flagged "player-creation"
     name = "belt ports: a loader at the wall connects to every kind of city",

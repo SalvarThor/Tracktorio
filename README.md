@@ -112,11 +112,11 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 
 ## Next steps
 
-No phase is scheduled yet. Open ideas:
+In progress: phase 2.10, Factorissimo buildings that grow with each tier (8x8, 12x12,
+16x16) and belt ports in their walls instead of inserters.
+
+Open ideas:
 - Tune breakdowns to be rarer for real play.
-- Revisit inserter throughput, which is often the bottleneck at stations.
-- Real art instead of the scaled vanilla stand-ins (Factorissimo, once its license is
-  confirmed).
 - Maybe drop the "city" naming.
 - Nuclear fuel control: the nuclear power city puts out a circuit signal (its steam level)
   so players can wire the fuel inserter to save fuel, as in vanilla nuclear setups.
@@ -148,3 +148,9 @@ tests/      test mod tracktorio-tests: runner and test cases
 tools/      PowerShell scripts (dev instance, check, tests, playtest)
 docs/       SPEC, PLAN, DECISIONS, ENV
 ```
+
+## Credits
+
+The city buildings are the Factorissimo 3 factory buildings by MagmaMcFry and notnotmelon,
+used under the MIT license (see [mod/graphics/factorissimo/](mod/graphics/factorissimo/)).
+Only the images are used, not Factorissimo's code.

@@ -1,4 +1,7 @@
 -- Shared helpers for test cases.
+local port_layout = require("__tracktorio__/shared/port_layout")
+local city_defs = require("__tracktorio__/shared/city_defs")
+
 local M = {}
 
 M.surface = function() return game.surfaces[1] end
@@ -112,22 +115,61 @@ function M.city_size(name)
   return math.floor(box.right_bottom.x - box.left_top.x + 0.5)
 end
 
+--- Rows and columns just outside a city's walls: { top, bottom, left, right } are the
+--- tile-centre coordinates of the first tile outside each wall.
+---@param city LuaEntity
+function M.edges(city)
+  local box = city.bounding_box
+  return {
+    top = math.floor(box.left_top.y + 0.5) - 0.5, bottom = math.floor(box.right_bottom.y + 0.5) + 0.5,
+    left = math.floor(box.left_top.x + 0.5) - 0.5, right = math.floor(box.right_bottom.x + 0.5) + 0.5,
+  }
+end
+
+--- The tile just outside a city's port for `name` (item or fluid) flowing `flow`, from the
+--- mod's port layout (2.10). Returns the position and the direction out of the city.
+---@param city LuaEntity
+---@param name string
+---@param flow "input"|"output"
+function M.port_spot(city, name, flow)
+  local info = assert(city_defs.by_entity[city.name], "not a city: " .. city.name)
+  for _, p in ipairs(port_layout.ports(info.def)) do
+    if p.name == name and p.flow == flow and p.tiers[info.tier] and not p.second then
+      local spot = port_layout.spot(p, M.city_size(city.name))
+      return { city.position.x + spot.outside[1], city.position.y + spot.outside[2] }, spot.direction
+    end
+  end
+  error("no " .. flow .. " port for " .. name .. " on " .. city.name)
+end
+
+--- An infinity pipe at a city's fluid port: a supply (`fill` true) or a drain.
+---@param city LuaEntity
+---@param fluid string
+---@param flow "input"|"output"
+---@param fill boolean?
+function M.pipe_at(city, fluid, flow, fill)
+  local pos = M.port_spot(city, fluid, flow)
+  local p = M.create("infinity-pipe", pos)
+  p.set_infinity_pipe_filter(fill and { name = fluid, percentage = 1, mode = "exactly" }
+    or { name = fluid, percentage = 0, mode = "exactly" })
+  return p
+end
+
 --- Clear an area and build: input chest -> inserter -> city -> inserter -> output chest.
---- The city is centred at {x + 0.5, 0.5}. Returns city, input chest, output chest (or nil).
+--- The city is placed at {x + 0.5, 0.5}. Returns city, input chest, output chest (or nil).
 ---@param name string city entity name
 ---@param x number
 ---@param contents ItemStackDefinition[] input chest contents
 ---@param with_output boolean
 function M.city_rig(name, x, contents, with_output)
-  local size = M.city_size(name)
-  local half = size / 2
-  local top, bottom = 0.5 - half, 0.5 + half
-  M.clear_area({ { x - half - 4, top - 4 }, { x + half + 5, bottom + 5 } })
+  local half = M.city_size(name) / 2
+  M.clear_area({ { x - half - 5, -half - 5 }, { x + half + 6, half + 6 } })
   local city = M.place_city(name, { x + 0.5, 0.5 })
+  local e = M.edges(city)
   local N = defines.direction.north
-  local cin = M.feeder({ x + 0.5, top - 1.5 }, { x + 0.5, top - 0.5 }, N, contents)
+  local cin = M.feeder({ x + 0.5, e.top - 1 }, { x + 0.5, e.top }, N, contents)
   local cout
-  if with_output then cout = M.feeder({ x + 0.5, bottom + 1.5 }, { x + 0.5, bottom + 0.5 }, N, {}) end
+  if with_output then cout = M.feeder({ x + 0.5, e.bottom + 1 }, { x + 0.5, e.bottom }, N, {}) end
   return city, cin, cout
 end
 

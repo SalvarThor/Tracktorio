@@ -86,13 +86,13 @@ return {
     name = "tiers: a tier 2 power city delivers more than tier 1's 5.4 MW",
     fn = function(ctx)
       local x = 3300
-      h.clear_area({ { x - 10, -12 }, { x + 16, 14 } })
+      h.clear_area({ { x - 12, -12 }, { x + 16, 14 } })
       local city = h.place_city("tt-city-power-t2", { x + 0.5, 0.5 })
       city.insert({ name = "coal", count = 50 })
-      local pipe = h.create("infinity-pipe", { x + 0.5, 5.5 })
-      pipe.set_infinity_pipe_filter({ name = "water", percentage = 1, mode = "exactly", temperature = 15 })
-      h.create("small-electric-pole", { x + 5.5, 0.5 })
-      local eei = h.create("electric-energy-interface", { x + 7, 1 })
+      h.pipe_at(city, "water", "input", true)
+      local e = h.edges(city)
+      h.create("small-electric-pole", { e.right, 0.5 })
+      local eei = h.create("electric-energy-interface", { e.right + 2, 1 })
       eei.power_production = 0
       eei.power_usage = 8e6 / 60 -- 8 MW demand
       eei.electric_buffer_size = 8e6 / 60

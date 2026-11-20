@@ -64,6 +64,14 @@ function M.place(name, surface, position, force)
   assert(M.is_city_name(name), "tt: not a city: " .. tostring(name))
   assert(prototypes.entity[name], "tt: unknown city prototype: " .. name)
   M.init() -- the scenario may place cities before this mod's on_init has run
+  -- Even sizes (2.10: 8x8, 12x12, 16x16) centre on a tile corner: the corner at the top
+  -- left of the tile asked for, so callers can keep passing tile centres and the north
+  -- and west walls stay where a 9x9 city's would be.
+  if prototypes.entity[name].tile_width % 2 == 0 then
+    local x = position.x or position[1]
+    local y = position.y or position[2]
+    position = { x = math.floor(x), y = math.floor(y) }
+  end
   local entity = surface.create_entity({
     name = name,
     position = position,

@@ -7,13 +7,6 @@ local X = 24000
 
 local function info(city) return remote.call("tt-city", "info", city) end
 
---- An infinity pipe at `pos` keeping `fluid` empty (a drain).
-local function drain(pos, fluid)
-  local p = h.create("infinity-pipe", pos)
-  p.set_infinity_pipe_filter({ name = fluid, percentage = 0, mode = "exactly" })
-  return p
-end
-
 --- A water city centred at (x + 0.5, 0.5), nothing else around it.
 local function place(x)
   h.clear_area({ { x - 14, -14 }, { x + 14, 14 } })
@@ -41,7 +34,7 @@ return {
     name = "water: with nothing but a pipe out of it, a water city makes 600 water/s",
     fn = function(ctx)
       local city = place(X)
-      drain({ X + 0.5, 5.5 }, "water")
+      h.pipe_at(city, "water", "output", false)
       ctx:wait(60, function() -- settle
         local start = city.products_finished
         ctx:wait(600, function()
@@ -101,7 +94,7 @@ return {
         if site then
           found = found + 1
           local x, y = site.x + 0.5, site.y + 0.5
-          assert_.equals(s.count_tiles_filtered({ area = { { x - 12.5, y - 12.5 }, { x + 12.5, y + 12.5 } }, collision_mask = "water_tile" }), 0, "water on the site")
+          assert_.equals(s.count_tiles_filtered({ area = { { x - 12, y - 12 }, { x + 12, y + 12 } }, collision_mask = "water_tile" }), 0, "water on the site")
           assert_.truthy(s.count_tiles_filtered({ area = { { x - 24.5, y - 24.5 }, { x + 24.5, y + 24.5 } }, collision_mask = "water_tile" }) > 0, "no water at the edge")
           assert_.truthy(s.count_tiles_filtered({ position = { x, y }, radius = 40, collision_mask = "water_tile" }) >= 600, "lake too small")
           log("water: shore site for " .. serpent.line(spot) .. " at " .. site.x .. "," .. site.y)

@@ -1,5 +1,5 @@
 -- 2.5: cities of the rocket chain. Each case: tier 1 rates (per second), power, and a real
--- run with infinity pipes (supply at the bottom, drain at the top) and items inserted.
+-- run with infinity pipes at their fluid ports (supply in, drain out) and items inserted.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
 
@@ -44,11 +44,6 @@ local function rates(name)
   for _, i in ipairs(r.ingredients) do out[i.name] = i.amount * per_s end
   for _, o in ipairs(r.products) do out[o.name] = o.amount * per_s end
   return out
-end
-
-local function pipe(pos, fluid, supply)
-  local p = h.create("infinity-pipe", pos)
-  p.set_infinity_pipe_filter({ name = fluid, percentage = supply and 1 or 0, mode = "exactly" })
 end
 
 local tests = {
@@ -108,8 +103,8 @@ for i, c in ipairs(CASES) do
       h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
       local city = h.place_city(c.city, { x + 0.5, 0.5 })
       for name, count in pairs(c.items or {}) do city.insert({ name = name, count = count }) end
-      for dx, fluid in pairs(c.supply or {}) do pipe({ x + dx + 0.5, 5.5 }, fluid, true) end
-      for dx, fluid in pairs(c.drain or {}) do pipe({ x + dx + 0.5, -4.5 }, fluid, false) end
+      for _, fluid in pairs(c.supply or {}) do h.pipe_at(city, fluid, "input", true) end
+      for _, fluid in pairs(c.drain or {}) do h.pipe_at(city, fluid, "output", false) end
       h.test_power({ x + 8.5, 0.5 }, 4e6)
       ctx:wait_until(function() return city.products_finished >= 1 end, 60 * 30, function()
         assert_.equals(remote.call("tt-city", "info", city).recipe.products[1].name, c.product)

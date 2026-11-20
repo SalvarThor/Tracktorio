@@ -644,10 +644,10 @@ south wall has the door in the middle on every building):
       kind won't take a loader: script moves the items (to be discussed first).
       Done: every kind takes a loader once the city has the "player-creation" flag; a
       hidden chest under a port takes off-recipe items (DECISIONS.md).
-- [ ] 2.10.2 Art: copy the three building images and shadows (and the port marker dots)
+- [x] 2.10.2 Art: copy the three building images and shadows (and the port marker dots)
       into `mod/graphics/factorissimo/` with the LICENSE. Credit in README. Cities use
       them at 8/12/16 tiles by tier instead of the scaled vanilla stand-ins.
-- [ ] 2.10.3 Sizes: city prototypes become 8x8 / 12x12 / 16x16 by tier (even sizes, so
+- [x] 2.10.3 Sizes: city prototypes become 8x8 / 12x12 / 16x16 by tier (even sizes, so
       centres sit on a tile corner; placement, sites and the layout adjust).
 - [ ] 2.10.4 Belt ports: each item in and out gets a port at a fixed spot on the wall,
       Tier 3 smelting gets two per item. Every port is clearly marked: its item's icon and

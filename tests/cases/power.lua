@@ -4,20 +4,20 @@ local h = require("__tracktorio-tests__/helpers")
 
 local CITY = "tt-city-power"
 
---- Power city at {x+0.5, 0.5} (9x9: x-4..x+5, y -4..5), coal fed from the north,
---- water from an infinity pipe at the south connection, a pole east of it, and an optional
---- electric-energy-interface consumer drawing `demand_w` watts.
+--- Power city at {x+0.5, 0.5}, coal fed from the north, water from an infinity pipe at its
+--- water port, a pole east of it, and an optional electric-energy-interface consumer
+--- drawing `demand_w` watts.
 local function power_rig(x, demand_w)
-  h.clear_area({ { x - 10, -12 }, { x + 16, 14 } })
+  h.clear_area({ { x - 12, -12 }, { x + 16, 14 } })
   local city = h.place_city(CITY, { x + 0.5, 0.5 })
-  h.feeder({ x + 0.5, -5.5 }, { x + 0.5, -4.5 }, defines.direction.north,
+  local e = h.edges(city)
+  h.feeder({ x + 0.5, e.top - 1 }, { x + 0.5, e.top }, defines.direction.north,
     { { name = "coal", count = 200 } })
-  local pipe = h.create("infinity-pipe", { x + 0.5, 5.5 })
-  pipe.set_infinity_pipe_filter({ name = "water", percentage = 1, mode = "exactly", temperature = 15 })
-  h.create("small-electric-pole", { x + 5.5, 0.5 })
+  h.pipe_at(city, "water", "input", true)
+  h.create("small-electric-pole", { e.right, 0.5 })
   local eei
   if demand_w then
-    eei = h.create("electric-energy-interface", { x + 7, 1 })
+    eei = h.create("electric-energy-interface", { e.right + 2, 1 })
     eei.power_production = 0
     eei.power_usage = demand_w / 60          -- J per tick
     eei.electric_buffer_size = demand_w      -- one second of demand

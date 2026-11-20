@@ -4,6 +4,26 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.2-2.10.3 building art and sizes
+- Cities draw the Factorissimo building of their tier (8x8, 12x12, 16x16) at its own
+  scale and shift. The research complex too. The rocket silo keeps the vanilla silo (9x9,
+  one tier): its rocket and launch animation is the point of it.
+- The vanilla machine a city used to look like still lends its icon and sound. 2.1
+  refuses a sound that names a working visualisation the new graphics lack (the
+  electromagnetic plant's "warm-up"), so those parts are dropped; if none is left, the
+  loop plays for all of the working time.
+- Even sizes centre on a tile corner. `cities.place` snaps to the corner at the top left of
+  the tile asked for, so the north and west walls stay where a 9x9 city's were and an
+  upgrade (same centre) grows evenly on every side.
+- Port layout in shared/port_layout.lua, used by both stages: inputs take the north wall
+  first, outputs the south; construction and service take what is left. Fluid
+  connections are laid out the same way, so pipes moved (refinery: inputs now north,
+  outputs south). Tier 3 smelting's second ports sit one line further out.
+- Sites reserve the 16x16 building: HALF 8. The margin around it went from 8 to 4 (it was
+  for the port chests, which go in 2.10.6), so the dry, cleared area is 24x24, about the
+  25x25 it was. Shore and lake checks behave as before.
+- Interim until 2.10.6: when a depot grows, its service port chest moves outward; the
+  packs move to the new chest and the old one goes.
 ## 2026-11-20: 2.10.1 loaders as belt ports (spike result)
 - A 2.1 loader-1x1 only connects to entities with the "player-creation" flag. Vanilla
   machines have it; our cities didn't, so loaders ignored them (inserters don't care).

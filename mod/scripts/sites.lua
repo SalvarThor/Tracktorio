@@ -7,10 +7,12 @@
 -- so script-set tiles count. A planned spot that is fine is checked directly; otherwise one
 -- batched grid covers the whole search. Only the chunks under the chosen site are
 -- generated, and its real tiles are checked again. 26 cities: ~3.4 s.
+local layout = require("shared.port_layout")
+
 local M = {}
 
-M.HALF = 4.5 -- a city is 9 x 9
-M.MARGIN = 8 -- room around it for the construction and service ports and the first rails
+M.HALF = layout.MAX_SIZE / 2 -- room for the city at its largest tier (16 x 16, 2.10)
+M.MARGIN = 4 -- room around it for the first belts and rails (2.10: ports are on the wall; HALF + MARGIN stays ~12)
 M.STEP = 8 -- spacing of candidate spots on the search spiral
 M.SEARCH = 320 -- furthest a site moves from its planned spot
 M.SAMPLE = 3 -- sample spacing of the dry check over the box

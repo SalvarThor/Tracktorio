@@ -5,18 +5,18 @@ local h = require("__tracktorio-tests__/helpers")
 local X = 11000
 local NUCLEAR = "tt-city-nuclear-power"
 
---- Nuclear power city at {x+0.5, 0.5} with water piped in at the bottom middle, a pole east
+--- Nuclear power city at {x+0.5, 0.5} with water piped in at its water port, a pole east
 --- of it and an optional consumer drawing `demand_w`. `cells` fuel cells go in its burner.
 local function nuclear_rig(x, demand_w, cells, name)
-  h.clear_area({ { x - 10, -12 }, { x + 16, 14 } })
+  h.clear_area({ { x - 12, -12 }, { x + 16, 14 } })
   local city = h.place_city(name or NUCLEAR, { x + 0.5, 0.5 })
-  local pipe = h.create("infinity-pipe", { x + 0.5, 5.5 })
-  pipe.set_infinity_pipe_filter({ name = "water", percentage = 1, mode = "exactly", temperature = 15 })
-  h.create("small-electric-pole", { x + 5.5, 0.5 })
+  h.pipe_at(city, "water", "input", true)
+  local e = h.edges(city)
+  h.create("small-electric-pole", { e.right, 0.5 })
   if cells and cells > 0 then city.get_fuel_inventory().insert({ name = "uranium-fuel-cell", count = cells }) end
   local eei
   if demand_w then
-    eei = h.create("electric-energy-interface", { x + 7, 1 })
+    eei = h.create("electric-energy-interface", { e.right + 2, 1 })
     eei.power_production = 0
     eei.power_usage = demand_w / 60
     eei.electric_buffer_size = demand_w
@@ -210,7 +210,7 @@ return {
         local conns = remote.call("tt-city", "info", city).connections
         assert_.equals(#conns, 1)
         assert_.equals(conns[1].fluid, "water")
-        assert_.equals(conns[1].side, "south")
+        assert_.equals(conns[1].side, "north") -- 2.10 port layout: water north-left, fuel north-right
       end)
     end,
   },

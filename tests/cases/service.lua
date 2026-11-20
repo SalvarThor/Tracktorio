@@ -64,7 +64,7 @@ return {
     end,
   },
   {
-    name = "service: the port and its packs stay through a depot upgrade; destroying the depot removes it",
+    name = "service: the packs stay through a depot upgrade; destroying the depot removes its port",
     fn = function(ctx)
       h.clear_area({ { X + 50, -230 }, { X + 70, -210 } })
       local city = h.place_city(DEPOT, { X + 60.5, -219.5 })
@@ -72,11 +72,13 @@ return {
       port.insert({ name = "repair-pack", count = 7 })
       local t2 = assert(remote.call("tt-city", "upgrade_now", city))
       local s = assert(status(t2), "tier 2 depot has no service status")
-      assert_.truthy(s.port == port, "service port was replaced")
       assert_.equals(s.packs, 7)
+      -- 2.10: the bigger building moves the port; the old one must not be left behind
+      assert_.truthy(s.port == port or not port.valid, "old service port left under the building")
+      local new_port = assert(s.port)
       t2.destroy({ raise_destroy = true })
       ctx:wait(2, function() -- on_object_destroyed arrives a tick later
-        assert_.falsy(port.valid, "service port left behind")
+        assert_.falsy(new_port.valid, "service port left behind")
       end)
     end,
   },

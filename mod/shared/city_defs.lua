@@ -28,6 +28,7 @@ local function smelting(name, ore, plate, other_plate, map_color)
   return {
     name = name,
     fuel = "coal", -- an ingredient burnt as fuel: notifications say when a tier drops it
+    double_ports_from = 3, -- 60/s at tier 3 is more than one blue belt: two ports per item (2.10)
     graphics = { type = "furnace", name = "electric-furnace" },
     map_color = map_color,
     tiers = {
@@ -131,9 +132,9 @@ local acid_recipe = { energy_required = 1,
   ingredients = { item("sulfur", 5), item("iron-plate", 1), fluid("water", 100) },
   results = { fluid("sulfuric-acid", 50) } }
 
-local S, N = defines.direction.south, defines.direction.north
-local function pipe_in(x, f) return { production_type = "input", position = { x, 4 }, direction = S, filter = f } end
-local function pipe_out(x, f) return { production_type = "output", position = { x, -4 }, direction = N, filter = f } end
+-- Fluid connections: where they sit comes from shared/port_layout.lua (2.10).
+local function pipe_in(f) return { production_type = "input", filter = f } end
+local function pipe_out(f) return { production_type = "output", filter = f } end
 
 -- Electronics (2.5.3), vanilla recipes in assemblers 2 (speed 0.75, 150 kW).
 -- Advanced circuit: 2 circuits + 2 plastic + 4 cables (2 copper) -> 1 in 6 s; speed 6 =
@@ -191,8 +192,7 @@ end
 M.WATER_PER_S = 600
 local water_recipe = { energy_required = 1, ingredients = {}, results = { fluid("water", M.WATER_PER_S) } }
 
---- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in at the
---- middle of the south side.
+--- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in.
 local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
   local function kw(f) return string.format("%gkW", power_t1 * f) end
   return {
@@ -201,7 +201,7 @@ local function fuel_depot(name, graphics, map_color, power_t1, recipe, speed_t1)
     graphics = { type = "assembling-machine", name = graphics },
     map_color = map_color,
     fluid_boxes = {
-      { production_type = "input", position = { 0, 4 }, direction = defines.direction.south, filter = "light-oil" },
+      pipe_in("light-oil"),
     },
     tiers = {
       { crafting_speed = speed_t1, power = kw(1), recipe = recipe },
@@ -233,7 +233,7 @@ M.list = {
     graphics = { type = "assembling-machine", name = "centrifuge" }, -- 2.4.3: the refinery city took the oil refinery look
     map_color = { r = 0.9, g = 0.85, b = 0.3 },
     fluid_boxes = {
-      { production_type = "input", position = { 0, 4 }, direction = defines.direction.south, filter = "water" },
+      pipe_in("water"),
       { production_type = "output", linked_id = 1, filter = "steam" },
     },
     tiers = {
@@ -250,7 +250,7 @@ M.list = {
     steam_temp = M.NUCLEAR_STEAM_TEMP,
     burner = { fuel_categories = { "nuclear" }, fuel = "uranium-fuel-cell" },
     fluid_boxes = {
-      { production_type = "input", position = { 0, 4 }, direction = defines.direction.south, filter = "water" },
+      pipe_in("water"),
       -- room for the steam of a tier 3 city between vents (scripts/nuclear.lua)
       { production_type = "output", linked_id = 1, filter = "steam", volume = 4000 },
     },
@@ -261,12 +261,12 @@ M.list = {
     },
   },
   {
-    -- Water out at the middle of the south side; room for two crafts at tier 3.
+    -- Room for two crafts at tier 3.
     name = "water",
     graphics = { type = "mining-drill", name = "pumpjack" },
     map_color = { r = 0.25, g = 0.5, b = 0.9 },
     fluid_boxes = {
-      { production_type = "output", position = { 0, 4 }, direction = defines.direction.south, filter = "water",
+      { production_type = "output", filter = "water",
         volume = 2 * 4 * M.WATER_PER_S },
     },
     tiers = {
@@ -284,15 +284,14 @@ M.list = {
   assembler_city("repair-packs", { type = "assembling-machine", name = "foundry" },
     { r = 0.75, g = 0.55, b = 0.85 }, 150, repair_recipe, 0.5, with_circuits(2000, 1000)),
   {
-    -- Inputs on the south side, outputs on the north side, 2 tiles either side of the middle.
     name = "refinery",
     graphics = { type = "assembling-machine", name = "oil-refinery" },
     map_color = { r = 0.45, g = 0.35, b = 0.25 },
     fluid_boxes = {
-      { production_type = "input", position = { -2, 4 }, direction = defines.direction.south, filter = "crude-oil" },
-      { production_type = "input", position = { 2, 4 }, direction = defines.direction.south, filter = "water" },
-      { production_type = "output", position = { -2, -4 }, direction = defines.direction.north, filter = "light-oil" },
-      { production_type = "output", position = { 2, -4 }, direction = defines.direction.north, filter = "petroleum-gas" },
+      pipe_in("crude-oil"),
+      pipe_in("water"),
+      pipe_out("light-oil"),
+      pipe_out("petroleum-gas"),
     },
     tiers = {
       { crafting_speed = 2, power = "950kW", recipe = refinery_recipe },
@@ -304,18 +303,18 @@ M.list = {
     { r = 0.6, g = 0.62, b = 0.65 }, 1440, steel_recipe, 16, with_circuits(2000, 1000)),
   assembler_city("plastic", { type = "assembling-machine", name = "biochamber" },
     { r = 0.85, g = 0.85, b = 0.85 }, 315, plastic_recipe, 1.5, with_circuits(2000, 1000),
-    { pipe_in(0, "petroleum-gas") }),
+    { pipe_in("petroleum-gas") }),
   assembler_city("sulfur", { type = "assembling-machine", name = "chemical-plant" },
     { r = 0.9, g = 0.85, b = 0.2 }, 105, sulfur_recipe, 0.5, with_circuits(2000, 1000),
-    { pipe_in(-2, "petroleum-gas"), pipe_in(2, "water") }),
+    { pipe_in("petroleum-gas"), pipe_in("water") }),
   assembler_city("sulfuric-acid", { type = "assembling-machine", name = "chemical-plant" },
     { r = 0.7, g = 0.9, b = 0.3 }, 100, acid_recipe, 0.1, with_circuits(2000, 1000),
-    { pipe_in(0, "water"), pipe_out(0, "sulfuric-acid") }),
+    { pipe_in("water"), pipe_out("sulfuric-acid") }),
   assembler_city("advanced-circuits", { type = "assembling-machine", name = "assembling-machine-3" },
     { r = 0.85, g = 0.3, b = 0.3 }, 1350, advanced_recipe, 6, with_circuits(2000, 1000)),
   assembler_city("processing-units", { type = "assembling-machine", name = "electromagnetic-plant" },
     { r = 0.3, g = 0.4, b = 0.9 }, 400, processing_recipe, 2, with_circuits(2000, 1000),
-    { pipe_in(0, "sulfuric-acid") }),
+    { pipe_in("sulfuric-acid") }),
   assembler_city("low-density-structure", { type = "assembling-machine", name = "foundry" },
     { r = 0.75, g = 0.6, b = 0.45 }, 600, lds_recipe, 3, with_circuits(2000, 1000)),
   assembler_city("blue-science", { type = "assembling-machine", name = "assembling-machine-2" },

@@ -64,7 +64,7 @@ return {
     end,
   },
   {
-    name = "city ui: the window says where each fluid connects (power city: water in, bottom middle)",
+    name = "city ui: the window says where each fluid connects (power city: water in, top right)",
     fn = function()
       h.clear_area({ { 1310, -12 }, { 1330, 12 } })
       local city = h.place_city("tt-city-power", { 1320.5, 0.5 })
@@ -72,14 +72,14 @@ return {
       assert_.equals(#c, 1, "connections " .. serpent.line(c))
       assert_.equals(c[1].kind, "input")
       assert_.equals(c[1].fluid, "water")
-      assert_.equals(c[1].side, "south")
-      assert_.equals(c[1].offset, 0)
+      assert_.equals(c[1].side, "north") -- 2.10 port layout: coal north-left, water north-right
+      assert_.equals(c[1].offset, 2.5)
       local p = assert(game.players[1])
       remote.call("tt-city", "open_gui", p.index, city)
       local line = assert(p.gui.screen["tt_city_frame"])["body"]["pipe-1"]
       assert_.truthy(line, "no pipe line in the window")
       assert_.equals(line.caption[1], "tt-gui.city-pipe-line")
-      assert_.equals(line.caption[4][1], "tt-gui.city-pipe-pos-south-mid") -- "bottom middle" (playtest 2.4.6)
+      assert_.equals(line.caption[4][1], "tt-gui.city-pipe-pos-north-b") -- "top right" (playtest 2.4.6)
       p.opened = nil
     end,
   },
@@ -123,8 +123,7 @@ return {
       h.clear_area({ { 1270, -12 }, { 1296, 14 } })
       local city = h.place_city("tt-city-power", { 1280.5, 0.5 })
       city.insert({ name = "coal", count = 20 })
-      local pipe = h.create("infinity-pipe", { 1280.5, 5.5 })
-      pipe.set_infinity_pipe_filter({ name = "water", percentage = 1, mode = "exactly", temperature = 15 })
+      h.pipe_at(city, "water", "input", true)
       ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function()
         local p = assert(game.players[1])
         remote.call("tt-city", "open_gui", p.index, city)

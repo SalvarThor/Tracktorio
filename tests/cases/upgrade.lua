@@ -42,15 +42,15 @@ return {
   {
     name = "upgrade: the upgraded electric city runs on power without coal",
     fn = function(ctx)
-      local city, _, cout = h.city_rig("tt-city-iron-smelting", 3740, { { name = "iron-ore", count = 100 } }, true)
+      h.clear_area({ { 3726, -14 }, { 3756, 16 } })
+      local city = h.place_city("tt-city-iron-smelting", { 3740.5, 0.5 })
       local pos = city.position
-      h.test_power({ 3747, 0 }, 10e6)
+      h.test_power({ 3749, 0 }, 10e6)
       h.feed_port(city, "copper-plate", 2000)
       local now = assert(h.city_at(pos))
       assert_.equals(now.name, "tt-city-iron-smelting-t2")
-      ctx:wait_until(function() return cout.get_item_count("iron-plate") > 0 end, 60 * 30, function()
-        assert_.truthy(now.products_finished > 0, "tier 2 made nothing")
-      end)
+      now.insert({ name = "iron-ore", count = 100 }) -- no coal: tier 2 is electric
+      ctx:wait_until(function() return now.products_finished > 0 end, 60 * 30, function() end)
     end,
   },
   {

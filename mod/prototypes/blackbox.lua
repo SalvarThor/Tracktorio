@@ -7,7 +7,9 @@
 --
 -- Definition fields:
 --   name            string, suffix of the entity name
---   size            odd integer tile size (default 9)
+--   size            integer tile size (default 9); even sizes centre on a tile corner
+--   art             optional tier (1-3): draw the Factorissimo building for that tier instead
+--                   of the scaled vanilla `graphics` (which still lends icon and sound)
 --   graphics        { type = <prototype type>, name = <prototype name> } vanilla source,
 --                   scaled up as a placeholder sprite
 --   crafting_speed  number (tier cap)
@@ -36,6 +38,57 @@ local function scale_sprites(t, factor)
   for _, v in pairs(t) do
     if type(v) == "table" then scale_sprites(v, factor) end
   end
+end
+
+-- Factorissimo 3 building art (MIT, see graphics/factorissimo/), one building per tier,
+-- drawn at the size it was made for: 8x8, 12x12, 16x16 (PLAN 2.10.2).
+local ART = {
+  { file = "factory-1", width = 832, height = 640, shift = { 1.5, 0 } },
+  { file = "factory-2", width = 1088, height = 896, shift = { 1.5, 0 } },
+  { file = "factory-3", width = 1408, height = 1216, shift = { 2, -0.09375 } },
+}
+
+--- The building picture for a tier, with its shadow.
+---@param tier integer
+function M.art(tier)
+  local a = assert(ART[tier], "tt: no building art for tier " .. tostring(tier))
+  local dir = "__tracktorio__/graphics/factorissimo/"
+  return {
+    layers = {
+      { filename = dir .. a.file .. "-shadow.png", width = a.width, height = a.height, scale = 0.5,
+        shift = a.shift, draw_as_shadow = true },
+      { filename = dir .. a.file .. ".png", width = a.width, height = a.height, scale = 0.5, shift = a.shift },
+    },
+  }
+end
+
+--- The source's working sound, without parts tied to its own animations: 2.1 refuses a
+--- sound that names a working visualisation the new graphics don't have. Sounds played
+--- only for one animation are dropped; if that leaves none, the looping one stays, for
+--- all of the working time.
+---@param src table
+---@param art integer?
+local function working_sound(src, art)
+  local sound = table.deepcopy(src.working_sound)
+  if not (art and type(sound) == "table") then return sound end
+  sound.sound_accents = nil
+  if sound.main_sounds then
+    local kept = {}
+    for _, m in ipairs(sound.main_sounds) do
+      if not m.play_for_working_visualisations then kept[#kept + 1] = m end
+    end
+    if #kept == 0 then
+      for _, m in ipairs(sound.main_sounds) do
+        local file = m.sound and (m.sound.filename or (m.sound.variations and m.sound.variations[1].filename)) or ""
+        if file:find("loop") then kept[1] = m end
+      end
+      kept[1] = kept[1] or sound.main_sounds[1]
+      kept[1].play_for_working_visualisations = nil
+      kept = { kept[1] }
+    end
+    sound.main_sounds = kept
+  end
+  return sound
 end
 
 local function source_prototype(src)
@@ -81,8 +134,9 @@ function M.make_city(def)
   local factor = size / src_size
 
   -- Sources without a graphics_set (the nuclear reactor) lend their static picture.
-  local graphics_set = table.deepcopy(src.graphics_set or (src.picture and { animation = src.picture }))
-  if graphics_set then
+  local graphics_set = def.art and { animation = M.art(def.art) }
+    or table.deepcopy(src.graphics_set or (src.picture and { animation = src.picture }))
+  if graphics_set and not def.art then
     graphics_set.frozen_patch = nil
     graphics_set.water_reflection = nil
     scale_sprites(graphics_set, factor)
@@ -132,7 +186,7 @@ function M.make_city(def)
     selection_box = { { -half, -half }, { half, half } },
     map_color = def.map_color or { r = 0.85, g = 0.65, b = 0.2 },
     graphics_set = graphics_set,
-    working_sound = src.working_sound,
+    working_sound = working_sound(src, def.art),
     fixed_recipe = name,
     show_recipe_icon = true,
     show_recipe_icon_on_map = true,
@@ -169,9 +223,14 @@ function M.make_lab(def)
   local src = source_prototype(def.graphics)
   local src_size = math.max(1, math.floor(src.collision_box[2][1] - src.collision_box[1][1] + 0.6))
   local factor = size / src_size
-  local on_animation, off_animation = table.deepcopy(src.on_animation), table.deepcopy(src.off_animation)
-  scale_sprites(on_animation, factor)
-  scale_sprites(off_animation, factor)
+  local on_animation, off_animation
+  if def.art then
+    on_animation, off_animation = M.art(def.art), M.art(def.art)
+  else
+    on_animation, off_animation = table.deepcopy(src.on_animation), table.deepcopy(src.off_animation)
+    scale_sprites(on_animation, factor)
+    scale_sprites(off_animation, factor)
+  end
   return { {
     type = "lab",
     name = name,
@@ -190,7 +249,7 @@ function M.make_lab(def)
     map_color = def.map_color or { r = 0.85, g = 0.65, b = 0.2 },
     on_animation = on_animation,
     off_animation = off_animation,
-    working_sound = src.working_sound,
+    working_sound = working_sound(src, def.art),
     inputs = def.inputs,
     researching_speed = def.researching_speed,
     energy_source = { type = "electric", usage_priority = "secondary-input" },

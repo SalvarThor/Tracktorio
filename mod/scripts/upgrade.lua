@@ -54,9 +54,23 @@ function M.upgrade(record)
   old.destroy()
 
   local city = cities.place(target, surface, position, force)
-  -- The service port stayed (the new tier adopted it); keep its pack credit and count.
+  -- Keep the service pack credit and count. The bigger building (2.10) puts its service
+  -- port elsewhere: the packs move to the new port and the old one goes. (Until 2.10.6
+  -- moves service deliveries onto a port in the wall.)
   local new_record = storage.tt_cities[city.unit_number]
   if record.service and new_record then new_record.service = record.service end
+  local old_service = record.service_port
+  if old_service and old_service.valid and new_record and new_record.service_port ~= old_service then
+    local to = new_record.service_port and new_record.service_port.valid and new_record.service_port.get_inventory(defines.inventory.chest)
+    for _, stack in ipairs(contents(old_service.get_inventory(defines.inventory.chest))) do
+      local inserted = to and to.insert(stack) or 0
+      if inserted < stack.count then
+        surface.spill_item_stack({ position = old_service.position, stack = { name = stack.name, count = stack.count - inserted, quality = stack.quality },
+          enable_looted = true, allow_belts = false })
+      end
+    end
+    old_service.destroy()
+  end
 
   -- Restore contents. What the new recipe can't take (coal after going electric) is spilled
   -- beside the port, for the player to pick up.

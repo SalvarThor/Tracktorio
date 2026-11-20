@@ -3,6 +3,7 @@
 local config = require("shared.config")
 local cities = require("scripts.cities")
 local city_defs = require("shared.city_defs")
+local port_layout = require("shared.port_layout")
 local silo = require("scripts.silo")
 local nuclear = require("scripts.nuclear")
 
@@ -114,23 +115,18 @@ local function lab_info(entity)
   return out
 end
 
-local SIDES = {
-  [defines.direction.north] = "north", [defines.direction.east] = "east",
-  [defines.direction.south] = "south", [defines.direction.west] = "west",
-}
-
---- Where the player connects pipes (2.4.2): one entry per visible fluid box of the city's
---- definition, { kind = "input"|"output", fluid, side, offset }. offset is tiles along the
---- edge from its middle: + is east on the north/south sides, south on the east/west sides.
+--- Where the player connects pipes (2.4.2): one entry per piped fluid at this tier, from
+--- the port layout (2.10), { kind = "input"|"output", fluid, side, offset }. offset is
+--- tiles along the wall from its middle: + is east on the north/south walls, south on the
+--- east/west walls.
 ---@param entity_name string
 function M.connections(entity_name)
   local info = city_defs.by_entity[entity_name]
   local out = {}
-  for _, f in ipairs(info and info.def.fluid_boxes or {}) do
-    if not f.linked_id then
-      local side = SIDES[f.direction]
-      local offset = (side == "north" or side == "south") and f.position[1] or f.position[2]
-      out[#out + 1] = { kind = f.production_type, fluid = f.filter, side = side, offset = offset }
+  if not info then return out end
+  for _, p in ipairs(port_layout.ports(info.def)) do
+    if p.kind == "fluid" and p.tiers[info.tier] then
+      out[#out + 1] = { kind = p.flow, fluid = p.name, side = p.wall, offset = p.offset }
     end
   end
   return out
