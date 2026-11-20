@@ -653,7 +653,7 @@ south wall has the door in the middle on every building):
       Tier 3 smelting gets two per item. Every port is clearly marked: its item's icon and
       an in or out arrow drawn on the ground at the port, and named in the tooltip (user:
       which spots are used matters little as long as each port is clearly marked).
-- [ ] 2.10.5 No inserters on cities: an inserter whose pickup or drop target is a city is
+- [x] 2.10.5 No inserters on cities: an inserter whose pickup or drop target is a city is
       refused when built, with a message pointing at the ports.
 - [ ] 2.10.6 Construction and service by port: a construction port on the building takes
       the next tier's materials (filtered to what is still needed) and the depot's service

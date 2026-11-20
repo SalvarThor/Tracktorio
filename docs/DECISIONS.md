@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-20: 2.10.5 no inserters on cities
+- Engine flags "no-automated-item-insertion/removal" were tried first: they block loaders
+  too, so they can't be used. The rule is scripted instead.
+- An inserter built (by a player or raised by script) or turned so that it picks from or
+  drops into a city or a port goes back to the player's inventory, with a flying message
+  to use the belt ports; with no player it is removed. The construction and service chests
+  still take inserters until 2.10.6; the MVP goal box (old saves, tests) keeps them.
+- An inserter finds its targets a tick after it is built, so the check runs on the
+  following ticks (up to 10).
+- Build events now go through one handler in control.lua (a mod gets one handler per
+  event), shared with the locomotive tracker.
+- Tests still create inserters by script without raising the build event, to feed cities
+  in tests about other things; 2.10.10 moves the helpers to belts.
 ## 2026-11-20: 2.10.4 belt ports
 - A port is a hidden loader (`tt-belt-port`, from loader-1x1) under the wall tile, filtered
   to its item, input loaders facing in and output loaders facing out. The player's belt

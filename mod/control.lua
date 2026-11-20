@@ -24,7 +24,25 @@ local debug_cmds = require("scripts.debug")
 debug_cmds.register()
 cities.register_events()
 city_gui.register_events()
-limp.register_events()
+-- Build events: one handler per event, shared by the modules that care (2.10.5).
+---@param e EventData.on_built_entity|EventData.script_raised_built|EventData.script_raised_revive|EventData.on_entity_cloned
+local function on_built(e)
+  local entity = e.entity or e.destination
+  if not (entity and entity.valid) then return end
+  limp.on_built(entity)
+  belt_ports.check_inserter(entity, e.player_index)
+end
+do
+  local filter = { { filter = "type", type = "locomotive" }, { filter = "type", type = "inserter" } }
+  script.on_event(defines.events.on_built_entity, on_built, filter)
+  script.on_event(defines.events.script_raised_built, on_built, filter)
+  script.on_event(defines.events.script_raised_revive, on_built, filter)
+  script.on_event(defines.events.on_entity_cloned, on_built, filter)
+end
+script.on_event(defines.events.on_player_rotated_entity, function(e)
+  belt_ports.check_inserter(e.entity, e.player_index)
+end)
+script.on_event(defines.events.on_tick, belt_ports.tick)
 silo.register_events()
 
 local migrate -- defined below; used by the tt-city.migrate test hook
@@ -53,6 +71,9 @@ city_remote.silo_fill = function(entity, parts)
   entity.rocket_parts = math.max(0, math.min(entity.prototype.rocket_parts_required - 1, math.floor(parts)))
 end
 city_remote.alerts_pending = function() return #(storage.tt_alerts or {}) end
+-- Tests: queue an inserter as if `player_index` had built it (2.10.5).
+city_remote.check_inserter = function(entity, player_index) belt_ports.check_inserter(entity, player_index) end
+city_remote.inserters_refused = function() return storage.tt_inserters_refused or 0 end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.
 city_remote.migrate = function(from_schema)

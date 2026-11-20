@@ -13,6 +13,8 @@ local cities = require("scripts.cities")
 
 local M = {}
 
+local CHECK_TICKS = 10
+
 local INWARD = {
   [defines.direction.north] = defines.direction.south, [defines.direction.south] = defines.direction.north,
   [defines.direction.east] = defines.direction.west, [defines.direction.west] = defines.direction.east,
@@ -87,6 +89,60 @@ function M.detach(record)
 end
 
 cities.on_any_placed(M.attach)
+
+--- Is this inserter reaching into a city or one of its ports? (The MVP goal box, which only
+--- old saves and tests have, still takes inserters.)
+---@param inserter LuaEntity
+local function reaches_city(inserter)
+  local function is_city(t)
+    return t ~= nil and t.valid and (t.name == config.BELT_PORT or (cities.is_city(t) and t.name ~= config.CITY.goal))
+  end
+  return is_city(inserter.pickup_target) or is_city(inserter.drop_target)
+end
+
+--- An inserter finds what it reaches a few ticks after it is built or turned, so the check
+--- waits: storage.tt_inserter_checks = { { entity, player_index, tick }, ... }, each looked
+--- at every tick for CHECK_TICKS (its first target is not always the final one).
+---@param inserter LuaEntity
+---@param player_index integer?
+function M.check_inserter(inserter, player_index)
+  if not (inserter.valid and inserter.type == "inserter") then return end
+  storage.tt_inserter_checks = storage.tt_inserter_checks or {}
+  table.insert(storage.tt_inserter_checks, { entity = inserter, player_index = player_index, tick = game.tick })
+end
+
+--- Run the checks queued before this tick (control.lua calls this every tick; cheap when
+--- the queue is empty).
+function M.tick()
+  local queue = storage.tt_inserter_checks
+  if not (queue and queue[1]) then return end
+  local later = {}
+  for _, c in ipairs(queue) do
+    local e = c.entity
+    if not e.valid then -- gone already
+    elseif c.tick >= game.tick then later[#later + 1] = c
+    elseif reaches_city(e) then M.refuse(e, c.player_index)
+    elseif game.tick - c.tick < CHECK_TICKS then
+      later[#later + 1] = c -- its targets may not be found yet: look again next tick
+    end
+  end
+  storage.tt_inserter_checks = later
+end
+
+--- No inserters on cities (2.10.5): an inserter that reaches a city goes back to the
+--- player who placed it, with a message saying to use the belt ports.
+---@param inserter LuaEntity
+---@param player_index integer?
+function M.refuse(inserter, player_index)
+  if not (inserter.valid and reaches_city(inserter)) then return end
+  storage.tt_inserters_refused = (storage.tt_inserters_refused or 0) + 1
+  local player = player_index and game.get_player(player_index)
+  if player then
+    player.create_local_flying_text({ text = { "tt-notify.no-inserters" }, position = inserter.position })
+    if player.mine_entity(inserter, true) then return end
+  end
+  if inserter.valid then inserter.destroy() end
+end
 
 --- The loaders of a city (tests, UI).
 ---@param city LuaEntity

@@ -106,18 +106,10 @@ function M.tick()
   s.cursor = i
 end
 
----@param e EventData.on_built_entity|EventData.script_raised_built|EventData.script_raised_revive|EventData.on_entity_cloned
-local function on_built(e)
-  local entity = e.entity or e.destination
-  if entity and entity.valid and entity.type == "locomotive" then M.track(entity) end
-end
-
-function M.register_events()
-  local filter = { { filter = "type", type = "locomotive" } }
-  script.on_event(defines.events.on_built_entity, on_built, filter)
-  script.on_event(defines.events.script_raised_built, on_built, filter)
-  script.on_event(defines.events.script_raised_revive, on_built, filter)
-  script.on_event(defines.events.on_entity_cloned, on_built, filter)
+--- A locomotive was built (control.lua dispatches the build events).
+---@param entity LuaEntity
+function M.on_built(entity)
+  if entity.type == "locomotive" then M.track(entity) end
 end
 
 function M.remote_interface()

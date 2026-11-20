@@ -158,6 +158,50 @@ return {
     end,
   },
   {
+    -- 2.10.5
+    name = "no inserters: one built into or out of a city is removed; others nearby stay",
+    fn = function(ctx)
+      local x = X + 860
+      h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
+      local city = h.place_city("tt-city-iron-smelting", { x + 0.5, 0.5 })
+      local e = h.edges(city)
+      local N, S, E = defines.direction.north, defines.direction.south, defines.direction.east
+      local cases = {
+        -- into the city (picks from the north, drops on the wall)
+        { "into", h.create("inserter", { x - 0.5, e.top }, { direction = N, raise_built = true }), false },
+        -- out of the city (picks from the wall, drops south)
+        { "out", h.create("inserter", { x - 0.5, e.bottom }, { direction = N, raise_built = true }), false },
+        -- onto the belt in front of a port, not the city: fine
+        { "beside", h.create("inserter", { x + 1.5, e.top - 2 }, { direction = E, raise_built = true }), true },
+        -- next to the wall but working along it: fine
+        { "along", h.create("inserter", { e.left - 1, 0.5 }, { direction = S, raise_built = true }), true },
+      }
+      ctx:wait(15, function()
+        for _, c in ipairs(cases) do
+          assert_.equals(c[2].valid, c[3], c[1] .. (c[3] and " inserter was removed" or " inserter was left"))
+        end
+      end)
+    end,
+  },
+  {
+    name = "no inserters: one a player builds into a city goes back to their inventory",
+    fn = function(ctx)
+      local p = assert(game.players[1])
+      local x = X + 920
+      h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
+      local city = h.place_city("tt-city-iron-smelting", { x + 0.5, 0.5 })
+      local ins = h.create("inserter", { x - 0.5, h.edges(city).top }, { direction = defines.direction.north })
+      local had = p.get_item_count("inserter")
+      local refused = remote.call("tt-city", "inserters_refused")
+      remote.call("tt-city", "check_inserter", ins, p.index)
+      ctx:wait(3, function()
+        assert_.falsy(ins.valid, "inserter left")
+        assert_.equals(p.get_item_count("inserter"), had + 1, "inserter not returned")
+        assert_.equals(remote.call("tt-city", "inserters_refused"), refused + 1)
+      end)
+    end,
+  },
+  {
     -- 2.10.1: 2.1 loaders only connect to entities flagged "player-creation"
     name = "belt ports: a loader at the wall connects to every kind of city",
     fn = function(ctx)
