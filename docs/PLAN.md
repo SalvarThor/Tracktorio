@@ -733,9 +733,9 @@ Items:
       changes (starve it, fill it), the construction point counts down as materials
       arrive, and the signals follow an upgrade; a train stop
       limit set from a city's signal works end to end.
-- [ ] 2.11.5 Locomotive tiers 2 and 3: prototypes (copied from the vanilla locomotive),
+- [x] 2.11.5 Locomotive tiers 2 and 3: prototypes (copied from the vanilla locomotive),
       free recipes, technologies, icons; wear per tier in config.
-- [ ] 2.11.6 Tests: stats per tier, research gating, wear rate per tier, limp and
+- [x] 2.11.6 Tests: stats per tier, research gating, wear rate per tier, limp and
       breakdown on tier 2/3, a tier 3 train beats a tier 1 train over the same run.
 - [ ] 2.11.7 SPEC, README and DECISIONS updated.
 - [ ] 2.11.8 `/playtest`: a station whose train limit comes from a city's signals; tier

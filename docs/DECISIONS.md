@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.11.5-2.11.6 locomotive tiers
+- Mk2 and Mk3 are copies of the vanilla locomotive with the user-approved stats (900 kW /
+  1.2 MW, 290 / 324 km/h, fuel effectivity 125% / 150%, wear 5% / 3% per minute). Free
+  recipes through config.FREE_ITEMS; technologies Mk2 (red + green, after Railway and
+  Logistic science pack, 200 units) and Mk3 (red + green + blue, after Mk2, Advanced
+  circuits and Chemical science pack, 300 units). Counts are a first guess for the full
+  run (2.12) to tune.
+- Look: the vanilla art in a different default colour (blue, purple), icons with the tier
+  digit. No new art.
+- Limp mode is relative: a limping Mk3 runs at 25% of its own top speed (0.375 tiles/tick).
+- 2.1 surprise: a technology named `x-2` is read as level 2 of `x`, so its locale lookup
+  goes to `technology-name.x`. The tier technologies set `localised_name` outright.
+- LuaEntityPrototype has no top speed field for locomotives; tests read
+  `train.max_forward_speed`.
+
 ## 2026-11-21: 2.11.1-2.11.3 city signal points
 - Signal points are copies of the vanilla constant combinator, kept visible (the plain
   combinator look says "wire here"), with an empty collision mask so they sit inside the

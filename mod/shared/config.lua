@@ -25,7 +25,21 @@ M.LIMP_PASS_TICKS = 60
 -- Reliability (PLAN 2.3): a locomotive's health. Driving drains it; the poll above applies
 -- the wear for the time since the locomotive was last seen, if it is moving.
 -- Fraction of max health lost per minute of driving, per locomotive prototype (tiers later).
-M.RELIABILITY_DECAY_PER_MINUTE = { locomotive = 0.075 }
+M.RELIABILITY_DECAY_PER_MINUTE = { locomotive = 0.075, ["tt-locomotive-2"] = 0.05, ["tt-locomotive-3"] = 0.03 }
+
+-- Locomotive tiers (PLAN 2.11, user 2026-11-21). Tier 1 is the vanilla locomotive (600 kW,
+-- 1.2 tiles/tick = 259 km/h, effectivity 1). Speeds in tiles per tick (x 216 = km/h).
+M.LOCOMOTIVE_TIER_NAME = { [2] = "tt-locomotive-2", [3] = "tt-locomotive-3" }
+M.LOCOMOTIVE_TIERS = {
+  [2] = { max_power = "900kW", max_speed = 290 / 216, effectivity = 1.25,
+    color = { r = 0.1, g = 0.45, b = 0.9, a = 0.5 },
+    prerequisites = { "railway", "logistic-science-pack" }, research_count = 200,
+    research = { { "automation-science-pack", 1 }, { "logistic-science-pack", 1 } } },
+  [3] = { max_power = "1.2MW", max_speed = 324 / 216, effectivity = 1.5,
+    color = { r = 0.6, g = 0.25, b = 0.85, a = 0.5 },
+    prerequisites = { "tt-locomotive-2", "advanced-circuit", "chemical-science-pack" }, research_count = 300,
+    research = { { "automation-science-pack", 1 }, { "logistic-science-pack", 1 }, { "chemical-science-pack", 1 } } },
+}
 M.RELIABILITY_FLOOR = 0.10 -- wear never takes a locomotive below this fraction
 -- While moving, chance per second of a breakdown = BREAKDOWN_CHANCE x (1 - health)^2.
 M.BREAKDOWN_CHANCE = 0.02
@@ -96,7 +110,7 @@ end
 M.FREE_ITEMS = {
   -- rails and trains
   "rail", "rail-signal", "rail-chain-signal", "train-stop",
-  "locomotive", "cargo-wagon", "fluid-wagon",
+  "locomotive", "tt-locomotive-2", "tt-locomotive-3", "cargo-wagon", "fluid-wagon",
   "rail-ramp", "rail-support",
   -- inserters
   "burner-inserter", "inserter", "long-handed-inserter", "fast-inserter", "bulk-inserter", "stack-inserter",

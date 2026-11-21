@@ -27,6 +27,7 @@ return {
     "__tracktorio-tests__/cases/reliability",
     "__tracktorio-tests__/cases/service",
     "__tracktorio-tests__/cases/fuels",
+    "__tracktorio-tests__/cases/locomotives",
     "__tracktorio-tests__/cases/oil",
     "__tracktorio-tests__/cases/chain",
     "__tracktorio-tests__/cases/nuclear",
