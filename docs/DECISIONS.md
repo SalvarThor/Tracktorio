@@ -20,9 +20,15 @@ decided during the build.
   is on its pole network yet") instead of "power cities on it make up to 0 MW"; the weak
   case reads "... but the power cities on it make only Y MW". Checked it was not a fault:
   a power city on the same poles is counted (new test).
-- Output lanes: measured, a port fills both lanes of a straight belt evenly (12/12,
-  27/27, ... 84/84 when backed up). One lane only comes from side-loading or a turn right
-  outside the port. Decision pending (2.10.19).
+- Output lanes (2.10.19, user: both lanes evenly). At 15/s a port fills both lanes evenly
+  (12/12 ... 84/84), but a slow output (the depot's 2 coal fuel/s) went entirely onto one
+  lane until it backed up, then the other: the engine's loader puts single items on one
+  lane, and no loader setting changes that. The input side plays no part. Scripted fix:
+  each output port keeps a tally of items per lane and moves a new item from the busier
+  lane to the other (items told apart by unique id, so none counts twice). A port is
+  looked at every other tick, only output ports are kept in the list, and backed-up ports
+  are skipped: the test suite runs 94 s against 88 s without it (a first version that
+  walked every city record each tick took 174 s).
 ## 2026-11-20: roof icons (user, before the 2.10 playtest)
 - Every city but the silo has a large icon of what it makes painted on its roof, as in
   Factorissimo, so cities tell apart at a glance: its first product, or `roof_icon` in its

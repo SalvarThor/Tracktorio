@@ -135,9 +135,69 @@ function M.attach(city, record)
           end
           cities.protect(loader)
           record.belt_ports[#record.belt_ports + 1] = loader
+          if not inward then
+            storage.tt_output_ports = storage.tt_output_ports or {}
+            storage.tt_output_ports[loader.unit_number] = { loader = loader, diff = 0, seen = {},
+              a = loader.get_transport_line(defines.transport_line.left_line),
+              b = loader.get_transport_line(defines.transport_line.right_line) }
+          end
         end
       end
       draw_marker(city, spot, SPRITE[p.kind] or ((p.kind == "item" and "item/" or "fluid/") .. p.name), inward)
+    end
+  end
+end
+
+--- Output ports fill both lanes evenly (2.10.19, user). The engine's loader puts single
+--- items on one lane until it backs up, which a slow city (the depot's 2 fuel/s) shows:
+--- one lane full, then the other. Each output port keeps a tally of the items it has put
+--- on each lane; a new item on the busier lane moves to the other. Items are told apart by
+--- their unique ids, so one seen on two checks counts once. Called every tick
+--- (control.lua); each port is looked at every other tick.
+--- storage.tt_output_ports[loader unit_number] = { loader = LuaEntity, a, b = its two
+--- LuaTransportLines, diff = lane 1 minus lane 2, seen = { [id] = true } }, kept by
+--- attach/detach.
+function M.balance()
+  local ports = storage.tt_output_ports
+  if not ports then return end
+  local parity = game.tick % 2
+  for unit, t in pairs(ports) do
+    local loader = t.loader
+    if not loader.valid then
+      ports[unit] = nil
+    elseif unit % 2 == parity then -- each port every other tick (an item stays longer than that)
+      local a, b = t.a, t.b
+      if #a + #b == 0 then
+        t.seen = {}
+      elseif not (a.can_insert_at_back() or b.can_insert_at_back()) then
+        -- backed up: nothing moves, nothing new arrives
+      else
+        local lines = { a, b }
+        -- new items on both lanes first, then moves, then what is there now (a moved item
+        -- must not count again on its new lane)
+        local fresh = {}
+        for lane = 1, 2 do
+          for _, d in pairs(lines[lane].get_detailed_contents()) do
+            if not t.seen[d.unique_id] then fresh[#fresh + 1] = { lane = lane, stack = d.stack } end
+          end
+        end
+        for _, f in ipairs(fresh) do
+          local lane = f.lane
+          local busier = (lane == 1 and t.diff > 0) or (lane == 2 and t.diff < 0)
+          local other = lines[3 - lane]
+          local stack = { name = f.stack.name, count = 1, quality = f.stack.quality }
+          local landed = lane
+          if busier and other.can_insert_at_back() and lines[lane].remove_item(stack) == 1 then
+            if other.insert_at_back(stack) then landed = 3 - lane else lines[lane].insert_at_back(stack) end
+          end
+          t.diff = t.diff + (landed == 1 and 1 or -1)
+        end
+        local now = {}
+        for lane = 1, 2 do
+          for _, d in pairs(lines[lane].get_detailed_contents()) do now[d.unique_id] = true end
+        end
+        t.seen = now
+      end
     end
   end
 end
@@ -146,7 +206,10 @@ end
 ---@param record table
 function M.detach(record)
   for _, loader in ipairs(record.belt_ports or {}) do
-    if loader.valid then loader.destroy() end
+    if loader.valid then
+      if storage.tt_output_ports then storage.tt_output_ports[loader.unit_number] = nil end
+      loader.destroy()
+    end
   end
   record.belt_ports = nil
 end

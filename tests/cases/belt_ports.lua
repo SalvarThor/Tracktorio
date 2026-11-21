@@ -366,6 +366,29 @@ return {
     end,
   },
   {
+    -- 2.10.19 (user): a slow output still fills both lanes evenly
+    name = "belt ports: a slow output port (depot, 2/s) fills both lanes of its belt evenly",
+    fn = function(ctx)
+      local x = X + 1300
+      h.clear_area({ { x - 14, -14 }, { x + 16, 40 } })
+      local city = h.place_city("tt-city-depot", { x + 0.5, 0.5 })
+      h.test_power({ h.edges(city).right + 1.5, 0 }, 5e6)
+      h.belt_to_port(city, "coal", "input")
+      local s = h.port_spots(city, "tt-coal-fuel", "output")[1]
+      local belts = {}
+      for k = 0, 6 do belts[#belts + 1] = h.create("transport-belt", { s.pos[1], s.pos[2] + k }, { direction = s.dir }) end
+      ctx:wait(60 * 10, function()
+        local a, b = 0, 0
+        for _, bt in ipairs(belts) do
+          a = a + bt.get_transport_line(1).get_item_count()
+          b = b + bt.get_transport_line(2).get_item_count()
+        end
+        assert_.truthy(a + b >= 10, "only " .. (a + b) .. " fuel came out")
+        assert_.truthy(math.abs(a - b) <= 2, "lanes " .. a .. " / " .. b)
+      end)
+    end,
+  },
+  {
     name = "roof icons: every city but the silo has a large icon of its product on the roof, at every tier",
     fn = function()
       local i = 0

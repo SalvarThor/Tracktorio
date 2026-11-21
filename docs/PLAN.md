@@ -685,6 +685,6 @@ south wall has the door in the middle on every building):
 - [x] 2.10.18 Upgrade message: "power cities on it make up to 0 MW" is confusing. With no
       power city on the network say so; otherwise reword. Check it wasn't a real fault
       (the hidden generator not seen on the network after 2.10's size change).
-- [ ] 2.10.19 Output port lanes: decide with the user how an output port fills the belt
+- [x] 2.10.19 Output port lanes: decide with the user how an output port fills the belt
       (it filled one lane, then the other).
 - [ ] 2.10.20 `/playtest` of 2.10.13-2.10.19.

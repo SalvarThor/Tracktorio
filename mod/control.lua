@@ -42,7 +42,10 @@ end
 script.on_event(defines.events.on_player_rotated_entity, function(e)
   belt_ports.check_inserter(e.entity, e.player_index)
 end)
-script.on_event(defines.events.on_tick, belt_ports.tick)
+script.on_event(defines.events.on_tick, function()
+  belt_ports.tick()
+  belt_ports.balance()
+end)
 silo.register_events()
 
 local migrate -- defined below; used by the tt-city.migrate test hook
