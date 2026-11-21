@@ -1,8 +1,9 @@
--- Black box cities at runtime: script placement, protection, hands-off enforcement, tracking.
+-- Black box cities at runtime: placement (by script, or built by the player since 2.15),
+-- protection, hands-off enforcement, tracking, removal.
 -- Cities are entities named "tt-city-*" (see prototypes/blackbox.lua).
 --
--- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, companion = LuaEntity?,
---   belt_ports, signal_points, throttle (their modules),
+-- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, surface_index,
+--   position, companion = LuaEntity?, belt_ports, signal_points, throttle (their modules),
 --   service_port = LuaEntity?, service = table? (scripts/service.lua) }
 -- storage.tt_hand_transfers = count of hand transfers that reached a city (should stay 0;
 --   operable=false is expected to block them, see DECISIONS.md A2).
@@ -30,6 +31,16 @@ function M.on_any_placed(fn)
   any_placed_hooks[#any_placed_hooks + 1] = fn
 end
 
+-- functions(old_record, new_record) run when a city replaces another in place (the upgrade
+-- planner's swap, 2.15.4), before the old one's parts are removed: the old record's entity
+-- is already gone, its parts are still there (signals.lua keeps the player's wires).
+local replace_hooks = {}
+
+---@param fn fun(old: table, new: table)
+function M.on_replace(fn)
+  replace_hooks[#replace_hooks + 1] = fn
+end
+
 ---@param name string?
 function M.is_city_name(name)
   return name ~= nil and string.sub(name, 1, #M.PREFIX) == M.PREFIX
@@ -45,7 +56,16 @@ function M.init()
   storage.tt_hand_transfers = storage.tt_hand_transfers or 0
 end
 
---- Hands-off protection for cities and their attached entities.
+--- Hands-off protection for a city: nobody opens, damages or rotates it. It stays minable:
+--- the player may remove a city they built (its contents are lost, see on_pre_mined).
+---@param entity LuaEntity
+function M.protect_city(entity)
+  entity.operable = false
+  entity.destructible = false
+  entity.rotatable = false
+end
+
+--- Hands-off protection for a city's attached entities (ports, points, generator, ...).
 ---@param entity LuaEntity
 function M.protect(entity)
   entity.operable = false
@@ -85,8 +105,50 @@ function M.place(name, surface, position, force)
     create_build_effect_smoke = false,
   })
   assert(entity, "tt: could not place " .. name .. " at " .. serpent.line(position))
-  M.protect(entity)
-  local record = { entity = entity, name = name }
+  M.adopt(entity)
+  return entity
+end
+
+--- Remove a city's attached entities (ports, points, generator, beacon, service chest).
+---@param record table
+local function remove_parts(record)
+  for _, key in ipairs({ "companion", "service_port" }) do
+    if record[key] and record[key].valid then record[key].destroy() end
+  end
+  for _, loader in ipairs(record.belt_ports or {}) do -- 2.10.4
+    if loader.valid then loader.destroy() end
+  end
+  for _, point in pairs(record.signal_points or {}) do -- 2.11
+    if point.valid then point.destroy() end
+  end
+  if record.throttle and record.throttle.beacon.valid then record.throttle.beacon.destroy() end -- 2.12
+end
+
+--- Track a city that now stands on the map, placed by script or built by the player (by
+--- hand, ghost, robot, blueprint or the upgrade planner): protect it, give it its hidden
+--- generator, and run the placement hooks (ports, signal point, throttle, service). Records
+--- whose city is gone are cleared first; one that stood at the same spot was just replaced
+--- in place (2.15.4), so the replace hooks see it before its parts go.
+---@param entity LuaEntity
+---@return table record
+function M.adopt(entity)
+  M.init()
+  local name = entity.name
+  if storage.tt_cities[entity.unit_number] then return storage.tt_cities[entity.unit_number] end
+  M.protect_city(entity)
+  local record = { entity = entity, name = name, surface_index = entity.surface.index,
+    position = { x = entity.position.x, y = entity.position.y } }
+  for un, old in pairs(storage.tt_cities) do
+    if not old.entity.valid then
+      if old.surface_index == record.surface_index and old.position
+          and old.position.x == record.position.x and old.position.y == record.position.y then
+        for _, fn in ipairs(replace_hooks) do fn(old, record) end
+      end
+      remove_parts(old)
+      storage.tt_cities[un] = nil
+    end
+  end
+  local surface = entity.surface
   local comp = config.CITY_COMPANIONS[name]
   if comp then
     local companion = surface.create_entity({ name = comp.entity, position = entity.position, force = entity.force })
@@ -99,7 +161,7 @@ function M.place(name, surface, position, force)
   script.register_on_object_destroyed(entity)
   if placed_hooks[name] then placed_hooks[name](entity) end
   for _, fn in ipairs(any_placed_hooks) do fn(entity, record) end
-  return entity
+  return record
 end
 
 --- All valid tracked cities, optionally filtered by name.
@@ -117,18 +179,7 @@ end
 local function on_object_destroyed(e)
   if e.type == defines.target_type.entity and e.useful_id then
     local record = storage.tt_cities[e.useful_id]
-    if record then
-      for _, key in ipairs({ "companion", "port", "service_port" }) do
-        if record[key] and record[key].valid then record[key].destroy() end
-      end
-      for _, loader in ipairs(record.belt_ports or {}) do -- 2.10.4
-        if loader.valid then loader.destroy() end
-      end
-      for _, point in pairs(record.signal_points or {}) do -- 2.11
-        if point.valid then point.destroy() end
-      end
-      if record.throttle and record.throttle.beacon.valid then record.throttle.beacon.destroy() end -- 2.12
-    end
+    if record then remove_parts(record) end
     storage.tt_cities[e.useful_id] = nil
   end
 end
@@ -150,7 +201,35 @@ local function on_player_fast_transferred(e)
   end
 end
 
+--- A city the player (or a robot) is about to mine loses everything inside (decision 5,
+--- 2.15): it is hands-off, so nothing may reach the player's inventory that way.
+---@param e EventData.on_pre_player_mined_item|EventData.on_robot_pre_mined
+local function on_pre_mined(e)
+  local entity = e.entity
+  if not (M.is_city(entity) and storage.tt_cities[entity.unit_number]) then return end
+  for i = 1, entity.get_max_inventory_index() do
+    local inv = entity.get_inventory(i --[[@as defines.inventory]])
+    if inv then inv.clear() end
+  end
+  entity.clear_fluid_inside()
+  if entity.type == "rocket-silo" then entity.rocket_parts = 0 end
+end
+
+-- Event filter for the entity types cities are (build and mine events).
+local CITY_TYPES = { { filter = "type", type = "assembling-machine" }, { filter = "type", type = "lab" },
+  { filter = "type", type = "rocket-silo" } }
+M.BUILD_FILTER = CITY_TYPES
+
+--- A city was built by the player, a robot or a script that raised the event. control.lua
+--- owns the build events (one handler each) and calls this.
+---@param entity LuaEntity
+function M.on_built(entity)
+  if M.is_city(entity) then M.adopt(entity) end
+end
+
 function M.register_events()
+  script.on_event(defines.events.on_pre_player_mined_item, on_pre_mined, CITY_TYPES)
+  script.on_event(defines.events.on_robot_pre_mined, on_pre_mined, CITY_TYPES)
   script.on_event(defines.events.on_object_destroyed, on_object_destroyed)
   script.on_event(defines.events.on_gui_opened, on_gui_opened)
   script.on_event(defines.events.on_player_fast_transferred, on_player_fast_transferred)

@@ -24,7 +24,7 @@ return {
       assert_.equals(need["rocket-fuel"], 10)
       h.clear_area({ { X - 10, -50 }, { X + 12, -30 } })
       local city = h.place_city(SILO, { X + 0.5, -39.5 })
-      assert_.falsy(city.operable or city.minable_flag or city.destructible, "not protected")
+      assert_.falsy(city.operable or city.destructible, "not protected")
       assert_.truthy(remote.call("tt-city", "has_window", city), "no window")
       local pl = assert(game.players[1])
       remote.call("tt-city", "open_gui", pl.index, city)

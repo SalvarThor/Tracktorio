@@ -43,6 +43,10 @@ function M.attach(city, record)
   local info = city_defs.by_entity[city.name]
   if not info then return end
   record.signal_points = { stock = create(city, config.SIGNAL_POINT, door(port_layout.size(info.def))) }
+  if record.saved_wires then -- the city it replaced in place had wires (2.15.4)
+    M.restore_wires(record, record.saved_wires)
+    record.saved_wires = nil
+  end
   M.update(record)
 end
 
@@ -170,5 +174,7 @@ function M.tick()
 end
 
 cities.on_any_placed(M.attach)
+-- the upgrade planner's swap (2.15.4): the new city keeps the player's wires
+cities.on_replace(function(old, new) new.saved_wires = M.save_wires(old) end)
 
 return M

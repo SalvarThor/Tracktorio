@@ -47,7 +47,7 @@ return {
       force.cancel_current_research()
       local city = complex(X)
       assert_.falsy(city.operable)
-      assert_.falsy(city.minable_flag)
+      assert_.truthy(city.minable_flag) -- 2.15: removable
       assert_.falsy(city.destructible)
       h.test_power({ X + 8.5, 0.5 }, 3e6)
       ctx:wait(10, function()

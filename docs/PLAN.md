@@ -946,9 +946,12 @@ Items:
       both on the tt_plot collision layer; every tile item's placement condition refuses
       it. Items and "tt-build-<city>" recipes for every kind (enabled until 2.15.5). Until
       2.15.6 the fixed map and the Nauvis layout paint a plot under each city they place.
-- [ ] 2.15.4 Building and removing: building a city (by hand, ghost or robot) sets up its
+- [x] 2.15.4 Building and removing: building a city (by hand, ghost or robot) sets up its
       ports, signal point and throttle through the existing "city placed" hook. Mining it
       (decision 5) removes all of them. Blueprints of a city and its station paste and build.
+      Done: cities.adopt sets up every city that appears (script, hand, robot, ghost
+      revive, fast replace); mining empties it first; the electric swap keeps the signal
+      wires. Robot builds now raise our build handler too.
 - [ ] 2.15.5 Research: each city kind is unlocked by a technology. The starting research
       gives the depot, coal power, water and both smelting cities; the rest go to the
       vanilla technologies they match (a table for the user to check before it's built).

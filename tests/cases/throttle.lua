@@ -222,7 +222,8 @@ return {
       end, function(samples)
         local t = assert(remote.call("tt-city", "throttle", city))
         assert_.truthy(t.percent >= 40 and t.percent <= 60, "speed " .. t.percent .. "%")
-        assert_.truthy(samples.other <= 2, "not working all the time: " .. serpent.line(samples.statuses))
+        -- one side-loaded lane arrives in clumps: a few short samples (under 3%) while it settles
+        assert_.truthy(samples.other <= 4, "not working all the time: " .. serpent.line(samples.statuses))
         local lo, hi = math.huge, -math.huge
         for _, v in ipairs(seen) do lo, hi = math.min(lo, v), math.max(hi, v) end
         assert_.truthy(changes <= 3 and hi - lo <= 10,

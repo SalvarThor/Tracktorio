@@ -37,7 +37,7 @@ return {
       local city = h.place_city(CITY, { 0.5, 0.5 })
       assert_.falsy(city.operable, "operable")
       assert_.falsy(city.destructible, "destructible")
-      assert_.falsy(city.minable_flag, "minable_flag")
+      assert_.truthy(city.minable_flag, "not minable (2.15: the player may remove a city)")
       assert_.falsy(city.rotatable, "rotatable")
       local listed = remote.call("tt-city", "list", CITY)
       local found = false

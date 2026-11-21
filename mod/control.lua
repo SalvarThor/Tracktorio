@@ -24,16 +24,20 @@ debug_cmds.register()
 cities.register_events()
 city_gui.register_events()
 -- Build events: one handler per event, shared by the modules that care (2.10.5).
----@param e EventData.on_built_entity|EventData.script_raised_built|EventData.script_raised_revive|EventData.on_entity_cloned
+---@param e EventData.on_built_entity|EventData.on_robot_built_entity|EventData.script_raised_built|EventData.script_raised_revive|EventData.on_entity_cloned
 local function on_built(e)
   local entity = e.entity or e.destination
   if not (entity and entity.valid) then return end
+  cities.on_built(entity) -- 2.15: the player builds cities
+  if not entity.valid then return end
   limp.on_built(entity)
   belt_ports.check_inserter(entity, e.player_index)
 end
 do
   local filter = { { filter = "type", type = "locomotive" }, { filter = "type", type = "inserter" } }
+  for _, f in ipairs(cities.BUILD_FILTER) do filter[#filter + 1] = f end
   script.on_event(defines.events.on_built_entity, on_built, filter)
+  script.on_event(defines.events.on_robot_built_entity, on_built, filter)
   script.on_event(defines.events.script_raised_built, on_built, filter)
   script.on_event(defines.events.script_raised_revive, on_built, filter)
   script.on_event(defines.events.on_entity_cloned, on_built, filter)

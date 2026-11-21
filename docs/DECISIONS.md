@@ -4,6 +4,23 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.4 building and removing cities
+- One path for every city that appears: `cities.adopt(entity)` (protection, hidden
+  generator, record, placement hooks). `cities.place` (script) calls it after
+  create_entity; control.lua's build handler calls it for on_built_entity,
+  on_robot_built_entity (newly registered), script_raised_built/revive and cloning.
+- Cities stay minable (decision 5); operable, destructible and rotatable stay off. Before
+  a player or robot mines one (on_pre_player_mined_item, on_robot_pre_mined), every
+  inventory, its fluids and a silo's rocket parts are cleared: nothing reaches the player.
+- In-place swap (upgrade planner, fast replace): when a city appears, records whose city
+  is gone are cleared at once, so the old belt ports are gone before the new ones are
+  made. One that stood on the same spot was replaced: the replace hooks run first, and
+  signals.lua copies the player's wires from the old signal point to the new one.
+  Contents carry over or not as the engine's fast replace does.
+- The one-lane throttle test allows 4 short samples in 150 (was 2 for a full belt into a
+  tier 2 city): a side-loaded lane arrives in clumps. It failed at 3 only after the tests
+  before it moved its start tick relative to the once-a-second control.
+
 ## 2026-11-21: 2.15.3 plots and city items
 - A plot is two tiles: tt-plot (a copy of refined concrete) inside a one-tile ring of
   tt-plot-border (refined hazard concrete, the "painted border"), both bright yellow-orange

@@ -1,4 +1,6 @@
 -- 2.15.3: plots. Cities are items the player builds, and only on plot tiles.
+-- 2.15.4: building (by hand, ghost, robot, upgrade planner) sets a city up; mining loses
+-- its contents.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
 local city_defs = require("__tracktorio__/shared/city_defs")
@@ -19,6 +21,31 @@ local function paint_plot(cx, cy)
     end
   end
   h.surface().set_tiles(tiles)
+end
+
+local RED = defines.wire_connector_id.circuit_red
+
+--- Build a city on a fresh plot as a player's build would: create_entity raising
+--- script_raised_built (the same handler as on_built_entity and on_robot_built_entity).
+---@param name string
+---@param cx integer plot centre (tile corner)
+local function build(name, cx)
+  h.clear_area({ { cx - 14, -14 }, { cx + 14, 16 } })
+  paint_plot(cx, 0)
+  return assert(h.surface().create_entity({ name = name, position = { cx, 0 }, force = "player", raise_built = true }))
+end
+
+--- What is set up around a city: { ports, point, beacon, generator, tracked }.
+---@param city LuaEntity
+local function parts(city)
+  local area = city.bounding_box
+  local s = h.surface()
+  return {
+    ports = s.count_entities_filtered({ area = area, name = "tt-belt-port" }),
+    points = s.count_entities_filtered({ area = area, name = "tt-signal-point" }),
+    beacons = s.count_entities_filtered({ area = area, name = "tt-throttle-beacon" }),
+    generators = s.count_entities_filtered({ area = area, name = "tt-power-generator" }),
+  }
 end
 
 ---@param name string
@@ -89,6 +116,77 @@ return {
         local coal = prototypes.entity["tt-city-" .. metal .. "-smelting"]
         assert_.equals(coal.next_upgrade and coal.next_upgrade.name, "tt-city-electric-" .. metal .. "-smelting", metal)
       end
+    end,
+  },
+  {
+    name = "build: a city the player builds is set up like a placed one: ports, signal point, throttle, generator",
+    fn = function()
+      local city = build("tt-city-iron-smelting", X + 100)
+      assert_.truthy(remote.call("tt-city", "has_window", city), "no window")
+      assert_.falsy(city.operable, "operable")
+      assert_.truthy(city.minable_flag, "not minable")
+      local n = parts(city)
+      assert_.equals(n.ports, 3, "belt ports")
+      assert_.equals(n.points, 1, "signal points")
+      assert_.equals(n.beacons, 1, "throttle beacons")
+      local power = build("tt-city-power", X + 140)
+      assert_.equals(parts(power).generators, 1, "power city generator")
+    end,
+  },
+  {
+    name = "build: a ghost revived (as a robot builds it) is set up too",
+    fn = function()
+      local cx = X + 180
+      h.clear_area({ { cx - 14, -14 }, { cx + 14, 16 } })
+      paint_plot(cx, 0)
+      local ghost = assert(h.surface().create_entity({ name = "entity-ghost", inner_name = "tt-city-depot",
+        position = { cx, 0 }, force = "player" }))
+      local _, city = ghost.revive({ raise_revive = true })
+      assert(city and city.valid, "ghost did not revive")
+      assert_.truthy(remote.call("tt-city", "service_status", city), "the depot has no service port")
+      assert_.equals(parts(city).points, 1, "signal points")
+    end,
+  },
+  {
+    name = "build: mining a city gives back the city and nothing inside it; its parts go",
+    fn = function(ctx)
+      local city = build("tt-city-iron-smelting", X + 220)
+      city.get_inventory(defines.inventory.crafter_input).insert({ name = "iron-ore", count = 30 })
+      city.get_inventory(defines.inventory.crafter_output).insert({ name = "iron-plate", count = 20 })
+      local area = city.bounding_box
+      local p = assert(game.players[1])
+      local inv = assert(p.get_main_inventory())
+      local ore, plates, items = inv.get_item_count("iron-ore"), inv.get_item_count("iron-plate"),
+        inv.get_item_count("tt-city-iron-smelting")
+      assert_.truthy(p.mine_entity(city, true), "could not mine the city")
+      assert_.equals(inv.get_item_count("tt-city-iron-smelting"), items + 1, "city item")
+      assert_.equals(inv.get_item_count("iron-ore"), ore, "ore came out of the city")
+      assert_.equals(inv.get_item_count("iron-plate"), plates, "plates came out of the city")
+      ctx:wait(2, function()
+        local s = h.surface()
+        assert_.equals(s.count_entities_filtered({ area = area, name = { "tt-belt-port", "tt-signal-point", "tt-throttle-beacon" } }), 0,
+          "parts left behind")
+      end)
+    end,
+  },
+  {
+    name = "build: the upgrade planner's swap to electric smelting keeps the wires and leaves one set of parts",
+    fn = function()
+      local cx = X + 260
+      local city = build("tt-city-iron-smelting", cx)
+      local pole = h.create("medium-electric-pole", { cx + 0.5, 9.5 })
+      local point = assert(remote.call("tt-city", "signal_points", city).stock)
+      assert(point.get_wire_connector(RED, true).connect_to(pole.get_wire_connector(RED, true), false), "wire")
+      local new = assert(h.surface().create_entity({ name = "tt-city-electric-iron-smelting", position = { cx, 0 },
+        force = "player", fast_replace = true, player = game.players[1], raise_built = true, spill = false }),
+        "the electric city did not replace the coal one")
+      assert_.falsy(city.valid, "the old city is still there")
+      local n = parts(new)
+      assert_.equals(n.ports, 2, "belt ports (ore in, plates out)")
+      assert_.equals(n.points, 1, "signal points")
+      assert_.equals(n.beacons, 1, "throttle beacons")
+      local new_point = assert(remote.call("tt-city", "signal_points", new).stock)
+      assert_.equals(new_point.get_wire_connector(RED, true).connection_count, 1, "the wire was lost")
     end,
   },
 }
