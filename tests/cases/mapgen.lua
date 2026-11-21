@@ -38,9 +38,9 @@ return {
     end,
   },
   {
-    -- 2.15.6 (user decisions): sites of 1-3 plots, a starter site of 4 near spawn, about
-    -- 75 plots, sites at least the spacing apart
-    name = "mapgen: the planner lays out about 75 plots in sites of 1-3, a starter site of 4 near spawn, all apart",
+    -- 2.15.6 (user decisions): about 75 plots, sites at least the spacing apart; playtest
+    -- 2.15.10: one plot per site, a starter site of 2 near spawn
+    name = "mapgen: the planner lays out about 75 plots, one per site, a starter site of 2 near spawn, all apart",
     fn = function()
       for _, seed in ipairs({ 1, 42, 314159, 271828 }) do
         local plan = remote.call("tt-map", "plan", seed, SPACING)
@@ -50,11 +50,11 @@ return {
         for i, c in ipairs(plan) do
           if c.starter then
             starters = starters + 1
-            assert_.equals(c.plots, 4, "starter plots")
+            assert_.equals(c.plots, 2, "starter plots")
             local d = math.sqrt(c.x ^ 2 + c.y ^ 2)
             assert_.truthy(d >= 40 and d <= 80, "starter site " .. d .. " from spawn")
           else
-            assert_.truthy(c.plots >= 1 and c.plots <= 3, c.plots .. " plots in a site")
+            assert_.equals(c.plots, 1, "plots in a site")
           end
           for j = i + 1, #plan do
             local o = plan[j]

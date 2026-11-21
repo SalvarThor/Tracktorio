@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.10 one plot per site; a starter pair
+- User, playtest 2.15.10: sites of 1-3 plots go against the mod, since 3-4 cities side by
+  side trade by 10 tiles of belt. Now every site is a single plot, at least 300 tiles from
+  the next; about 75 plots, so the layout reaches further out ("if someone wants to use all
+  75-ish plots then they should be looking at a vast and complex network of trains").
+- Starter site (user's pick of three): 2 plots near spawn, for the first power and water
+  cities (the water is piped across). The depot and smelting go on the nearest single
+  plots. Rejected: keeping the starter of 4; no starter cluster.
+- Twice the sites made the 3x-spacing layout 12.2 s (budget 10 s). Profiled: chunk
+  generation 3 s, the rest the water forecast. Fixes: each site's search box is sized to
+  its plots (a single plot: half side 6, not the 2 x 2 site's 17), and the forecast asks
+  `is_chunk_generated` once per chunk instead of once per point. Now 7.7 s.
+
 ## 2026-11-21: 2.15.10 city icons show the product
 - User, playtest 2.15.10: the city items all looked alike in the quickbar (the building art
   with a tiny product badge). Now the product (or roof icon: steam engine, reactor, lab) is

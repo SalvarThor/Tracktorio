@@ -1,10 +1,10 @@
 -- Procedural plot layout (PLAN 2.15.6; before that, of the cities themselves, 2.8.2). Pure
 -- planning: positions only, nothing is placed here. Seeded, so the same map seed always
 -- gives the same layout.
--- User decisions (2026-11-21, phase 2.15): plots come in small sites of 1-3, at least
--- SPACING apart (x the "City spacing" startup setting); about TARGET_PLOTS plots; a starter
--- site of 4 near spawn for the first depot, power, water and smelting cities. Any city on
--- any plot. Sites take no account of resources.
+-- User decisions (2026-11-21, phase 2.15): one plot per site, sites at least SPACING apart
+-- (x the "City spacing" startup setting); about TARGET_PLOTS plots; a starter site of 2
+-- near spawn for the first power and water cities (playtest 2.15.10: bigger sites let
+-- cities trade by short belts). Any city on any plot. Sites take no account of resources.
 
 local M = {}
 
@@ -16,18 +16,24 @@ M.SPACING = 300
 -- "the variance a lot higher").
 M.GAP_SPREAD, M.GAP_SKEW = 1, 2.5
 M.TARGET_PLOTS = 75
-M.STARTER_PLOTS = 4
+M.STARTER_PLOTS = 2
 M.STARTER_RADIUS = { 40, 80 } -- the starter site's distance from spawn
-M.MAX_PLOTS = 3 -- an ordinary site has 1..MAX_PLOTS plots
+M.MAX_PLOTS = 1 -- an ordinary site has 1..MAX_PLOTS plots
 M.TRIES = 30 -- random angles per radius before stepping out
 M.STEP_OUT = 1.08
 M.FIRST_RING = 1.2 -- the first ordinary sites plan this many spacings out
 
--- Plots of a site: up to a 2 x 2 grid, PITCH tiles from plot centre to plot centre (a
+-- Plots of a site (the starter's two side by side; up to a 2 x 2 grid), PITCH tiles from plot centre to plot centre (a
 -- 12-tile plot and GAP tiles of ground between: room for a belt run or a rail).
 M.GAP = 10
 M.PITCH = 12 + M.GAP
 M.SITE_HALF = M.PITCH / 2 + 6 -- half the side of a full 2 x 2 site (17)
+
+--- Half the side of a site of `n` plots (a single plot: 6).
+---@param n integer
+function M.site_half(n)
+  return n == 1 and 6 or M.SITE_HALF
+end
 
 --- Minimum distance between sites for this game: SPACING x the startup setting.
 function M.spacing()

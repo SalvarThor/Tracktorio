@@ -51,7 +51,7 @@ Shared behaviour:
 (User decisions 2026-11-21, phase 2.15.)
 
 - Map generation paints plots: 12x12 building spots with a marked border, visible on the map. A city can only be built on a plot, and any city fits any plot. Plots can't be mined or covered with other tiles.
-- Plots come in small sites of 1-3, at least 300 tiles between sites, so belting between sites is clearly worse than rail. About 75 plots on a map. A starter site of 4 plots near spawn takes the first depot, power, water and smelting cities.
+- One plot per site, at least 300 tiles between sites, so belting between cities is clearly worse than rail. About 75 plots on a map: using them all takes a vast train network, and that is the challenge. A starter site of 2 plots near spawn takes the first power and water cities; the depot and smelting go on the nearest single plots. (User decision 2026-11-21, playtest 2.15.10; before that, sites of 1-3 and a starter of 4, which let neighbouring cities trade by short belts.)
 - Each site has a map tag.
 - Rejected: buildings already on the map, unassigned, that the player gives a role once (no blueprints, and a wrong pick can't be undone).
 

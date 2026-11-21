@@ -352,10 +352,11 @@ function M.place_procedural(surface, seed, spacing)
   --- Near the planned spot, else the same distance from spawn turned around it in
   --- ALT_TURN steps (+15, -15, +30, ...); if every turn is blocked, a little further out.
   local function near_plan(c)
-    local site = sites.find(surface, c.x, c.y, placed, apart)
+    local half = layout.site_half(c.plots)
+    local site = sites.find(surface, c.x, c.y, placed, apart, nil, half)
     local function try_spot(x, y)
       if not free(x, y) then return nil end
-      return sites.find(surface, x, y, placed, apart, M.ALT_SEARCH)
+      return sites.find(surface, x, y, placed, apart, M.ALT_SEARCH, half)
     end
     local scale = 1
     for _ = 0, M.ALT_OUT_STEPS do
@@ -376,7 +377,7 @@ function M.place_procedural(surface, seed, spacing)
     c.label = site_label(c)
     local site = near_plan(c)
     if site then
-      sites.clear(surface, site.x, site.y)
+      sites.clear(surface, site.x, site.y, layout.site_half(c.plots))
       c.planned = { x = c.x, y = c.y }
       c.x, c.y = site.x, site.y
       for _, o in ipairs(layout.offsets(c.plots)) do

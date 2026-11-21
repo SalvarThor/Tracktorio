@@ -10,7 +10,8 @@
 -- generated, and its real tiles are checked again.
 local M = {}
 
-M.HALF = require("scripts.layout").SITE_HALF -- room for a site of up to 2 x 2 plots (2.15.6)
+M.HALF = require("scripts.layout").SITE_HALF -- default room: a site of up to 2 x 2 plots (2.15.6)
+-- A caller may pass a smaller half side for a smaller site (one plot: 6; playtest 2.15.10).
 M.MARGIN = 4 -- room around it for the first belts and rails (ports are on the wall)
 M.STEP = 8 -- spacing of candidate spots on the search spiral
 M.SEARCH = 320 -- furthest a site moves from its planned spot
@@ -25,9 +26,17 @@ M.RAYS_NEEDED = 6 -- rays that must reach RAY_LENGTH over land (an island fails 
 ---@return boolean[]
 local function water(surface, positions)
   local out, ask, idx = {}, {}, {}
+  local gen = {} -- chunk key -> generated? (one engine call per chunk, not per point)
   for i, p in ipairs(positions) do
     local x, y = p[1], p[2]
-    if surface.is_chunk_generated({ math.floor(x / 32), math.floor(y / 32) }) then
+    local cx, cy = math.floor(x / 32), math.floor(y / 32)
+    local key = cx * 1048576 + cy
+    local g = gen[key]
+    if g == nil then
+      g = surface.is_chunk_generated({ cx, cy })
+      gen[key] = g
+    end
+    if g then
       local tile = surface.get_tile(x, y)
       out[i] = tile.collides_with("water_tile") or tile.name == "out-of-map"
     else
@@ -51,9 +60,9 @@ local function any(list)
   return false
 end
 
---- Points over the city's box (city and margin) around a centre.
-local function box_points(x, y)
-  local r, pts = M.HALF + M.MARGIN, {}
+--- Points over the site's box (half side r: site and margin) around a centre.
+local function box_points(x, y, r)
+  local pts = {}
   for dx = -r, r, M.SAMPLE do
     for dy = -r, r, M.SAMPLE do pts[#pts + 1] = { x + dx, y + dy } end
   end
@@ -84,8 +93,8 @@ function M.mainland(surface, x, y)
 end
 
 ---@param surface LuaSurface
-local function usable(surface, x, y)
-  return not any(water(surface, box_points(x, y))) and M.mainland(surface, x, y)
+local function usable(surface, x, y, r)
+  return not any(water(surface, box_points(x, y, r))) and M.mainland(surface, x, y)
 end
 
 --- Is the whole disc of `search` around (x, y) too close to some taken site? Then there
@@ -100,8 +109,7 @@ end
 
 --- Generate the chunks under a site's box.
 ---@param surface LuaSurface
-local function generate(surface, x, y)
-  local r = M.HALF + M.MARGIN
+local function generate(surface, x, y, r)
   for cx = math.floor((x - r) / 32), math.floor((x + r) / 32) do
     for cy = math.floor((y - r) / 32), math.floor((y + r) / 32) do
       surface.request_to_generate_chunks({ cx * 32 + 16, cy * 32 + 16 }, 0)
@@ -131,8 +139,8 @@ local function grid(surface, x, y, radius, step)
 end
 
 --- Candidate check against the grid: the box is dry and enough rays reach land's end.
-local function usable_on(wet, x, y)
-  local r, g = M.HALF + M.MARGIN, M.RAY_STEP
+local function usable_on(wet, x, y, r)
+  local g = M.RAY_STEP
   for dx = -r, r + g - 1, g do
     for dy = -r, r + g - 1, g do
       if wet(x + math.min(dx, r), y + math.min(dy, r)) then return false end
@@ -156,8 +164,7 @@ end
 
 --- The real check once the site's chunks exist: real tiles in the box, then mainland.
 ---@param surface LuaSurface
-local function confirmed(surface, x, y)
-  local r = M.HALF + M.MARGIN
+local function confirmed(surface, x, y, r)
   local area = { { x - r, y - r }, { x + r, y + r } }
   if surface.count_tiles_filtered({ area = area, collision_mask = "water_tile", limit = 1 }) > 0 then return false end
   if surface.count_tiles_filtered({ area = area, name = "out-of-map", limit = 1 }) > 0 then return false end
@@ -173,8 +180,10 @@ end
 ---@param taken table[]?
 ---@param apart (number|fun(t: table): number)? distance to keep from each taken site
 ---@param search number? furthest the site may move (default SEARCH)
-function M.find(surface, x, y, taken, apart, search)
+---@param half number? half the side of the site (default HALF)
+function M.find(surface, x, y, taken, apart, search, half)
   search = search or M.SEARCH
+  local box = (half or M.HALF) + M.MARGIN
   if blocked(x, y, taken, apart, search) then return nil end
   local function free(cx, cy)
     for _, t in ipairs(taken or {}) do
@@ -184,16 +193,16 @@ function M.find(surface, x, y, taken, apart, search)
     return true
   end
   local function try(cx, cy)
-    generate(surface, cx + 0.5, cy + 0.5)
-    return confirmed(surface, cx + 0.5, cy + 0.5)
+    generate(surface, cx + 0.5, cy + 0.5, box)
+    return confirmed(surface, cx + 0.5, cy + 0.5, box)
   end
   -- most planned spots are fine as they are: check that before building the grid
-  if free(x, y) and usable(surface, x + 0.5, y + 0.5) and try(x, y) then return { x = x, y = y } end
+  if free(x, y) and usable(surface, x + 0.5, y + 0.5, box) and try(x, y) then return { x = x, y = y } end
   -- in stages: a small grid first (most sites are close), a wider one only if needed
   local done = 0
   for _, stage in ipairs(M.STAGES) do
     local reach = math.min(stage, search)
-    local wet = grid(surface, x + 0.5, y + 0.5, reach + M.RAY_LENGTH + M.HALF + M.MARGIN + M.RAY_STEP)
+    local wet = grid(surface, x + 0.5, y + 0.5, reach + M.RAY_LENGTH + box + M.RAY_STEP)
     for ring = done + 1, math.floor(reach / M.STEP) do
       local r = ring * M.STEP
       local n = ring * 6
@@ -201,7 +210,7 @@ function M.find(surface, x, y, taken, apart, search)
         local a = i * 2 * math.pi / n
         local cx, cy = math.floor(x + r * math.cos(a)), math.floor(y + r * math.sin(a))
         -- the grid is a forecast: confirm on the real tiles
-        if free(cx, cy) and usable_on(wet, cx + 0.5, cy + 0.5) and try(cx, cy) then return { x = cx, y = cy } end
+        if free(cx, cy) and usable_on(wet, cx + 0.5, cy + 0.5, box) and try(cx, cy) then return { x = cx, y = cy } end
       end
     end
     done = math.floor(reach / M.STEP)
@@ -217,8 +226,9 @@ M.STAGES = { 96, 320 }
 ---@param surface LuaSurface
 ---@param x integer
 ---@param y integer
-function M.clear(surface, x, y)
-  local r = M.HALF + M.MARGIN
+---@param half number? half the side of the site (default HALF)
+function M.clear(surface, x, y, half)
+  local r = (half or M.HALF) + M.MARGIN
   local area = { { x + 0.5 - r, y + 0.5 - r }, { x + 0.5 + r, y + 0.5 + r } }
   for _, e in pairs(surface.find_entities_filtered({ area = area, type = { "tree", "simple-entity", "cliff", "fish" } })) do
     e.destroy()
