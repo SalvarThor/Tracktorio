@@ -969,9 +969,10 @@ Items:
 - [x] 2.15.8 The MVP scenario off the menu (decision 6); the tests keep loading it.
       Already so since 2.8.10 (the hand-made map is built only through the tt-map remote);
       the scenario's description and welcome now speak of plots and building cities.
-- [ ] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,
+- [x] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,
       research unlocks, plot counts and spacing on generated maps, several cities of one
       kind running at once.
+      Done across 2.15.3-2.15.9 (tests/cases/plots.lua and the rewritten mapgen tests); 218.
 - [ ] 2.15.10 README for the new game; `/playtest`: build the start, add a second city of one kind, and give both
       stops the same name.
 Stop. Report to the user. Then 2.14 resumes (the recorder and the full run).

@@ -225,4 +225,34 @@ return {
       if not was then force.recipes["tt-build-tt-city-steel"].enabled = false end
     end,
   },
+  {
+    -- 2.15.9: the point of plots: a product from several cities
+    name = "build: two smelting cities of one kind on neighbouring plots each run on their own belts",
+    fn = function(ctx)
+      local cx = X + 320
+      h.clear_area({ { cx - 30, -20 }, { cx + 30, 24 } })
+      local made = {}
+      for i, dx in ipairs({ -11, 11 }) do
+        paint_plot(cx + dx, 0)
+        local city = assert(h.surface().create_entity({ name = "tt-city-iron-smelting", position = { cx + dx, 0 },
+          force = "player", raise_built = true }))
+        h.belt_to_port(city, "iron-ore", "input")
+        h.belt_to_port(city, "coal", "input")
+        h.belt_to_port(city, "iron-plate", "output")
+        made[i] = city
+      end
+      assert_.truthy(made[1].unit_number ~= made[2].unit_number, "one city")
+      ctx:wait(60 * 5, function() -- belts fill
+        local start = { made[1].products_finished, made[2].products_finished }
+        ctx:wait(60 * 8, function()
+          for i, city in ipairs(made) do
+            local n = city.products_finished - start[i]
+            -- 0.75 crafts/s at full speed: 6 in 8 s
+            assert_.truthy(n >= 5, "city " .. i .. " made " .. n .. " in 8 s")
+            assert_.equals(remote.call("tt-city", "info", city).status, "running", "city " .. i)
+          end
+        end)
+      end)
+    end,
+  },
 }
