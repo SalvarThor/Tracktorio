@@ -865,6 +865,14 @@ Decided with the user (2026-11-21): 10-minute snapshots; the recorder stays in t
   across as many sessions as the user likes; the user's own Factorio saves are untouched.
 
 Items:
+- [ ] 2.14.0 The user's QoL mods in the playtest instance (user, 2026-11-21): Speedy Bot
+      Start, Even Distribution, Far Reach, Infinity Invo, Jetpack, Quick Adjustable
+      Inserters (+ inserter-throughput-lib), Squeak Through 2. Listed in
+      tools/playtest-mods.txt, copied from the user's mods folder. All eight are 2.0
+      releases, which 2.1 refuses: the user updates them in the playtest instance's mod
+      manager. Then a playtest: what loads, what works, what gets around Tracktorio's rules
+      (robots from Speedy Bot Start; Jetpack can't be crafted while every non-free recipe
+      is hidden). Fixes on our side, or a decision by the user.
 - [ ] 2.14.1 Recorder: milestones (events and polls), storage, /tt-timeline, the file.
 - [ ] 2.14.2 Snapshots every 10 minutes.
 - [ ] 2.14.3 Tests: each milestone kind is recorded once, a snapshot has every city, the

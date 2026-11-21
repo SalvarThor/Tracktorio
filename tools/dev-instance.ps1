@@ -12,7 +12,10 @@ param(
     # Extra mods to disable in mod-list.json (for probes, e.g. -Disable quality,recycler)
     [string[]]$Disable = @(),
     # "test" (.factorio) or "play" (.factorio-play)
-    [ValidateSet('test', 'play')][string]$Instance = 'test'
+    [ValidateSet('test', 'play')][string]$Instance = 'test',
+    # Other mods to enable (play instance only): internal names. Their newest zip is copied
+    # from the user's own Factorio mods folder, which is only read.
+    [string[]]$ExtraMods = @()
 )
 $ErrorActionPreference = 'Stop'
 $TTInstance = $Instance
@@ -67,10 +70,28 @@ foreach ($link in $links.GetEnumerator()) {
     Write-Host "junction $($link.Key) -> $target"
 }
 
+# Extra mods (2.14): copy the newest zip of each from the user's mods folder if the
+# instance has none.
+$userMods = Join-Path $env:APPDATA 'Factorio\mods'
+foreach ($m in $ExtraMods) {
+    $zip = Get-ChildItem -Path $userMods -Filter "$($m)_*.zip" -ErrorAction SilentlyContinue |
+        Where-Object { $_.BaseName -match "^$([regex]::Escape($m))_\d+\.\d+\.\d+$" } |
+        Sort-Object { [version]($_.BaseName -replace '^.*_', '') } | Select-Object -Last 1
+    if (-not $zip) { throw "extra mod $m not found in $userMods" }
+    # Any version already in the instance stays: one updated there through the game's mod
+    # manager (for 2.1) must not be replaced by the user's older copy.
+    $have = Get-ChildItem -Path $TT.ModsDir -Filter "$($m)_*.zip" -ErrorAction SilentlyContinue
+    if (-not $have) {
+        Copy-Item -Path $zip.FullName -Destination (Join-Path $TT.ModsDir $zip.Name)
+        Write-Host "copied $($zip.Name)"
+    }
+}
+
 $enabled = [ordered]@{}
 foreach ($m in @('base', 'elevated-rails', 'recycler', 'space-age')) { $enabled[$m] = $true }
 $enabled['quality'] = $false   # tracktorio declares "! quality"
 foreach ($m in $links.Keys) { if (Test-Path $links[$m]) { $enabled[$m] = $true } }
+foreach ($m in $ExtraMods) { $enabled[$m] = $true }
 foreach ($m in $Disable) { $enabled[$m] = $false }
 $modList = @{ mods = @($enabled.GetEnumerator() | ForEach-Object { [ordered]@{ name = $_.Key; enabled = $_.Value } }) }
 $modList | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $TT.ModsDir 'mod-list.json') -Encoding utf8NoBOM

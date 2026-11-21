@@ -13,14 +13,22 @@
 .PARAMETER Menu
   Start at the main menu instead (2.8.7: New Game on Nauvis, with the map preview and the
   mod's startup settings).
+.PARAMETER NoExtraMods
+  Leave out the other mods listed in tools\playtest-mods.txt (the user's QoL mods, 2.14).
 #>
 [CmdletBinding()]
-param([string]$Scenario = 'tracktorio/tracktorio', [switch]$Menu)
+param([string]$Scenario = 'tracktorio/tracktorio', [switch]$Menu, [switch]$NoExtraMods)
 $ErrorActionPreference = 'Stop'
 $TTInstance = 'play'
 . "$PSScriptRoot\common.ps1"
 
-& "$PSScriptRoot\dev-instance.ps1" -Instance play | Out-Null
+$extra = @()
+$list = Join-Path $PSScriptRoot 'playtest-mods.txt'
+if (-not $NoExtraMods -and (Test-Path $list)) {
+    $extra = @(Get-Content $list | ForEach-Object { $_.Trim() } | Where-Object { $_ -and -not $_.StartsWith('#') })
+}
+& "$PSScriptRoot\dev-instance.ps1" -Instance play -ExtraMods $extra | Out-Null
+if ($extra.Count -gt 0) { Write-Host "Other mods: $($extra -join ', ')" }
 $gameArgs = @('--config', "`"$($TT.Config)`"")
 if (-not $Menu) { $gameArgs += @('--load-scenario', $Scenario) }
 $p = Start-Process -FilePath $TT.Exe -PassThru -ArgumentList $gameArgs

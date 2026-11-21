@@ -88,6 +88,8 @@ Keep this section accurate. All game runs use the separate dev instance in `.fac
 - Launch game with the scenario for a playtest: `./tools/playtest.ps1 [-Scenario MOD/NAME]`
   (`-Menu` starts at the main menu instead, for a New Game on Nauvis)
   (own instance `.factorio-play\`, so tests still run while it is open)
+  (loads the other mods in `tools/playtest-mods.txt`, the user's QoL mods; `-NoExtraMods`
+  leaves them out; tests never load them)
   (from the user's `!` prompt, which is Git Bash: `! pwsh -NoProfile -File tools/playtest.ps1`)
 - Never `Remove-Item -Recurse` inside `.factorio\data\mods\`: those are junctions into the
   repo.

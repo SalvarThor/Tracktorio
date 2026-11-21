@@ -1,0 +1,12 @@
+# Other mods loaded in the playtest instance (.factorio-play) only, never in tests. One
+# internal mod name per line; their zips are copied from the user's own Factorio mods folder
+# (read only). List required dependencies too. `./tools/playtest.ps1 -NoExtraMods` skips them.
+# The user's QoL mods (2026-11-21, phase 2.14):
+Kux-SpeedyBotStart
+even-distribution
+far-reach
+infinity-invo
+jetpack
+quick-adjustable-inserters
+inserter-throughput-lib
+squeak-through-2
