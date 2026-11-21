@@ -842,13 +842,13 @@ Items:
       research complex and the silo, running and starved. Playtest 2026-11-21: "much
       better"; clean log.
 
-### Phase 2.14: the full run (DRAFT, waiting for the user's approval)
+### Phase 2.14: the full run (approved by the user 2026-11-21)
 
 Why: nobody has played from the start to the rocket. Upgrade costs, research counts,
 distances, breakdown rates and power budgets were each set by a test, never against a
 whole game. A real run, recorded, lets the tuning come from data instead of feel.
 
-Proposed (2026-11-21), to confirm with the user:
+Decided with the user (2026-11-21): 10-minute snapshots; the recorder stays in the released mod.
 - A milestone recorder, always on and invisible to the player (it costs next to nothing;
   it stays in the released mod): storage.tt_timeline, a list of { tick, kind, detail }.
   Kinds: first locomotive built, first train under way, each city's first output, each
