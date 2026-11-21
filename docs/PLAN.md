@@ -670,4 +670,21 @@ south wall has the door in the middle on every building):
       keeps a belt connected.
 - [x] 2.10.11 SPEC, README and DECISIONS updated.
 - [ ] 2.10.12 `/playtest`: building a station on belt ports, an upgrade growing a city with
-      its belts still connected, the new art at all three tiers.
+      its belts still connected, the new art at all three tiers. Playtest 2026-11-21:
+      stations, the inserter rule, upgrades and pipes passed; the fixes below came out of it.
+      Dump: 30 cities; the depot grew to tier 3 with its 3 ports; 1 inserter refused.
+- [ ] 2.10.13 Tier pips: a fixed small size, not scaled with the building, clear of the
+      port markers.
+- [ ] 2.10.14 Construction port: one general icon used everywhere (wall marker, window),
+      explained by the port's own tooltip/description when hovered (construction and
+      service ports get separate prototypes so each has its own description).
+- [ ] 2.10.15 Hidden port loaders: no visible moving belt sliver at an unconnected port.
+- [ ] 2.10.16 Footprint outline much more subtle: visible, not prominent.
+- [ ] 2.10.17 Coal fuel gets an icon clearly different from coal (in/out markers on the
+      depot looked like coal in, coal out).
+- [ ] 2.10.18 Upgrade message: "power cities on it make up to 0 MW" is confusing. With no
+      power city on the network say so; otherwise reword. Check it wasn't a real fault
+      (the hidden generator not seen on the network after 2.10's size change).
+- [ ] 2.10.19 Output port lanes: decide with the user how an output port fills the belt
+      (it filled one lane, then the other).
+- [ ] 2.10.20 `/playtest` of 2.10.13-2.10.19.
