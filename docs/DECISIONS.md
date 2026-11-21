@@ -4,6 +4,23 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: personal construction robots (user)
+- Rule change (user): building is free, so building fast is fine. Personal construction
+  robots are allowed; roboports on the ground and logistic robots stay out, so robots never
+  move cargo between places. Options rejected by the user: also allowing ground roboports
+  for construction (networks could span the map); getting the kit by research.
+- Start kit (scripts/start_kit.lua, once per player, in the scenario and the generated test
+  map): power armor (6x8 grid) with a fission reactor equipment (750 kW, needs no fuel), two
+  personal roboports, two batteries; 20 construction robots. Equipment goes into the grid
+  with LuaEquipmentGrid.put (player.insert can't fit it).
+- Construction robots are a free hand-craft, unlocked from the start (Construction
+  robotics joins the start research), to replace lost ones. Armor and equipment stay
+  uncraftable: the kit is all there is.
+- Robots repair damaged entities near the player with repair packs from the player's
+  inventory, locomotives included. That matches the spec's manual repair on site.
+- Speedy Bot Start (the user's QoL mod) adds nothing in a Tracktorio game: it hands out its
+  items through the freeplay interface, which the scenario doesn't use.
+
 ## 2026-11-21: 2.13.1-2.13.5 a clearer city window
 - One compact page (user's pick over tabs). Order: coloured status (green running, red
   starved, orange output full, yellow power or other) with a short hint only when

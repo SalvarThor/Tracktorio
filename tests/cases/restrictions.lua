@@ -5,9 +5,11 @@ local FREE = { "rail", "locomotive", "cargo-wagon", "fluid-wagon", "train-stop",
   "inserter", "transport-belt", "iron-chest", "pipe", "pump",
   "small-electric-pole", "big-electric-pole", "electric-mining-drill", "decider-combinator" }
 local BANNED = { "stone-furnace", "assembling-machine-1", "oil-refinery", "chemical-plant", "boiler",
-  "steam-engine", "solar-panel", "car", "tank", "spidertron", "construction-robot",
+  "steam-engine", "solar-panel", "car", "tank", "spidertron",
   "logistic-robot", "roboport", "requester-chest", "lab", "rocket-silo", "foundry", "recycler",
   "offshore-pump" } -- 2.9.2: water comes only from water cities
+-- construction robots left this list on 2026-11-21 (user: personal construction robots,
+-- tests/cases/start_kit.lua)
 -- Unlocked at start (SPEC MVP starting research).
 local START_ENABLED = { "rail", "locomotive", "cargo-wagon", "fluid-wagon", "train-stop", "rail-signal",
   "rail-chain-signal", "inserter", "burner-inserter", "transport-belt", "underground-belt",

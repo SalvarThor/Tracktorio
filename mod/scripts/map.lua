@@ -2,6 +2,7 @@
 -- A fresh surface whose map gen makes only grass inside a fixed rectangle; water, ore, coal
 -- and the cities are placed by this module at fixed positions.
 local config = require("shared.config")
+local start_kit = require("scripts.start_kit")
 local cities = require("scripts.cities")
 local city_defs = require("shared.city_defs")
 local layout = require("scripts.layout")
@@ -536,6 +537,7 @@ function M.setup_player(player)
   if not storage.tt_map_started[player.index] then
     storage.tt_map_started[player.index] = true
     for _, stack in ipairs(M.START_ITEMS) do player.insert(stack) end
+    start_kit.give(player)
   end
 end
 

@@ -35,7 +35,8 @@ The design spec is authoritative:
 - Transformation (smelting, assembling, refining, chemistry, power generation) happens only
   inside black boxes. The player gets no furnaces, assemblers, refineries, chemical plants,
   boilers, steam engines or solar.
-- Transportation means trains. No cars, tanks, spidertrons or robots.
+- Transportation means trains. No cars, tanks, spidertrons, roboports or logistic robots.
+  Personal construction robots are allowed (start kit; user, 2026-11-21).
 - Black boxes are hands-off: items go in and out only through belt ports in their walls and
   fluids through pipes, never inserters or the player's inventory.
 - Locomotive fuel comes only from depot cities (`tt-coal-fuel` in MVP). Vanilla coal is not

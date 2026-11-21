@@ -52,6 +52,7 @@ silo.register_events()
 
 local migrate -- defined below; used by the tt-city.migrate test hook
 local require_next_tier = require("shared.city_defs").next_tier
+local require_start_kit = require("scripts.start_kit")
 
 local city_remote = cities.remote_interface()
 city_remote.info = city_info.remote_info
@@ -93,6 +94,11 @@ city_remote.throttle = function(entity)
   return t and { steps = t.steps, fraction = t.fraction, percent = throttle.percent(record), beacon = t.beacon } or nil
 end
 city_remote.throttle_tick = function() throttle.tick() end
+-- Tests: give a player the start kit again (personal construction robots, 2026-11-21).
+city_remote.give_start_kit = function(player_index)
+  if storage.tt_start_kit then storage.tt_start_kit[player_index] = nil end
+  require_start_kit.give(assert(game.get_player(player_index)))
+end
 city_remote.throttle_set = function(entity, steps) throttle.set(assert(storage.tt_cities[entity.unit_number]), steps) end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.

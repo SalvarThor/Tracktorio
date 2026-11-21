@@ -120,6 +120,8 @@ M.FREE_ITEMS = {
   -- rails and trains
   "rail", "rail-signal", "rail-chain-signal", "train-stop",
   "locomotive", "tt-locomotive-2", "tt-locomotive-3", "cargo-wagon", "fluid-wagon",
+  -- personal construction robots (user, 2026-11-21): replace lost ones by hand
+  "construction-robot",
   "rail-ramp", "rail-support",
   -- inserters
   "burner-inserter", "inserter", "long-handed-inserter", "fast-inserter", "bulk-inserter", "stack-inserter",
@@ -159,9 +161,9 @@ M.BANNED_ITEMS = {
   "offshore-pump",
   -- vehicles
   "car", "tank", "spidertron",
-  -- robots
-  "construction-robot", "logistic-robot", "roboport",
-  "personal-roboport-equipment", "personal-roboport-mk2-equipment",
+  -- robots: personal construction robots are allowed (user, 2026-11-21: start kit,
+  -- scripts/start_kit.lua); roboports on the ground and logistic robots stay out
+  "logistic-robot", "roboport",
   "active-provider-chest", "passive-provider-chest", "storage-chest", "buffer-chest", "requester-chest",
   -- space
   "asteroid-collector", "thruster", "cargo-bay", "cargo-landing-pad", "space-platform-starter-pack",
@@ -184,6 +186,20 @@ M.START_TECHNOLOGIES = {
   "steam-power",                    -- pipe, pipe-to-ground (boiler, engine and offshore pump stripped)
   "fluid-handling",                 -- pump, storage tank
   "electric-energy-distribution-1", -- medium and big electric pole
+  "construction-robotics",          -- construction robot (free; personal robots, 2026-11-21)
+}
+
+-- What every new player starts wearing and carrying (user, 2026-11-21): personal
+-- construction robots. Power armor (6x8 grid) holds the reactor (4x4, no fuel), two
+-- roboports (2x2, 10 robots each) and two batteries (1x2).
+M.START_KIT = {
+  armor = "power-armor",
+  equipment = {
+    { name = "fission-reactor-equipment", count = 1 },
+    { name = "personal-roboport-equipment", count = 2 },
+    { name = "battery-equipment", count = 2 },
+  },
+  robots = 20,
 }
 
 local function set(list) local s = {} for _, v in ipairs(list) do s[v] = true end return s end

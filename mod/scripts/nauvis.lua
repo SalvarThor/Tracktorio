@@ -4,6 +4,7 @@
 -- User decisions (DECISIONS.md, 2026-11-20): biters forced off, whatever the map settings;
 -- no resources near spawn; cities laid out by scripts/layout.lua and scripts/sites.lua.
 local map = require("scripts.map")
+local start_kit = require("scripts.start_kit")
 local layout = require("scripts.layout")
 
 local M = {}
@@ -140,6 +141,7 @@ function M.on_player_created(e)
   if not player then return end
   if storage.tt_start == "scenario" then
     for _, stack in ipairs(map.START_ITEMS) do player.insert(stack) end
+    start_kit.give(player)
   elseif storage.tt_start == "freeplay" then
     player.print({ "tt-notify.started-from-freeplay" })
   end
