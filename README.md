@@ -2,22 +2,25 @@
 
 A Factorio 2.1 mod (with Space Age) where **trains are the whole game**.
 
-All production happens in fixed-location "black box" cities that turn inputs into outputs
-on their own. You don't build furnaces or assemblers. You mine raw resources, lay the rail
-network, and design the stations that feed and drain the cities. Cities chain across the
-map the way a factory does, and the train network is the belts. The challenge is
+All production happens in "black box" cities that turn inputs into outputs on their own.
+You don't build furnaces or assemblers: you build cities, for free, on the plots the map
+provides. Each city is modest, so a product soon comes from several cities, and your trains
+go to whichever stop of that name is nearest and has room. You mine raw resources, lay the
+rail network, and design the stations that feed and drain the cities. Cities chain across
+the map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
 
-> Status: in development. Post-MVP phases 2.1 to 2.13 (procedural maps, water city, Factorissimo buildings, city signals, steady production, a clearer city window) are
-> built and playtested. Not on the mod portal yet.
+> Status: in development. Post-MVP phases 2.1 to 2.14.0 are built and playtested; phase
+> 2.15 (the player builds cities on plots) is built and waiting for its playtest. Not on
+> the mod portal yet.
 
 ## How to play
 
 Enable the mod, then New Game -> Mod scenarios -> **Tracktorio**. You get the usual map
-settings (seed, preview, resources). The cities are laid out across a new Nauvis map
-each game, far apart, and all of them are marked on the map from the start. Biters are
-always off. The "City spacing" startup setting (Settings -> Mod settings -> Startup)
-scales the distance between cities.
+settings (seed, preview, resources). A new Nauvis map each game has about 75 city plots in
+small sites of one to three, far apart, all marked on the map from the start; four plots
+next to spawn are for your first cities. Biters are always off. The "City spacing"
+startup setting (Settings -> Mod settings -> Startup) scales the distance between sites.
 
 Starting Freeplay with the mod on gives the same game, with a note saying so.
 
@@ -33,6 +36,9 @@ Starting Freeplay with the mod on gives the same game, with a note saying so.
 - **Logistics are free.** Rails, signals, stops, trains, inserters, belts, chests, pipes,
   pumps, poles, circuit entities, miners and pumpjacks cost nothing to craft. Research
   still unlocks them.
+- **Cities are built on plots.** Every city is a free hand-craft once researched, and can
+  only be placed on a plot: a 12x12 square of concrete inside hazard stripes. Plots can't
+  be mined or covered. Removing a city gives it back, but whatever was inside is lost.
 - **Cities are hands-off.** Items go in and out only through belt ports in their walls,
   and fluids through pipes; inserters can't reach a city. The player places nothing by
   hand.
@@ -44,43 +50,46 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 
 ## What's in the game now
 
-**25 city types**, each at a fixed place on the map (30 cities: four coal power cities and four water cities):
+**26 city types**, each buildable on any plot once researched:
 
 | Group | Cities |
 |---|---|
-| Smelting | iron, copper, steel |
-| Water | four water cities on lake shores (no inputs, 600/1,200/2,400 water/s); the only water source, since offshore pumps are removed |
-| Power | four coal power cities (coal + water in, electricity out to your poles); a nuclear power city (uranium fuel cells + water in, 20/40/80 MW, burns flat out like a real reactor); a uranium city (uranium ore + iron in, fuel cells out) |
+| Smelting | iron, copper (coal-fired); electric iron and copper (no coal, swapped in place with the upgrade planner); steel |
+| Water | water city (no inputs, 300 water/s); the only water source, since offshore pumps are removed |
+| Power | coal power city (coal + water in, electricity out to your poles); nuclear power city (uranium fuel cells + water in, 10 MW, burns flat out like a real reactor); uranium city (uranium ore + iron in, fuel cells out) |
 | Fuel depots | coal fuel, solid fuel, rocket fuel |
 | Oil and chemistry | refinery (crude oil + water in, light oil + petroleum gas out), plastic, sulfur, sulfuric acid |
 | Intermediates | electronic circuits, advanced circuits, processing units, low density structure, repair packs |
-| Science | red, green and blue science cities, and a research complex that works like a block of labs |
+| Science | red, green and blue science cities, and a research complex that works like 10 labs |
 | Endgame | rocket silo |
+
+From the start you can build the coal fuel depot, coal power, water, iron and copper
+smelting, red science, circuits and the research complex. The others unlock with the
+vanilla technology for the same thing (Steel processing for steel, Oil processing for the
+refinery, and so on).
 
 **Cities**
 - Each city runs at the rate of its slowest input and stops when its output is full.
 - Electric cities draw what the equivalent vanilla buildings would. They slow down on low
   power and stop without it.
-- **Buildings and ports:** cities are Factorissimo buildings. Run a belt straight into a
-  port in the wall; each port shows its item and an in or out arrow. One yellow belt per
-  item is enough at tier 1, red at tier 2, blue at tier 3 (tier 3 smelting has two ports
-  per item).
-- **Tiers:** most cities have 3 tiers (x1, x2, x4). Upgrade a city by belting materials
-  into its **construction port** (marked with a steel chest). You get a heads-up message at 90%,
-  then the city upgrades in place and grows: 8x8, 12x12, 16x16. The dashed outline shows
-  how big it gets; whatever you built inside it comes back to you, and belts into the
-  ports still reach them. Pips on the city show its tier.
+- **Modest rates:** a city makes half of what its vanilla equivalent would (an iron
+  smelting city 7.5 plates/s, half a yellow belt). More output means another city on
+  another plot.
+- **Buildings and ports:** cities are 12x12 Factorissimo buildings. Run a belt straight
+  into a port in the wall; each port shows its item and an in or out arrow. One yellow
+  belt per item is enough.
+- **Building:** by hand, by your robots, from blueprints (a city with its station), or by
+  swapping coal smelting for electric with the upgrade planner (the signal wires stay).
 - **Windows:** click a city or a port. The status comes first, in colour, with a short
   hint when something is wrong; then a table of what goes in and out (now, max, held),
-  its ports with the belt each needs, and its tier with the next tier's materials.
+  and its ports with the belt each needs.
   Hover the title and the headings for the explanations.
 - **Steady production:** a city fed below its full rate (or whose output is taken away
   slower) runs steadily at that rate, down to 20%, using less power to match. Its window
   says "Running at 60%".
-- **Signals:** wire the two combinators in a city's door. The left one sends what the
-  city holds, whether it is running, starved, output full or without power, its speed
-  in percent and its tier (T); the right one what its next tier still needs. Use them for train limits,
-  interrupts or construction trains.
+- **Signals:** wire the combinator in a city's door. It sends what the city holds,
+  whether it is running, starved, output full or without power, and its speed in percent.
+  Use it for train limits, so trains go to the city of that name that needs them.
 
 **Trains**
 - **Limp mode:** a locomotive that runs out of fuel crawls instead of stopping dead.
@@ -99,22 +108,22 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 **Research**
 - Feed the research complex red, green and blue packs. The red/green/blue part of the
   tech tree can be researched in full.
-- Research unlocks only the player's logistics items and bonuses. Every city works from
-  the start.
+- Research unlocks the player's logistics items, bonuses and the cities beyond the
+  starting ones.
 
 **Winning**
 - Feed the rocket silo city 500 processing units, 500 low density structures and 500
   rocket fuel. It builds 50 rocket parts and launches on its own.
 - The first launch wins.
 
-**Map:** a new Nauvis map each game with vanilla terrain and ore. Cities later in the chain
-tend to stand further out. A depot, a water city and a power city stand near spawn, close
-enough to pipe water from one to the other. The hand-made test map is kept for the tests.
+**Map:** a new Nauvis map each game with vanilla terrain and ore, no cities, and about 75
+plots in sites at least 300 tiles apart; within a site, plots stand 10 tiles apart. The
+hand-made test map is kept for the tests.
 
 ## How it was built
 
 The mod is built item by item from [docs/PLAN.md](docs/PLAN.md). Every item has automated
-in-game tests (263 at the moment). Every phase ends with a playtest round, and its
+in-game tests (218 at the moment). Every phase ends with a playtest round, and its
 findings go back into the plan. Decisions, and the reasons behind them, are logged in
 [docs/DECISIONS.md](docs/DECISIONS.md).
 
@@ -135,6 +144,8 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 | 2.11 | City signals (stock, status, tier, construction needs) for the circuit network; locomotive Mk2 and Mk3 |
 | 2.12 | Steady production: cities fed below their full rate run steadily at that rate (hidden throttle beacons), speed in the window and as a signal; coal fuel briquettes |
 | 2.13 | A clearer city window: coloured status, a flows table, short port lines, explanations in tooltips |
+| 2.14.0 | The user's QoL mods in the playtest; personal construction robots from the start |
+| 2.15 | The player builds the cities: plots on the map, free city items gated by research, half rates so a product needs several cities; tiers and construction ports removed |
 
 ## Next steps
 
@@ -158,7 +169,6 @@ Windows, PowerShell, Factorio 2.1 with Space Age. Machine paths are in
 
 Debug commands for playtests:
 - `/tt-dump`: snapshot of the mod's state to `script-output`.
-- `/tt-port-fill <percent>`: fill a city's upgrade progress.
 - `/tt-reliability [percent]`: show or set a locomotive's reliability.
 - `/tt-silo-fill <parts>`: set the rocket parts in a silo.
 - `/tt-goal`: show the goal status.
