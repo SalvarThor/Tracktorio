@@ -252,31 +252,6 @@ function M.tick_tags()
   return placed
 end
 
---- After an upgrade: the city's map tag shows its tier, e.g. "Iron smelting city (tier 2)".
----@param city LuaEntity
-function M.retag(city)
-  local info = city_defs.by_entity[city.name]
-  if not info then return end
-  local pos = city.position
-  for _, tag in ipairs(city.force.find_chart_tags(city.surface, { { pos.x - 1, pos.y - 1 }, { pos.x + 1, pos.y + 1 } })) do
-    local base = string.gsub(tag.text, " %(tier %d+%)$", "")
-    tag.text = info.tier > 1 and (base .. " (tier " .. info.tier .. ")") or base
-  end
-end
-
---- Bring existing map tags in line with the current labels (2.4.6 renamed "Depot city" to
---- "Coal fuel depot"), keeping a tier suffix.
----@param surface LuaSurface
-local function relabel(surface)
-  local force = game.forces["player"]
-  for _, c in ipairs(M.CITIES) do
-    local pos = { x = c.x + 0.5, y = c.y + 0.5 }
-    for _, tag in ipairs(force.find_chart_tags(surface, { { pos.x - 1, pos.y - 1 }, { pos.x + 1, pos.y + 1 } })) do
-      local suffix = string.match(tag.text, " %(tier %d+%)$") or ""
-      if tag.text ~= c.label .. suffix then tag.text = c.label .. suffix end
-    end
-  end
-end
 
 --- Create (if needed) and populate the map surface. Returns the surface.
 ---@param name string? surface name (default M.SURFACE)
@@ -321,7 +296,6 @@ function M.extend(surface)
   place_cities(surface)
   game.forces["player"].chart(surface, area)
   tag_cities(surface)
-  relabel(surface)
 end
 
 --- Retry blocked city spots (called every GOAL_TICK_INTERVAL); cheap when nothing waits.
@@ -514,10 +488,7 @@ function M.on_chunk_charted(e)
   for _, c in ipairs(placed) do
     local x, y = c.x + 0.5, c.y + 0.5
     if not (c.tagged and c.tagged[e.force.index]) and x >= lt.x and x < rb.x and y >= lt.y and y < rb.y then
-      local city = surface.find_entities_filtered({ position = { x, y }, radius = 1 })[1]
-      local info = city and city_defs.by_entity[city.name]
       local text = c.label
-      if info and info.tier > 1 then text = text .. " (tier " .. info.tier .. ")" end
       local tag = e.force.add_chart_tag(surface, { position = { x = x, y = y }, icon = { type = "item", name = c.tag_icon }, text = text })
       if tag then
         c.tagged = c.tagged or {}

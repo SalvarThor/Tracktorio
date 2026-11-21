@@ -1,12 +1,11 @@
--- Depot servicing (PLAN 2.3.3). Every depot city gets a fixed service port on the tile east
--- of its top-right corner; it takes repair packs only. Once a second, every locomotive of a
+-- Depot servicing (PLAN 2.3.3). Every depot city gets a service port in its wall (2.10.6);
+-- it takes repair packs only. Once a second, every locomotive of a
 -- train stopped at a train stop within SERVICE_RANGE tiles of a depot's edge is repaired,
 -- using packs from that depot's port. Back at full health, a broken-down locomotive is cured
 -- (reliability.lua).
 --
 -- record.service_port = LuaEntity; record.service = { hp_credit = HP left from the last pack
 --   opened, serviced = locomotives brought back to full health }
--- The port is not destroyed on upgrade: the new tier adopts it (and its packs).
 local config = require("shared.config")
 local city_defs = require("shared.city_defs")
 local cities = require("scripts.cities")

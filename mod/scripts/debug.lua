@@ -69,23 +69,6 @@ local function cmd_goal(cmd)
   if player then player.print(msg) else log(msg) end
 end
 
---- /tt-port-fill <percent>   set the upgrade progress of the city (or port) under the cursor
---- (playtest helper; admins only; remote twin: tt-city.port_fill(entity, fraction))
----@param cmd CustomCommandData
-local function cmd_port_fill(cmd)
-  local player = cmd.player_index and game.get_player(cmd.player_index)
-  if not player then return end
-  if not player.admin then player.print("tt-port-fill: admins only"); return end
-  local pct = tonumber(cmd.parameter or "")
-  local target = player.selected
-  if not (pct and target) then
-    player.print("tt-port-fill: hover over a city or its construction port and type /tt-port-fill <percent>")
-    return
-  end
-  local ok, err = pcall(remote.call, "tt-city", "port_fill", target, pct / 100)
-  player.print(ok and ("tt-port-fill: " .. pct .. "%") or ("tt-port-fill: " .. tostring(err)))
-end
-
 --- /tt-reliability <percent>   set the reliability (health) of the locomotive under the cursor
 --- (playtest helper; admins only; remote twin: tt-reliability.set(loco, fraction))
 ---@param cmd CustomCommandData
@@ -123,7 +106,6 @@ end
 function M.register()
   commands.add_command("tt-silo-fill", "Set the rocket parts of the rocket silo under the cursor: /tt-silo-fill <parts> (playtest helper).", cmd_silo_fill)
   commands.add_command("tt-reliability", "Show or set the reliability of the locomotive under the cursor: /tt-reliability [percent] (playtest helper).", cmd_reliability)
-  commands.add_command("tt-port-fill", "Set the upgrade progress of the city under the cursor: /tt-port-fill <percent> (playtest helper).", cmd_port_fill)
   commands.add_command("tt-dump", "Write a JSON snapshot of Tracktorio's storage to script-output/tt-dump.json.", cmd_dump)
   commands.add_command("tt-goal", "Show goal progress. /tt-goal <iron> <copper> sets the targets.", cmd_goal)
   remote.add_interface("tt-debug", {

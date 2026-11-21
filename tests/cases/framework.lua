@@ -1,6 +1,5 @@
--- 2.2.1: every city definition works from its data alone (no per-city code): each tier
--- exists, opens a window, has pips and (below max tier) a port, and every Tracktorio
--- prototype has a locale name.
+-- 2.2.1: every city definition works from its data alone (no per-city code): each kind
+-- exists and opens a window, and every Tracktorio prototype has a locale name.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
 local defs = require("__tracktorio__/shared/city_defs")
@@ -11,53 +10,17 @@ local function info(city) return remote.call("tt-city", "info", city) end
 
 return {
   {
-    name = "framework: every tier of every city has a window, pips (if it has tiers) and a port below max tier",
+    name = "framework: every city kind is 12x12 (the silo 9x9) and has a window and recipe or lab info",
     fn = function()
       h.clear_area({ { X - 20, -30 }, { X + 20, 30 } })
       for _, def in ipairs(defs.list) do
-        for tier = 1, #def.tiers do
-          local name = defs.entity_name(def.name, tier)
-          local city = h.place_city(name, { X + 0.5, 0.5 })
-          assert_.truthy(remote.call("tt-city", "has_window", city), name .. ": no window")
-          if #def.tiers > 1 then
-            local m = assert(remote.call("tt-city", "tier_marks", city), name .. ": no pips")
-            assert_.equals(m.filled, tier, name .. " pips")
-            assert_.equals(m.total, #def.tiers, name .. " pips")
-          else
-            assert_.equals(remote.call("tt-city", "tier_marks", city), nil, name .. ": single tier has pips")
-          end
-          local s = assert(remote.call("tt-city", "upgrade_status", city))
-          assert_.equals(s.tier, tier, name .. " tier")
-          if tier < #def.tiers then
-            assert_.truthy(s.port and s.port.valid, name .. ": no port")
-            for _, c in ipairs(def.tiers[tier + 1].cost) do
-              assert_.equals(s.cost[c.name], c.count, name .. " cost " .. c.name)
-              assert_.truthy(prototypes.item[c.name], name .. ": unknown cost item " .. c.name)
-            end
-          else
-            assert_.truthy(not (s.port and s.port.valid), name .. ": max tier has a port")
-          end
-          assert_.truthy(info(city).recipe or info(city).lab, name .. ": no recipe or lab info")
-          if s.port and s.port.valid then s.port.destroy() end -- the destroy event is a tick late
-          city.destroy()
-        end
+        local name = defs.entity_name(def.name)
+        local city = h.place_city(name, { X + 0.5, 0.5 })
+        assert_.equals(h.city_size(name), def.kind == "silo" and 9 or 12, name .. " size")
+        assert_.truthy(remote.call("tt-city", "has_window", city), name .. ": no window")
+        assert_.truthy(info(city).recipe or info(city).lab, name .. ": no recipe or lab info")
+        city.destroy()
       end
-    end,
-  },
-  {
-    name = "framework: an idle power city at tier 2 says no power demand, not output full",
-    fn = function(ctx)
-      h.clear_area({ { X - 20, 40 }, { X + 20, 70 } })
-      local city = h.place_city("tt-city-power-t2", { X + 0.5, 50.5 })
-      city.insert({ name = "coal", count = 40 })
-      h.pipe_at(city, "water", "input", true)
-      ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function()
-        local p = assert(game.players[1])
-        remote.call("tt-city", "open_gui", p.index, city)
-        local status = assert(p.gui.screen["tt_city_frame"])["body"]["status"]
-        assert_.equals(status.caption[1], "tt-gui.city-status-power-idle")
-        p.opened = nil
-      end)
     end,
   },
   {

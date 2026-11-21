@@ -60,13 +60,9 @@ M.GOAL_ITEMS = { iron = "iron-plate", copper = "copper-plate" }
 M.GOAL_CLOSED_ITEM = "tt-goal-closed"
 
 -- Construction port beside each upgradable city (PLAN 2.1.2).
-M.PORT = "tt-construction-port"
 M.BELT_PORT = "tt-belt-port" -- 2.10.4: hidden loader under a city wall
-M.BOX_PORT = "tt-belt-port-box" -- 2.10.6: construction port, feeding the hidden chest two tiles in
 M.SERVICE_BOX_PORT = "tt-belt-port-service" -- 2.10.14: the same for a depot's repair packs
-M.CONSTRUCTION_ICON = "item/steel-chest" -- 2.10.14: marks the construction port everywhere
 M.SIGNAL_POINT = "tt-signal-point" -- 2.11: a city's stock and status, for the circuit network
-M.CONSTRUCTION_SIGNAL_POINT = "tt-signal-point-construction" -- 2.11: materials its next tier still needs
 -- Throttle (2.12): a hidden beacon in each crafting city and the research complex, with
 -- modules taking THROTTLE_STEP off speed and power each; at most THROTTLE_MAX_STEPS (the
 -- engine floors speed and consumption at 20%).
@@ -80,9 +76,6 @@ M.SIGNAL = { -- 2.11: status signals of the stock point (value 1 while true)
   output_full = "tt-city-output-full", no_power = "tt-city-no-power",
   speed = "tt-city-speed", -- 2.12: its speed in percent
 }
-M.PORT_SLOTS = 4
-M.PORT_CLOSED_ITEM = "tt-port-closed"
-M.PORT_HEADS_UP = 0.9 -- progress fraction for the "upgrade coming" message (2.1.4)
 
 -- Service port beside each depot city (PLAN 2.3.3): takes repair packs only. Locomotives of
 -- a train stopped at a train stop within SERVICE_RANGE tiles of the depot's edge are
@@ -102,15 +95,13 @@ M.RATE_WINDOW_TICKS = 60 * 60
 
 -- Hidden companion entities placed with a city and joined by a linked fluidbox connection.
 -- city entity name -> { entity, city_link_id, companion_link_id }. One generator per power
--- city tier (shared/city_defs.lua).
+-- city kind (shared/city_defs.lua).
 local city_defs = require("shared.city_defs")
 M.CITY_COMPANIONS = {}
 for _, def in ipairs(city_defs.list) do
-  for tier, t in ipairs(def.tiers) do
-    if t.generator_usage then
-      M.CITY_COMPANIONS[city_defs.entity_name(def.name, tier)] = {
-        entity = city_defs.generator_name(tier, def), city_link_id = 1, companion_link_id = 1 }
-    end
+  if def.generator_usage then
+    M.CITY_COMPANIONS[city_defs.entity_name(def.name)] = {
+      entity = city_defs.generator_name(def), city_link_id = 1, companion_link_id = 1 }
   end
 end
 

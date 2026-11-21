@@ -118,7 +118,7 @@ local function lab_info(entity)
   return out
 end
 
---- Where the player connects pipes (2.4.2): one entry per piped fluid at this tier, from
+--- Where the player connects pipes (2.4.2): one entry per piped fluid, from
 --- the port layout (2.10), { kind = "input"|"output", fluid, side, offset }. offset is
 --- tiles along the wall from its middle: + is east on the north/south walls, south on the
 --- east/west walls.
@@ -128,7 +128,7 @@ function M.connections(entity_name)
   local out = {}
   if not info then return out end
   for _, p in ipairs(port_layout.ports(info.def)) do
-    if p.kind == "fluid" and p.tiers[info.tier] then
+    if p.kind == "fluid" then
       out[#out + 1] = { kind = p.flow, fluid = p.name, side = p.wall, offset = p.offset }
     end
   end
@@ -138,9 +138,9 @@ end
 -- Belt speeds (items/s, both lanes) for "the belt this port needs" (2.10.9).
 M.BELTS = { { "yellow", 15 }, { "red", 30 }, { "blue", 45 }, { "turbo", 60 } }
 
---- Every port of a city at its tier (2.10), for the window: { kind, name, flow, side,
+--- Every port of a city (2.10), for the window: { kind, name, flow, side,
 --- offset, per_s, belt }. per_s is what one port carries at full output (items or fluid
---- units per second; nil where it doesn't apply: research packs, construction, service);
+--- units per second; nil where it doesn't apply: research packs, service);
 --- belt is the slowest belt that carries it ("yellow", "red", "blue", "turbo").
 ---@param entity_name string
 function M.ports(entity_name)
@@ -161,11 +161,9 @@ function M.ports(entity_name)
   if fuel then rate["input/" .. fuel] = proto.get_max_energy_usage() * 60 / prototypes.item[fuel].fuel_value end
   local ports, count = {}, {}
   for _, p in ipairs(port_layout.ports(info.def)) do
-    if p.tiers[info.tier] then
-      ports[#ports + 1] = p
-      local key = p.flow .. "/" .. tostring(p.name)
-      count[key] = (count[key] or 0) + 1
-    end
+    ports[#ports + 1] = p
+    local key = p.flow .. "/" .. tostring(p.name)
+    count[key] = (count[key] or 0) + 1
   end
   for _, p in ipairs(ports) do
     local key = p.flow .. "/" .. tostring(p.name)

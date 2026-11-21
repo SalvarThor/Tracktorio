@@ -105,7 +105,7 @@ return {
     end,
   },
   {
-    name = "nuclear: uranium city tier 1 takes 1.43 ore + 0.01 iron/s, makes 0.01 fuel cells/s at 0.6 MW",
+    name = "nuclear: uranium city takes 1.43 ore + 0.01 iron/s, makes 0.01 fuel cells/s at 0.6 MW",
     fn = function()
       local p = prototypes.entity["tt-city-uranium"]
       local r = p.fixed_recipe
@@ -119,21 +119,20 @@ return {
       assert_.equals(table_size(got), 3)
       local w = p.get_max_energy_usage() * 60
       assert_.truthy(math.abs(w - 600e3) < 1000, "draws " .. w)
-      for tier = 2, 3 do assert_.truthy(prototypes.entity["tt-city-uranium-t" .. tier], "tier " .. tier) end
     end,
   },
   {
-    name = "nuclear: a powered uranium city (tier 3) turns ore and iron into a fuel cell",
+    name = "nuclear: a powered uranium city turns ore and iron into a fuel cell",
     fn = function(ctx)
       local x = X + 60
       h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
-      local city = h.place_city("tt-city-uranium-t3", { x + 0.5, 0.5 })
+      local city = h.place_city("tt-city-uranium", { x + 0.5, 0.5 })
       h.test_power({ x + 8.5, 0.5 }, 3e6)
       city.insert({ name = "uranium-ore", count = 143 })
       city.insert({ name = "iron-plate", count = 1 })
       ctx:wait_until(function()
         return city.get_output_inventory().get_item_count("uranium-fuel-cell") >= 1
-      end, 60 * 40, function()
+      end, 60 * 120, function()
         assert_.equals(city.get_inventory(defines.inventory.crafter_input).get_item_count("uranium-ore"), 0, "ore left")
       end)
     end,
@@ -146,13 +145,13 @@ return {
     end,
   },
   {
-    name = "nuclear: nuclear power city makes 20 / 40 / 80 MW from 206 water/s per 20 MW; a cell lasts 400 s; no depleted cells",
+    name = "nuclear: nuclear power city makes 20 MW from 206 water/s; a cell lasts 400 s; no depleted cells",
     fn = function()
       local cell = prototypes.item["uranium-fuel-cell"]
       assert_.equals(cell.fuel_value, 8e9)
       assert_.equals(cell.burnt_result, nil, "fuel cell still leaves a depleted cell")
-      for tier, mw in ipairs({ 20, 40, 80 }) do
-        local name = tier == 1 and NUCLEAR or (NUCLEAR .. "-t" .. tier)
+      do
+        local mw, name = 20, NUCLEAR
         local p = assert(prototypes.entity[name], name)
         assert_.truthy(p.burner_prototype, name .. " has no burner")
         assert_.truthy(p.burner_prototype.fuel_categories["nuclear"], name .. " burns no nuclear fuel")
@@ -162,11 +161,11 @@ return {
         local steam = r.products[1].amount * p.get_crafting_speed() / r.energy
         assert_.truthy(math.abs(steam - mw * 1e6 / 97e3) < 0.01, name .. " steam/s " .. steam)
         assert_.equals(r.products[1].temperature, 500)
-        local gen = assert(prototypes.entity[tier == 1 and "tt-nuclear-generator" or ("tt-nuclear-generator-t" .. tier)])
+        local gen = assert(prototypes.entity["tt-nuclear-generator"])
         local out = gen.get_max_energy_production() * 60
         assert_.truthy(math.abs(out - mw * 1e6) < 1e3, name .. " generator " .. out)
         assert_.equals(gen.maximum_temperature, 500)
-        assert_.truthy(math.abs(cell.fuel_value / burn - 400 / (mw / 20)) < 0.01, name .. " cell lasts " .. cell.fuel_value / burn)
+        assert_.truthy(math.abs(cell.fuel_value / burn - 400) < 0.01, name .. " cell lasts " .. cell.fuel_value / burn)
       end
     end,
   },
@@ -251,20 +250,6 @@ return {
     end,
   },
   {
-    name = "nuclear: upgrading keeps the fuel cells and the one burning",
-    fn = function(ctx)
-      local city = nuclear_rig(X + 240, 30e6, 5)
-      ctx:wait(120, function()
-        local before = fuel_left(city)
-        local t2 = assert(remote.call("tt-city", "upgrade_now", city))
-        assert_.equals(t2.name, NUCLEAR .. "-t2")
-        assert_.truthy(math.abs(fuel_left(t2) - before) < 1e6, "fuel " .. before .. " -> " .. fuel_left(t2))
-        assert_.equals(#h.surface().find_entities_filtered({ name = "tt-nuclear-generator-t2", position = t2.position, radius = 1 }), 1)
-        assert_.equals(#h.surface().find_entities_filtered({ name = "tt-nuclear-generator", position = t2.position, radius = 1 }), 0)
-      end)
-    end,
-  },
-  {
     name = "nuclear: a belt feeds fuel cells into the nuclear city's burner through its port",
     fn = function(ctx)
       local x = X + 280
@@ -283,49 +268,6 @@ return {
     fn = function()
       local surface = remote.call("tt-map", "generate", "tt-map-uranium")
       assert_.equals(surface.count_entities_filtered({ name = NUCLEAR }), 1)
-    end,
-  },
-  {
-    -- 2.6.5: the balance agreed with the user (DECISIONS 2026-11-20): coal power cities alone
-    -- cover every city at tier 1 and roughly every city at tier 3 (tight); nuclear is the
-    -- other way to get there.
-    name = "power budget: coal covers tier 1, is tight at tier 3, nuclear plus one coal city covers tier 3",
-    fn = function()
-      local function tier_name(name, tier)
-        if tier == 1 then return name end
-        local t = name .. "-t" .. tier
-        return prototypes.entity[t] and t or name -- single-tier cities (the silo) stay as they are
-      end
-      local function generator_w(name, tier)
-        local base = name == "tt-city-nuclear-power" and "tt-nuclear-generator" or "tt-power-generator"
-        return prototypes.entity[tier == 1 and base or (base .. "-t" .. tier)].get_max_energy_production() * 60
-      end
-      local l = remote.call("tt-map", "layout")
-      local demand, coal, nuclear = {}, {}, {}
-      for tier = 1, 3 do
-        demand[tier], coal[tier], nuclear[tier] = 0, 0, 0
-        for _, c in ipairs(l.cities) do
-          local p = prototypes.entity[tier_name(c.name, tier)]
-          if c.name == "tt-city-power" then
-            coal[tier] = coal[tier] + generator_w(c.name, tier)
-          elseif c.name == "tt-city-nuclear-power" then
-            nuclear[tier] = nuclear[tier] + generator_w(c.name, tier)
-          elseif p.electric_energy_source_prototype then
-            demand[tier] = demand[tier] + p.get_max_energy_usage() * 60
-          end
-        end
-      end
-      local function mw(w) return string.format("%.1f MW", w / 1e6) end
-      local summary = ""
-      for tier = 1, 3 do
-        summary = summary .. string.format(" T%d: demand %s, coal %s, nuclear %s;", tier, mw(demand[tier]), mw(coal[tier]), mw(nuclear[tier]))
-      end
-      log("power budget:" .. summary)
-      local one_coal_t3 = generator_w("tt-city-power", 3)
-      assert_.truthy(coal[1] >= demand[1], "coal does not cover tier 1:" .. summary)
-      assert_.truthy(coal[3] >= 0.9 * demand[3] and coal[3] <= 1.15 * demand[3], "coal at tier 3 is not tight:" .. summary)
-      assert_.truthy(nuclear[3] + one_coal_t3 >= demand[3], "nuclear + one coal city fall short at tier 3:" .. summary)
-      assert_.truthy(nuclear[3] < demand[3], "nuclear alone covers everything at tier 3 (no choice left):" .. summary)
     end,
   },
 }

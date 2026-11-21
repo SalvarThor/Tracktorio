@@ -1,4 +1,4 @@
--- 2.5: cities of the rocket chain. Each case: tier 1 rates (per second), power, and a real
+-- 2.5: cities of the rocket chain. Each case: rates (per second), power, and a real
 -- run with infinity pipes at their fluid ports (supply in, drain out) and items inserted.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
@@ -35,7 +35,7 @@ local CASES = {
     items = { ["steel-plate"] = 10, ["iron-plate"] = 40, ["advanced-circuit"] = 15, sulfur = 5 }, product = "chemical-science-pack" },
 }
 
---- Per-second amounts of every ingredient and product at the city's tier 1 speed.
+--- Per-second amounts of every ingredient and product at the city's speed.
 local function rates(name)
   local p = prototypes.entity[name]
   local r = p.fixed_recipe
@@ -48,7 +48,7 @@ end
 
 local tests = {
   {
-    name = "chain: tier 1 rates and power of the rocket chain cities",
+    name = "chain: rates and power of the rocket chain cities",
     fn = function()
       for _, c in ipairs(CASES) do
         local got = rates(c.city)
@@ -58,7 +58,6 @@ local tests = {
         for name in pairs(got) do assert_.truthy(c.rates[name], c.city .. " has extra " .. name) end
         local w = prototypes.entity[c.city].get_max_energy_usage() * 60
         assert_.truthy(math.abs(w - c.watts) < 1000, c.city .. " draws " .. w)
-        for tier = 2, 3 do assert_.truthy(prototypes.entity[c.city .. "-t" .. tier], c.city .. " tier " .. tier) end
       end
     end,
   },
@@ -75,7 +74,7 @@ tests[#tests + 1] = {
     assert_.falsy(axe.researched, "steel axe already researched")
     local x = X - 40
     h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
-    local city = h.place_city("tt-city-steel-t3", { x + 0.5, 0.5 })
+    local city = h.place_city("tt-city-steel", { x + 0.5, 0.5 })
     city.insert({ name = "iron-plate", count = 400 })
     h.test_power({ x + 8.5, 0.5 }, 8e6)
     local out = assert(city.get_inventory(defines.inventory.crafter_output))
@@ -83,8 +82,8 @@ tests[#tests + 1] = {
     ctx:wait_until(function()
       out.clear() -- keep the output from filling up
       city.insert({ name = "iron-plate", count = 100 }) -- and the input topped up
-      return axe.researched or city.products_finished >= 70 or game.tick - t0 > 60 * 25
-    end, 60 * 30, function()
+      return axe.researched or city.products_finished >= 60 or game.tick - t0 > 60 * 75
+    end, 60 * 80, function()
       local made = city.products_finished
       local done = axe.researched
       axe.researched = false

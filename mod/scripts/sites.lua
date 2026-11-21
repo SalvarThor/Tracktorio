@@ -11,8 +11,8 @@ local layout = require("shared.port_layout")
 
 local M = {}
 
-M.HALF = layout.MAX_SIZE / 2 -- room for the city at its largest tier (16 x 16, 2.10)
-M.MARGIN = 4 -- room around it for the first belts and rails (2.10: ports are on the wall; HALF + MARGIN stays ~12)
+M.HALF = layout.MAX_SIZE / 2 -- room for the city (12 x 12, 2.15)
+M.MARGIN = 4 -- room around it for the first belts and rails (ports are on the wall)
 M.STEP = 8 -- spacing of candidate spots on the search spiral
 M.SEARCH = 320 -- furthest a site moves from its planned spot
 M.SAMPLE = 3 -- sample spacing of the dry check over the box

@@ -1,9 +1,7 @@
--- City signal points (PLAN 2.11): two constant combinators in the door of every city, in the
--- middle of its south wall. The player wires to them; scripts/signals.lua writes what they
--- send. The stock point sends what the city holds, its status and tier; the construction
--- point sends the materials its next tier still needs. They keep the vanilla combinator
--- look, so it is plain where to wire, and they sit inside the building: they collide with
--- nothing.
+-- City signal point (PLAN 2.11): a constant combinator in the door of every city, in the
+-- middle of its south wall. The player wires to it; scripts/signals.lua writes what it
+-- sends: what the city holds, its status and speed. It keeps the vanilla combinator look, so
+-- it is plain where to wire, and it sits inside the building: it collides with nothing.
 local config = require("shared.config")
 
 local function point(name, icons)
@@ -29,8 +27,6 @@ end
 local combinator = { icon = "__base__/graphics/icons/constant-combinator.png" }
 data:extend({
   point(config.SIGNAL_POINT, { combinator }),
-  point(config.CONSTRUCTION_SIGNAL_POINT, { combinator,
-    { icon = "__base__/graphics/icons/steel-chest.png", scale = 0.3, shift = { 8, 8 }, floating = true } }),
 })
 
 -- Status signals: value 1 while the city is in that state.

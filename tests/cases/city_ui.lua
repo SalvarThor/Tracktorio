@@ -187,12 +187,12 @@ return {
   },
   {
     -- 2.13: one compact page for every kind of city
-    name = "city ui: every city's window shows a coloured status, its flows (or packs, or parts), ports and tier",
+    name = "city ui: every city's window shows a coloured status, its flows (or packs, or parts) and ports",
     fn = function()
       local p = assert(game.players[1])
       local i = 0
       for _, def in ipairs(city_defs.list) do
-        local name = city_defs.entity_name(def.name, 1)
+        local name = city_defs.entity_name(def.name)
         local x = 52000 + i * 24
         i = i + 1
         h.clear_area({ { x - 10, -10 }, { x + 11, 11 } })
@@ -211,7 +211,6 @@ return {
         if def.kind == "silo" then assert_.truthy(body["silo"], name .. ": no rocket parts") end
         assert_.truthy(body["port-1"], name .. ": no ports")
         assert_.truthy(body["signals"], name .. ": no signals line")
-        if #def.tiers > 1 then assert_.truthy(body["tier"], name .. ": no tier line") end
         assert_.truthy(frame["titlebar"]["title"].tooltip, name .. ": no description on the title")
         p.opened = nil
         city.destroy()

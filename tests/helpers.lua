@@ -75,32 +75,7 @@ function M.test_power(sub_pos, watts, buffer_ticks)
   return eei
 end
 
---- Construction port of a city (nil if none).
----@param city LuaEntity
-function M.port_of(city)
-  local s = remote.call("tt-city", "upgrade_status", city)
-  return s and s.port
-end
-
---- Put `count` of `item` into a city's port in chunks, counting after each chunk (as the
---- once-a-second port tick would). Returns what could not be inserted. If the city upgrades
---- along the way, the rest is refused by the new port's filters and returned.
----@param city LuaEntity
----@param item string
----@param count integer
-function M.feed_port(city, item, count)
-  local port = assert(M.port_of(city), "no port")
-  local inv = assert(port.get_inventory(defines.inventory.chest))
-  while count > 0 and port.valid do
-    local n = inv.insert({ name = item, count = count })
-    if n == 0 then return count end
-    count = count - n
-    remote.call("tt-city", "port_tick")
-  end
-  return count
-end
-
---- The city entity now standing at a position (after an upgrade replaced it).
+--- The city entity now standing at a position.
 ---@param position MapPosition
 function M.city_at(position)
   for _, e in pairs(M.surface().find_entities_filtered({ position = position, radius = 0.5 })) do
@@ -134,7 +109,7 @@ end
 function M.port_spot(city, name, flow)
   local info = assert(city_defs.by_entity[city.name], "not a city: " .. city.name)
   for _, p in ipairs(port_layout.ports(info.def)) do
-    if p.name == name and p.flow == flow and p.tiers[info.tier] and not p.second then
+    if p.name == name and p.flow == flow then
       local spot = port_layout.spot(p, M.city_size(city.name))
       return { city.position.x + spot.outside[1], city.position.y + spot.outside[2] }, spot.direction
     end
@@ -142,9 +117,9 @@ function M.port_spot(city, name, flow)
   error("no " .. flow .. " port for " .. name .. " on " .. city.name)
 end
 
---- Every port for `name` flowing `flow` at the city's tier (tier 3 smelting has two):
+--- Every port for `name` flowing `flow`:
 --- list of { pos, dir } with `pos` the tile just outside the wall and `dir` out of the city.
---- `name` may also be "construction" or "service" (2.10.6).
+--- `name` may also be "service" (2.10.6).
 ---@param city LuaEntity
 ---@param name string
 ---@param flow "input"|"output"
@@ -152,7 +127,7 @@ function M.port_spots(city, name, flow)
   local info = assert(city_defs.by_entity[city.name], "not a city: " .. city.name)
   local out = {}
   for _, p in ipairs(port_layout.ports(info.def)) do
-    if (p.name == name or p.kind == name) and p.flow == flow and p.tiers[info.tier] then
+    if (p.name == name or p.kind == name) and p.flow == flow then
       local spot = port_layout.spot(p, M.city_size(city.name))
       out[#out + 1] = { pos = { city.position.x + spot.outside[1], city.position.y + spot.outside[2] }, dir = spot.direction }
     end
@@ -168,6 +143,32 @@ local BACK = {
   [defines.direction.north] = defines.direction.south, [defines.direction.south] = defines.direction.north,
   [defines.direction.east] = defines.direction.west, [defines.direction.west] = defines.direction.east,
 }
+
+-- Turning a direction a quarter clockwise.
+local RIGHT = {
+  [defines.direction.north] = defines.direction.east, [defines.direction.east] = defines.direction.south,
+  [defines.direction.south] = defines.direction.west, [defines.direction.west] = defines.direction.north,
+}
+
+--- One lane of a yellow belt (7.5 items/s) into a city's input port for `name`: three belt
+--- tiles towards the port, fed from the side onto the middle one (side-loading fills only
+--- the near lane) by a loader from an infinity chest.
+---@param city LuaEntity
+---@param name string
+function M.lane_to_port(city, name)
+  local s = M.port_spots(city, name, "input")[1]
+  local d = STEP[s.dir]
+  local toward = BACK[s.dir]
+  for k = 0, 2 do M.create("transport-belt", { s.pos[1] + d[1] * k, s.pos[2] + d[2] * k }, { direction = toward }) end
+  local side = RIGHT[s.dir]
+  local sd = STEP[side]
+  local mid = { s.pos[1] + d[1], s.pos[2] + d[2] }
+  local function at(k) return { mid[1] + sd[1] * k, mid[2] + sd[2] * k } end
+  M.create("transport-belt", at(1), { direction = BACK[side] })
+  M.create("loader-1x1", at(2), { direction = BACK[side], type = "output" })
+  local chest = M.create("infinity-chest", at(3))
+  chest.set_infinity_container_filter(1, { name = name, count = 100, mode = "exactly" })
+end
 
 --- A belt run on every port for `name`: inputs are fed from an infinity chest, outputs
 --- drained into one. Two tiles of `belt` outside the wall, a fast loader (the port
@@ -195,9 +196,9 @@ function M.belt_to_port(city, name, flow, belt, length)
   end
 end
 
---- Where the hidden chest behind a city's construction or service port is (2.10.6).
+--- Where the hidden chest behind a city's service port is (2.10.6).
 ---@param city LuaEntity
----@param kind "construction"|"service"
+---@param kind "service"
 function M.box_spot(city, kind)
   return port_layout.box_position(city, kind, city_defs.by_entity)
 end
@@ -270,7 +271,7 @@ function M.city_rig(name, x, contents, with_output)
   if with_output then
     local info = city_defs.by_entity[name]
     for _, p in ipairs(port_layout.ports(info.def)) do
-      if p.kind == "item" and p.flow == "output" and p.tiers[info.tier] and not p.second and not cout then
+      if p.kind == "item" and p.flow == "output" and not cout then
         cout = M.belt_out(city, p.name)
       end
     end

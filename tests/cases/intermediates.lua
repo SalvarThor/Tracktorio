@@ -34,7 +34,7 @@ local CASES = {
 
 local tests = {
   {
-    name = "intermediates: tier 1 rates, inputs and power match the vanilla equivalent",
+    name = "intermediates: rates, inputs and power match the vanilla equivalent",
     fn = function()
       for _, c in ipairs(CASES) do
         local p = prototypes.entity[c.city]
@@ -48,21 +48,6 @@ local tests = {
         end
         for item in pairs(got) do assert_.truthy(c.inputs[item], c.city .. " has extra input " .. item) end
       end
-    end,
-  },
-  {
-    name = "intermediates: upgrade costs are plates, plus circuits at tier 3 for science",
-    fn = function()
-      for _, c in ipairs(CASES) do
-        for tier = 2, 3 do
-          local name = c.city .. "-t" .. tier
-          assert_.truthy(prototypes.entity[name], "missing " .. name)
-        end
-      end
-      local t3 = defs.by_entity["tt-city-red-science-t3"].def.tiers[3].cost
-      local names = {}
-      for _, c in ipairs(t3) do names[c.name] = c.count end
-      assert_.equals(names["electronic-circuit"], 1000)
     end,
   },
 }

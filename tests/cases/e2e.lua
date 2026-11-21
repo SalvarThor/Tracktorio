@@ -54,21 +54,21 @@ return {
       local coal = h.create("iron-chest", { 2031.5, Y - 1.5 }); coal.insert({ name = "coal", count = 10 })
       for _, x in ipairs({ 2029.5, 2030.5, 2031.5 }) do inserter(x, Y - 0.5, N) end
 
-      -- B (eastbound, x 2151): city south of the wagon (x 2141), 8x8 at x 2137..2145,
-      -- y Y+4..Y+12. Belt ports (2.10): ore in at x 2138.5 and coal at 2143.5 on the north
+      -- B (eastbound, x 2151): city south of the wagon (x 2141), 12x12 at x 2135..2147,
+      -- y Y+4..Y+16. Belt ports (2.10): ore in at x 2138.5 and coal at 2143.5 on the north
       -- wall, plates out at 2138.5 on the south wall. Filtered inserters put ore and coal
       -- from the wagon onto one-tile belts into the ports; the plates belt runs round the
       -- west side and under the ore belt to an inserter that loads the wagon.
       stop("tt-e2e-B", 2150, E, 2)
-      local city = h.place_city(IRON, { 2141.5, Y + 8.5 })
+      local city = h.place_city(IRON, { 2141.5, Y + 10.5 })
       power({ 2141, Y - 3 }, { 2141, Y - 6 })
       inserter(2138.5, Y + 2.5, N, "iron-ore")
       h.create("transport-belt", { 2138.5, Y + 3.5 }, { direction = S })
       inserter(2143.5, Y + 2.5, N, "coal")
       h.create("transport-belt", { 2143.5, Y + 3.5 }, { direction = S })
-      for _, x in ipairs({ 2138.5, 2137.5 }) do h.create("transport-belt", { x, Y + 12.5 }, { direction = W }) end
-      for y = Y + 12.5, Y + 4.5, -1 do h.create("transport-belt", { 2136.5, y }, { direction = N }) end
-      h.create("transport-belt", { 2136.5, Y + 3.5 }, { direction = E })
+      for x = 2138.5, 2135.5, -1 do h.create("transport-belt", { x, Y + 16.5 }, { direction = W }) end
+      for y = Y + 16.5, Y + 4.5, -1 do h.create("transport-belt", { 2134.5, y }, { direction = N }) end
+      for x = 2134.5, 2136.5 do h.create("transport-belt", { x, Y + 3.5 }, { direction = E }) end
       h.create("underground-belt", { 2137.5, Y + 3.5 }, { direction = E, type = "input" })
       h.create("underground-belt", { 2139.5, Y + 3.5 }, { direction = E, type = "output" })
       inserter(2139.5, Y + 2.5, S)

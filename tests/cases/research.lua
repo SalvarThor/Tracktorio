@@ -26,19 +26,17 @@ end
 
 return {
   {
-    name = "research: the complex is a lab taking red, green and blue, 20/40/80 labs, 1.2/2.4/4.8 MW",
+    name = "research: the complex is a lab taking red, green and blue, 20 labs, 1.2 MW",
     fn = function()
-      for tier, f in ipairs({ 1, 2, 4 }) do
-        local name = tier == 1 and "tt-city-research" or ("tt-city-research-t" .. tier)
-        local p = assert(prototypes.entity[name], "missing " .. name)
-        assert_.equals(p.type, "lab")
-        assert_.equals(p.get_researching_speed(), 20 * f)
-        local w = p.get_max_energy_usage() * 60
-        assert_.truthy(math.abs(w - 1.2e6 * f) < 1000, name .. " draws " .. w)
-        local inputs = {}
-        for _, i in ipairs(p.lab_inputs) do inputs[i] = true end
-        assert_.truthy(inputs[RED] and inputs[GREEN] and inputs["chemical-science-pack"] and #p.lab_inputs == 3, name .. " inputs")
-      end
+      local name = "tt-city-research"
+      local p = assert(prototypes.entity[name], "missing " .. name)
+      assert_.equals(p.type, "lab")
+      assert_.equals(p.get_researching_speed(), 20)
+      local w = p.get_max_energy_usage() * 60
+      assert_.truthy(math.abs(w - 1.2e6) < 1000, name .. " draws " .. w)
+      local inputs = {}
+      for _, i in ipairs(p.lab_inputs) do inputs[i] = true end
+      assert_.truthy(inputs[RED] and inputs[GREEN] and inputs["chemical-science-pack"] and #p.lab_inputs == 3, name .. " inputs")
       assert_.falsy(prototypes.item["tt-city-research"], "the complex has an item")
     end,
   },
@@ -81,21 +79,6 @@ return {
           assert_.truthy(force.technologies[tech].researched)
         end)
       end)
-    end,
-  },
-  {
-    name = "research: upgrading the complex keeps its packs",
-    fn = function()
-      local city = complex(X + 80)
-      city.insert({ name = RED, count = 50 })
-      city.insert({ name = GREEN, count = 30 })
-      local t2 = assert(remote.call("tt-city", "upgrade_now", city))
-      assert_.equals(t2.name, "tt-city-research-t2")
-      local inv = assert(t2.get_inventory(defines.inventory.lab_input))
-      assert_.equals(inv.get_item_count(RED), 50)
-      assert_.equals(inv.get_item_count(GREEN), 30)
-      local i = info(t2)
-      assert_.equals(i.lab.speed, 40)
     end,
   },
 }

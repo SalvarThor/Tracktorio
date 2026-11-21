@@ -2,7 +2,7 @@
 -- Cities are entities named "tt-city-*" (see prototypes/blackbox.lua).
 --
 -- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, companion = LuaEntity?,
---   port = LuaEntity?, upgrade = table? (scripts/ports.lua),
+--   belt_ports, signal_points, throttle (their modules),
 --   service_port = LuaEntity?, service = table? (scripts/service.lua) }
 -- storage.tt_hand_transfers = count of hand transfers that reached a city (should stay 0;
 --   operable=false is expected to block them, see DECISIONS.md A2).

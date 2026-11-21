@@ -17,7 +17,7 @@ local M = {}
 local CHECK_TICKS = 10
 
 -- Marker icons of the ports that aren't for one recipe item or fluid.
-local SPRITE = { construction = config.CONSTRUCTION_ICON, service = "item/repair-pack" }
+local SPRITE = { service = "item/repair-pack" }
 
 local INWARD = {
   [defines.direction.north] = defines.direction.south, [defines.direction.south] = defines.direction.north,
@@ -50,35 +50,13 @@ local function draw_marker(city, spot, sprite, inward)
   })
 end
 
---- Dashed outline on the ground of the largest building a city grows to (2.10.8), while
---- it is still smaller. Drawn on the city, so it goes with it.
----@param city LuaEntity
----@param def table
----@param size integer
-local function draw_footprint(city, def, size)
-  local full = port_layout.size(def, #def.tiers)
-  if full <= size then return end
-  local h = full / 2
-  local corners = { { -h, -h }, { h, -h }, { h, h }, { -h, h } }
-  for i = 1, 4 do
-    local a, b = corners[i], corners[i % 4 + 1]
-    rendering.draw_line({
-      -- playtest 2.10: visible, not prominent
-      color = { r = 0.15, g = 0.15, b = 0.15, a = 0.2 }, width = 1, dash_length = 0.5, gap_length = 0.5,
-      from = { entity = city, offset = a }, to = { entity = city, offset = b },
-      surface = city.surface, render_layer = "decals",
-    })
-  end
-end
-
 --- The icon painted on a city's roof: `roof_icon` from its definition, else its first
 --- product. Nil for the rocket silo (it keeps the vanilla silo).
 ---@param def table
----@param tier integer
-local function roof_sprite(def, tier)
+local function roof_sprite(def)
   if def.roof_icon then return def.roof_icon end
   if def.kind == "silo" then return nil end
-  local recipe = def.tiers[tier].recipe
+  local recipe = def.recipe
   local p = recipe and recipe.results and recipe.results[1]
   return p and ((p.type == "fluid" and "fluid/" or "item/") .. p.name) or nil
 end
@@ -87,10 +65,9 @@ end
 --- cities tell apart at a glance. Scaled with the building; drawn on the city.
 ---@param city LuaEntity
 ---@param def table
----@param tier integer
 ---@param size integer
-local function draw_roof(city, def, tier, size)
-  local sprite = roof_sprite(def, tier)
+local function draw_roof(city, def, size)
+  local sprite = roof_sprite(def)
   if not sprite then return end
   local k = size / 8
   rendering.draw_sprite({
@@ -102,49 +79,45 @@ local function draw_roof(city, def, tier, size)
   })
 end
 
---- Build the ports for a city's tier: loaders for items, markers for items and fluids.
+--- Build a city's ports: loaders for items, markers for items and fluids.
 ---@param city LuaEntity
 ---@param record table
 function M.attach(city, record)
   local info = city_defs.by_entity[city.name]
   if not info then return end
-  local size = port_layout.size(info.def, info.tier)
-  draw_footprint(city, info.def, size)
-  draw_roof(city, info.def, info.tier, size)
+  local size = port_layout.size(info.def)
+  draw_roof(city, info.def, size)
   record.belt_ports = {}
   for _, p in ipairs(port_layout.ports(info.def)) do
-    if p.tiers[info.tier] then
-      local spot = port_layout.spot(p, size)
-      local inward = p.flow == "input"
-      if p.kind ~= "fluid" then
-        -- item ports feed the city; construction and service ports feed the hidden chest
-        -- behind them (scripts/ports.lua, scripts/service.lua), whose slot filters decide
-        -- what it takes
-        local loader = city.surface.create_entity({
-          name = p.kind == "item" and config.BELT_PORT or p.kind == "service" and config.SERVICE_BOX_PORT or config.BOX_PORT,
-          position = { city.position.x + spot.inside[1], city.position.y + spot.inside[2] },
-          direction = inward and INWARD[spot.direction] or spot.direction,
-          type = inward and "input" or "output",
-          force = city.force,
-          create_build_effect_smoke = false,
-        })
-        if loader then
-          if p.kind == "item" then
-            loader.set_filter(1, p.name)
-            loader.loader_filter_mode = "whitelist"
-          end
-          cities.protect(loader)
-          record.belt_ports[#record.belt_ports + 1] = loader
-          if not inward then
-            storage.tt_output_ports = storage.tt_output_ports or {}
-            storage.tt_output_ports[loader.unit_number] = { loader = loader, diff = 0, seen = {},
-              a = loader.get_transport_line(defines.transport_line.left_line),
-              b = loader.get_transport_line(defines.transport_line.right_line) }
-          end
+    local spot = port_layout.spot(p, size)
+    local inward = p.flow == "input"
+    if p.kind ~= "fluid" then
+      -- item ports feed the city; the service port feeds the hidden chest behind it
+      -- (scripts/service.lua), whose slot filters decide what it takes
+      local loader = city.surface.create_entity({
+        name = p.kind == "item" and config.BELT_PORT or config.SERVICE_BOX_PORT,
+        position = { city.position.x + spot.inside[1], city.position.y + spot.inside[2] },
+        direction = inward and INWARD[spot.direction] or spot.direction,
+        type = inward and "input" or "output",
+        force = city.force,
+        create_build_effect_smoke = false,
+      })
+      if loader then
+        if p.kind == "item" then
+          loader.set_filter(1, p.name)
+          loader.loader_filter_mode = "whitelist"
+        end
+        cities.protect(loader)
+        record.belt_ports[#record.belt_ports + 1] = loader
+        if not inward then
+          storage.tt_output_ports = storage.tt_output_ports or {}
+          storage.tt_output_ports[loader.unit_number] = { loader = loader, diff = 0, seen = {},
+            a = loader.get_transport_line(defines.transport_line.left_line),
+            b = loader.get_transport_line(defines.transport_line.right_line) }
         end
       end
-      draw_marker(city, spot, SPRITE[p.kind] or ((p.kind == "item" and "item/" or "fluid/") .. p.name), inward)
     end
+    draw_marker(city, spot, SPRITE[p.kind] or ((p.kind == "item" and "item/" or "fluid/") .. p.name), inward)
   end
 end
 
@@ -206,7 +179,7 @@ function M.balance()
   end
 end
 
---- Remove a city's ports (upgrade, destruction).
+--- Remove a city's ports (destruction, the upgrade planner's swap).
 ---@param record table
 function M.detach(record)
   for _, loader in ipairs(record.belt_ports or {}) do
@@ -225,8 +198,8 @@ cities.on_any_placed(M.attach)
 ---@param inserter LuaEntity
 local function reaches_city(inserter)
   local function is_city(t)
-    return t ~= nil and t.valid and (t.name == config.BELT_PORT or t.name == config.BOX_PORT or t.name == config.SERVICE_BOX_PORT
-      or t.name == config.PORT or t.name == config.SERVICE_PORT or (cities.is_city(t) and t.name ~= config.CITY.goal))
+    return t ~= nil and t.valid and (t.name == config.BELT_PORT or t.name == config.SERVICE_BOX_PORT
+      or t.name == config.SERVICE_PORT or (cities.is_city(t) and t.name ~= config.CITY.goal))
   end
   return is_city(inserter.pickup_target) or is_city(inserter.drop_target)
 end

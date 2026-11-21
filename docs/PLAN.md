@@ -931,20 +931,23 @@ Items:
 - [x] 2.15.1 SPEC, CLAUDE.md and DECISIONS rewritten for player-built cities (Thesis, Rules,
       Black boxes, a Plots section, the post-MVP list). The README follows in 2.15.10, once
       the game plays that way.
-- [ ] 2.15.2 The plot: a tile with a painted border (visible on the map), not minable,
+- [x] 2.15.2 Tier growth removed (done first: the city items need one entity per kind).
+      City definitions have one set of numbers each (today's tier 1); every city is 12x12;
+      electric iron and copper smelting are their own kinds (decision 2; the in-place swap
+      comes with 2.15.4). Gone: upgrade.lua, ports.lua (construction ports), tier_marks.lua,
+      the construction port prototype, the second signal point, the window's tier section,
+      upgrade messages, /tt-port-fill, tier map tags, the upgrade and migration tests.
+- [ ] 2.15.3 The plot: a tile with a painted border (visible on the map), not minable,
       and no other tile can be placed over it (concrete, landfill). Each city kind gets an
       item with a free recipe; the city entity requires plot tiles under all of it
       (tile_buildability_rules, as Space Age uses), so the engine shows red off-plot and
       refuses. Placing a city by script still works (tests).
-- [ ] 2.15.3 Building and removing: building a city (by hand, ghost or robot) sets up its
+- [ ] 2.15.4 Building and removing: building a city (by hand, ghost or robot) sets up its
       ports, signal point and throttle through the existing "city placed" hook. Mining it
       (decision 5) removes all of them. Blueprints of a city and its station paste and build.
-- [ ] 2.15.4 Research: each city kind is unlocked by a technology. The starting research
+- [ ] 2.15.5 Research: each city kind is unlocked by a technology. The starting research
       gives the depot, coal power, water and both smelting cities; the rest go to the
       vanilla technologies they match (a table for the user to check before it's built).
-- [ ] 2.15.5 Tier growth removed: upgrade.lua, construction ports, tier marks, the second
-      signal point and the window's tier section. Decision 2 for the tiers that change the
-      kind.
 - [ ] 2.15.6 Map generation: the layout plans plot sites instead of cities (decision 4).
       Land finding (sites.lua) is reused; each site gets a map tag.
 - [ ] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.

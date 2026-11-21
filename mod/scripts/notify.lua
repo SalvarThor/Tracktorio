@@ -1,10 +1,8 @@
--- Player-facing upgrade messages (PLAN 2.1.4): chat message with a map link, custom alert,
--- flying text, a 90% heads-up, and a warning when the city's network looks too weak.
+-- Player-facing messages: chat with a map link, custom alerts, flying text (breakdowns,
+-- repairs, blocked map spots), and a check whether a city's network looks too weak.
 local city_defs = require("shared.city_defs")
 
 local M = {}
-
-local ALERT_TICKS = 60 * 30
 
 function M.init()
   storage.tt_alerts = storage.tt_alerts or {} -- { { player_index, entity, expires? }, ... } (no expiry: removed by code)
@@ -28,13 +26,13 @@ local function generator_watts(usage, temp)
   return usage * 60 * city_defs.steam_joules(temp or city_defs.POWER_STEAM_TEMP)
 end
 
---- What a city tier does: { per_min, product, draw (W)?, output (W)?, coal = bool }.
+--- What a city does: { per_min, product, draw (W)?, output (W)?, labs? }.
 ---@param entity_name string
-function M.tier_facts(entity_name)
+function M.city_facts(entity_name)
   local proto = prototypes.entity[entity_name]
   local info = city_defs.by_entity[entity_name]
   local recipe = proto and proto.fixed_recipe
-  local facts = { coal = false }
+  local facts = {}
   if proto and info and proto.type == "lab" then
     facts.labs = proto.get_researching_speed()
     facts.draw = proto.get_max_energy_usage() * 60
@@ -45,51 +43,9 @@ function M.tier_facts(entity_name)
   facts.product = p.name
   facts.product_type = p.type
   facts.per_min = (p.amount or 0) * 60 * proto.get_crafting_speed() / recipe.energy
-  -- "uses coal": only for cities that burn an ingredient as fuel (def.fuel); the depot and
-  -- power city consume coal as their main input at every tier
-  for _, ing in ipairs(recipe.ingredients) do
-    if info.def.fuel and ing.name == info.def.fuel then facts.coal = true end
-  end
   if proto.electric_energy_source_prototype then facts.draw = proto.get_max_energy_usage() * 60 end
-  local t = info.def.tiers[info.tier]
-  if t.generator_usage then facts.output = generator_watts(t.generator_usage, info.def.steam_temp) end
+  if info.def.generator_usage then facts.output = generator_watts(info.def.generator_usage, info.def.steam_temp) end
   return facts
-end
-
---- A per-minute rate for text: whole numbers from 10 up, one decimal below (playtest 2.6.6:
---- the uranium city's 0.6 and 1.2 cells/min both read "1").
----@param per_min number
-function M.format_rate(per_min)
-  if per_min >= 10 then return tostring(math.floor(per_min + 0.5)) end
-  local s = string.format("%.1f", per_min)
-  return (string.gsub(s, "%.0$", ""))
-end
-
---- Localised description of a tier: "makes up to 1800 [item]/min, draws up to 8.6 MW, ..."
----@param entity_name string
----@param previous string? entity name of the previous tier (to mention "no longer uses coal")
-function M.describe(entity_name, previous)
-  local f = M.tier_facts(entity_name)
-  ---@type any[]
-  local parts = { "" }
-  if f.labs then
-    parts[#parts + 1] = { "tt-notify.labs", tostring(math.floor(f.labs + 0.5)) }
-  elseif f.output then
-    parts[#parts + 1] = { "tt-notify.power-out", mw(f.output) }
-  elseif f.per_min then
-    local icon = (f.product_type == "fluid" and "[fluid=" or "[item=") .. f.product .. "]"
-    parts[#parts + 1] = { "tt-notify.rate", M.format_rate(f.per_min), icon }
-  end
-  if f.draw then parts[#parts + 1] = { "tt-notify.power-draw", mw(f.draw) } end
-  if previous and M.tier_facts(previous).coal and not f.coal then parts[#parts + 1] = { "tt-notify.no-coal" } end
-  return parts
-end
-
---- Base (tier-independent) name of a city, e.g. "Iron smelting city".
----@param entity_name string
-function M.base_name(entity_name)
-  local info = city_defs.by_entity[entity_name]
-  return info and { "entity-name." .. city_defs.entity_name(info.def.name, 1) } or { "entity-name." .. entity_name }
 end
 
 --- Power check for an electric city: nil if fine, else a localised warning.
@@ -97,7 +53,7 @@ end
 --- power cities on it (other consumers like drills come on top).
 ---@param city LuaEntity
 function M.network_warning(city)
-  local facts = M.tier_facts(city.name)
+  local facts = M.city_facts(city.name)
   if not facts.draw then return nil end
   if not city.is_connected_to_electric_network() then return { "tt-notify.not-connected" } end
   local net = city.electric_network_id
@@ -105,7 +61,7 @@ function M.network_warning(city)
   for _, record in pairs(storage.tt_cities) do
     local e = record.entity
     if e.valid then
-      local f = M.tier_facts(e.name)
+      local f = M.city_facts(e.name)
       if f.draw and e.electric_network_id == net then demand = demand + f.draw end
       if f.output and record.companion and record.companion.valid and record.companion.electric_network_id == net then
         supply = supply + f.output
@@ -131,42 +87,6 @@ end
 
 --- Recent messages (newest last).
 function M.recent() return storage.tt_notify_log or {} end
-
---- After an upgrade: chat, alert, flying text.
----@param old_name string
----@param city LuaEntity
-function M.upgraded(old_name, city)
-  local info = city_defs.by_entity[city.name]
-  local tier = info and info.tier or 0
-  ---@type any
-  local message = { "tt-notify.upgraded", gps(city), M.base_name(city.name), tostring(tier), M.describe(city.name, old_name) }
-  local warning = M.network_warning(city)
-  if warning then message = { "", message, " ", warning } end
-  tell(city.force --[[@as LuaForce]], message)
-  for _, player in pairs(city.force.connected_players) do
-    ---@type any
-    local alert_text = { "tt-notify.alert", M.base_name(city.name), tostring(tier) }
-    player.add_custom_alert(city, { type = "entity", name = city.name }, alert_text, true)
-    storage.tt_alerts[#storage.tt_alerts + 1] = { player_index = player.index, entity = city, expires = game.tick + ALERT_TICKS }
-    if player.surface == city.surface then
-      ---@type any
-      local flying = { "tt-notify.flying", tostring(tier) }
-      player.create_local_flying_text({ text = flying, position = city.position, time_to_live = 180 })
-    end
-  end
-end
-
---- 90% heads-up, once per tier.
----@param record table
-function M.heads_up(record)
-  local city = record.entity
-  local target = record.upgrade and record.upgrade.target
-  if not (city and city.valid and target) then return end
-  local info = city_defs.by_entity[target]
-  ---@type any
-  local message = { "tt-notify.heads-up", gps(city), M.base_name(city.name), tostring(info and info.tier or 0), M.describe(target, city.name) }
-  tell(city.force --[[@as LuaForce]], message)
-end
 
 --- A new city's spot on an extended map is taken by something the player built (2.2.6).
 ---@param label string

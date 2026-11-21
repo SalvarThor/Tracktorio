@@ -4,6 +4,27 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.2 tier growth removed
+- City definitions are flat (crafting_speed, power, recipe, ... on the definition; no
+  `tiers` list), at today's tier 1 numbers until 2.15.7 halves them. Entity names stay
+  "tt-city-<name>"; `city_defs.by_entity[name] = { def = def }`.
+- Every city is the 12x12 Factorissimo building (factory-2 art); ports keep the +-2.5 lines
+  (8 spots), so no port moved for a city's first layout. No double ports.
+- Electric iron and copper smelting are separate kinds ("tt-city-electric-iron-smelting",
+  `upgrade_from` names the coal-fired kind): same 15 plates/s, no coal, 4.32 MW (24
+  electric furnaces). The upgrade planner swap comes with building (2.15.4).
+- The signal point keeps the west tile of the door; it no longer sends T (tier).
+  Wire save/restore stays for the upgrade planner swap.
+- Removed with the tiers: construction ports and their chest, upgrade progress, upgrade and
+  heads-up messages, tier pips, the dashed outline of the largest building, tier suffixes
+  on map tags, /tt-port-fill, the save migrations of the tier era (pre-release: no saves to
+  keep), and the power and water budget tests, which balanced tiers against the fixed map.
+- The service port window said "Construction port for ..." (shared locale key): now
+  "Service port of ...".
+- Tests: 214 (from 263; upgrade, tier and migration tests removed). The steady-throttle
+  test now feeds an electric smelting city one lane of a yellow belt (side-loaded, 7.5/s,
+  half its rate) instead of a tier 2 city a full belt.
+
 ## 2026-11-21: player-built cities on plots (user; phase 2.15 proposed)
 - Direction (user, after the 2.14.0 playtest): the player builds the cities, for free once
   researched, but only on plots that map generation paints. There are many more plots

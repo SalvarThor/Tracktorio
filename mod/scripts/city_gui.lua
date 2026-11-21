@@ -5,8 +5,6 @@ local city_defs = require("shared.city_defs")
 local cities = require("scripts.cities")
 local city_info = require("scripts.city_info")
 local goal = require("scripts.goal")
-local ports = require("scripts.ports")
-local notify = require("scripts.notify")
 local service = require("scripts.service")
 
 local M = {}
@@ -16,16 +14,6 @@ M.OPEN_INPUT = "tt-open-city"
 
 function M.init()
   storage.tt_city_gui = storage.tt_city_gui or {}
-end
-
---- Schema 1 stored a unit number per open window: close those windows.
-function M.migrate_legacy()
-  for index, shown in pairs(storage.tt_city_gui) do
-    if type(shown) == "number" then
-      local player = game.get_player(index)
-      if player then M.close(player) else storage.tt_city_gui[index] = nil end
-    end
-  end
 end
 
 local function sprite_for(kind, name)
@@ -184,56 +172,23 @@ local function add_flows(body, entity, info)
   end
 end
 
---- Tier, next tier and the construction materials, each with its progress bar on one row.
----@param body LuaGuiElement
----@param city LuaEntity
-local function add_tiers(body, city)
-  local s = ports.status(city)
-  if not s or s.max_tier <= 1 then return end
-  body.add({ type = "line", direction = "horizontal" })
-  local line = add_text(body, { "tt-gui.tier-line", tostring(s.tier), tostring(s.max_tier), notify.describe(city.name) }, true, "tier")
-  if not s.next then
-    add_text(body, { "tt-gui.tier-top" })
-    return
-  end
-  line.tooltip = { "tt-gui.tier-where" }
-  add_text(body, { "tt-gui.tier-next", tostring(s.tier + 1), notify.describe(s.next, city.name) }).tooltip = { "tt-gui.tier-where" }
-  local items = {}
-  for item in pairs(s.cost) do items[#items + 1] = item end
-  table.sort(items)
-  for _, item in ipairs(items) do
-    local got, need = math.min(s.delivered[item] or 0, s.cost[item]), s.cost[item]
-    local row = body.add({ type = "flow", direction = "horizontal", name = "material-" .. item })
-    row.style.vertical_align = "center"
-    row.add({ type = "sprite", sprite = "item/" .. item, tooltip = prototypes.item[item].localised_name })
-    ---@type any
-    local caption = { "tt-gui.tier-material", tostring(got), tostring(need) }
-    local count = row.add({ type = "label", caption = caption })
-    count.style.minimal_width = 90
-    local bar = row.add({ type = "progressbar", value = got / need })
-    bar.style.horizontally_stretchable = true
-  end
-end
-
 local BELT_ITEM = { yellow = "transport-belt", red = "fast-transport-belt", blue = "express-transport-belt", turbo = "turbo-transport-belt" }
 
---- Every port at this tier: item, in/out, where on the wall and the belt it needs at full
---- output (an icon; the rate in the tooltip). Signals as one line, explained in its tooltip.
+--- Every port: item, in/out, where on the wall and the belt it needs at full output (an
+--- icon; the rate in the tooltip). Signals as one line, explained in its tooltip.
 ---@param body LuaGuiElement
 ---@param port_list table[]?
----@param has_next boolean the city has a next tier (and so a construction signal point)
-local function add_ports(body, port_list, has_next)
+local function add_ports(body, port_list)
   if not port_list or #port_list == 0 then return end
   add_heading(body, { "tt-gui.city-ports" }, { "tt-gui.city-ports-tip" })
   for i, p in ipairs(port_list) do
-    local what = p.kind == "construction" and ("[img=" .. config.CONSTRUCTION_ICON .. "]") or p.kind == "service" and "[item=repair-pack]"
+    local what = p.kind == "service" and "[item=repair-pack]"
       or ("[" .. p.kind .. "=" .. p.name .. "]")
     ---@type any
     local extra = ""
     ---@type any
     local tip = nil
-    if p.kind == "construction" then tip = { "tt-gui.city-port-construction-tip" }
-    elseif p.kind == "service" then tip = { "tt-gui.city-port-service-tip" }
+    if p.kind == "service" then tip = { "tt-gui.city-port-service-tip" }
     elseif p.belt then
       local belt = "[item=" .. BELT_ITEM[p.belt] .. "]"
       extra, tip = belt, { "tt-gui.city-port-belt-tip", belt, fmt(p.per_s) }
@@ -242,9 +197,9 @@ local function add_ports(body, port_list, has_next)
       { p.flow == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" }, port_where(p), extra }, false, "port-" .. i)
     if tip then label.tooltip = tip end
   end
-  -- 2.11: the signal points in the door
+  -- 2.11: the signal point in the door
   add_text(body, { "tt-gui.city-signals", "[img=item/constant-combinator]" }, false, "signals").tooltip =
-    { has_next and "tt-gui.city-signals-tip" or "tt-gui.city-signals-top-tip" }
+    { "tt-gui.city-signals-tip" }
 end
 
 --- A depot's servicing in one line; the rules in its tooltip (2.3.3).
@@ -292,8 +247,7 @@ local function fill_lab(body, entity, info)
     packs.add({ type = "label", caption = tostring(p.count) })
   end
   add_text(body, { "tt-gui.lab-speed", tostring(math.floor(info.lab.speed + 0.5)) })
-  add_ports(body, info.ports, city_defs.next_tier(entity.name) ~= nil)
-  add_tiers(body, entity)
+  add_ports(body, info.ports)
 end
 
 ---@param body LuaGuiElement
@@ -317,18 +271,8 @@ local function fill_city(body, entity)
     bar.style.horizontally_stretchable = true
     add_text(body, { "tt-gui.silo-launched", tostring(info.silo.launched) })
   end
-  add_ports(body, info.ports, city_defs.next_tier(entity.name) ~= nil)
+  add_ports(body, info.ports)
   add_service(body, entity)
-  add_tiers(body, entity)
-end
-
---- The city a construction port belongs to.
----@param port LuaEntity
-local function city_of_port(port)
-  for _, record in pairs(storage.tt_cities) do
-    if record.port == port and record.entity.valid then return record.entity end
-  end
-  return nil
 end
 
 --- The city a belt port belongs to.
@@ -365,12 +309,6 @@ local function fill(frame, entity)
   body.clear()
   if entity.name == config.CITY.goal then
     fill_goal(body)
-  elseif entity.name == config.PORT then
-    local city = city_of_port(entity)
-    if city then
-      add_text(body, { "tt-gui.port-for", city.localised_name }, true, "status")
-      add_tiers(body, city)
-    end
   elseif entity.name == config.SERVICE_PORT then
     local city = service.city_of_port(entity)
     if city then
@@ -382,11 +320,11 @@ local function fill(frame, entity)
   end
 end
 
---- Entities with a window: crafting cities, the goal box, construction and service ports.
+--- Entities with a window: crafting cities, the goal box, service ports.
 ---@param entity LuaEntity?
 function M.has_window(entity)
   if not (entity and entity.valid) then return false end
-  if entity.name == config.PORT or entity.name == config.SERVICE_PORT then return true end
+  if entity.name == config.SERVICE_PORT then return true end
   return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.type == "lab" or entity.type == "rocket-silo"
     or entity.name == config.CITY.goal)
 end
@@ -439,13 +377,12 @@ local function on_open_input(e)
   local selected = player.selected
   -- with a wire in hand, a click on a signal point connects the wire: no window
   local cursor = player.cursor_stack
-  if selected and (selected.name == config.SIGNAL_POINT or selected.name == config.CONSTRUCTION_SIGNAL_POINT)
-      and cursor and cursor.valid_for_read then
+  if selected and selected.name == config.SIGNAL_POINT and cursor and cursor.valid_for_read then
     return
   end
   -- a belt port (2.10) or signal point (2.11) opens its city's window
-  if selected and (selected.name == config.BELT_PORT or selected.name == config.BOX_PORT or selected.name == config.SERVICE_BOX_PORT
-      or selected.name == config.SIGNAL_POINT or selected.name == config.CONSTRUCTION_SIGNAL_POINT) then
+  if selected and (selected.name == config.BELT_PORT or selected.name == config.SERVICE_BOX_PORT
+      or selected.name == config.SIGNAL_POINT) then
     selected = city_of_belt_port(selected)
   end
   if selected and M.has_window(selected) then

@@ -33,17 +33,11 @@ port.belt_animation_set = {
 port.next_upgrade = nil
 port.fast_replaceable_group = nil
 
--- The construction and service ports (2.10.6) feed a hidden chest two tiles in, clear of
--- the tile in front of every item port (on the 8x8 building the item ports at the corners
--- share their front tiles).
--- Construction and service ports are separate prototypes so each explains itself when
--- hovered (2.10.14).
-local box_port = table.deepcopy(port)
-box_port.name = config.BOX_PORT
-box_port.container_distance = 2
-box_port.icon = "__base__/graphics/icons/steel-chest.png"
-local service_port = table.deepcopy(box_port)
+-- A depot's service port (2.10.6) feeds a hidden chest two tiles in, clear of the tile in
+-- front of every item port. Its own prototype, so it explains itself when hovered (2.10.14).
+local service_port = table.deepcopy(port)
 service_port.name = config.SERVICE_BOX_PORT
+service_port.container_distance = 2
 service_port.icon = "__base__/graphics/icons/repair-pack.png"
 
-data:extend({ port, box_port, service_port })
+data:extend({ port, service_port })

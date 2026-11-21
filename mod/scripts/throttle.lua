@@ -51,7 +51,7 @@ function M.applies(city)
   if not info or city_defs.is_power(city.name) then return false end
   if city.type == "lab" then return true end
   if city.type ~= "assembling-machine" then return false end
-  local recipe = info.def.tiers[info.tier].recipe
+  local recipe = info.def.recipe
   return recipe ~= nil and recipe.ingredients ~= nil and #recipe.ingredients > 0
 end
 

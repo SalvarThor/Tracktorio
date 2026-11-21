@@ -16,18 +16,16 @@ end
 return {
   {
     -- 2.9.1
-    name = "water: 600 / 1,200 / 2,400 water/s at tiers 1-3, no ingredients, no power",
+    name = "water: 600 water/s, no ingredients, no power",
     fn = function()
-      for tier, want in ipairs({ 600, 1200, 2400 }) do
-        local name = tier == 1 and WATER or (WATER .. "-t" .. tier)
-        local p = assert(prototypes.entity[name], name)
-        local r = p.fixed_recipe
-        assert_.equals(#r.ingredients, 0, name .. " ingredients")
-        local per_s = p.get_crafting_speed() / r.energy
-        assert_.equals(r.products[1].name, "water", name .. " product")
-        assert_.equals(r.products[1].amount * per_s, want, name .. " water/s")
-        assert_.falsy(p.electric_energy_source_prototype, name .. " draws power")
-      end
+      local name = WATER
+      local p = assert(prototypes.entity[name], name)
+      local r = p.fixed_recipe
+      assert_.equals(#r.ingredients, 0, name .. " ingredients")
+      local per_s = p.get_crafting_speed() / r.energy
+      assert_.equals(r.products[1].name, "water", name .. " product")
+      assert_.equals(r.products[1].amount * per_s, 600, name .. " water/s")
+      assert_.falsy(p.electric_energy_source_prototype, name .. " draws power")
     end,
   },
   {
@@ -94,7 +92,7 @@ return {
         if site then
           found = found + 1
           local x, y = site.x + 0.5, site.y + 0.5
-          assert_.equals(s.count_tiles_filtered({ area = { { x - 12, y - 12 }, { x + 12, y + 12 } }, collision_mask = "water_tile" }), 0, "water on the site")
+          assert_.equals(s.count_tiles_filtered({ area = { { x - 10, y - 10 }, { x + 10, y + 10 } }, collision_mask = "water_tile" }), 0, "water on the site")
           assert_.truthy(s.count_tiles_filtered({ area = { { x - 24.5, y - 24.5 }, { x + 24.5, y + 24.5 } }, collision_mask = "water_tile" }) > 0, "no water at the edge")
           assert_.truthy(s.count_tiles_filtered({ position = { x, y }, radius = 40, collision_mask = "water_tile" }) >= 600, "lake too small")
           log("water: shore site for " .. serpent.line(spot) .. " at " .. site.x .. "," .. site.y)
@@ -141,51 +139,6 @@ return {
         assert_.truthy(shores >= 3, "only " .. shores .. " water cities on a shore, seed " .. seed)
         game.delete_surface(s)
       end
-    end,
-  },
-  {
-    -- 2.9.6: like the power budget, so a retune can't silently break the balance
-    name = "water budget: four water cities cover every city's water at the same tier",
-    fn = function()
-      local function per_s(name, fluid, products)
-        local p = prototypes.entity[name]
-        if not p or not p.fixed_recipe then return 0 end
-        local r = p.fixed_recipe
-        local n = 0
-        for _, x in ipairs(products and r.products or r.ingredients) do
-          if x.name == fluid then n = n + x.amount end
-        end
-        return n * p.get_crafting_speed() / r.energy
-      end
-      local cities = remote.call("tt-map", "layout").cities
-      local supply, demand = {}, {}
-      for tier = 1, 3 do
-        supply[tier], demand[tier] = 0, 0
-        for _, c in ipairs(cities) do
-          local name = tier == 1 and c.name or (c.name .. "-t" .. tier)
-          if not prototypes.entity[name] then name = c.name end -- single-tier cities
-          supply[tier] = supply[tier] + per_s(name, "water", true)
-          demand[tier] = demand[tier] + per_s(name, "water", false)
-        end
-      end
-      log(string.format("water budget: supply %d / %d / %d, demand %d / %d / %d per s",
-        supply[1], supply[2], supply[3], demand[1], demand[2], demand[3]))
-      for tier = 1, 3 do
-        assert_.truthy(supply[tier] >= demand[tier], "tier " .. tier .. ": supply " .. supply[tier] .. " < demand " .. demand[tier])
-      end
-      -- tier 3 demand can't be met by tier 1 water cities: upgrades matter
-      assert_.truthy(demand[3] > supply[1], "tier 3 demand " .. demand[3] .. " within tier 1 supply")
-    end,
-  },
-  {
-    name = "water: plates delivered to its port upgrade it to tier 2 (1,200/s)",
-    fn = function()
-      local city = place(X + 120)
-      local pos = city.position
-      h.feed_port(city, "iron-plate", 1000)
-      h.feed_port(city, "copper-plate", 1000)
-      local now = assert(h.city_at(pos))
-      assert_.equals(now.name, WATER .. "-t2")
     end,
   },
 }

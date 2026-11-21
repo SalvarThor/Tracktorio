@@ -112,30 +112,26 @@ return {
   {
     name = "throttle: every crafting city and the research complex has one; power and water cities and the silo don't",
     fn = function()
-      local i = 0
-      for _, def in ipairs(city_defs.list) do
-        for tier = 1, #def.tiers do
-          local name = city_defs.entity_name(def.name, tier)
-          local x = X + 300 + i * 24
-          i = i + 1
-          h.clear_area({ { x - 10, -10 }, { x + 11, 11 } })
-          local city = h.place_city(name, { x + 0.5, 0.5 })
-          local t = remote.call("tt-city", "throttle", city)
-          local recipe = def.tiers[tier].recipe
-          local expect = def.kind == "lab" or (city.type == "assembling-machine" and not city_defs.is_power(name)
-            and recipe and #recipe.ingredients > 0)
-          if expect then
-            assert(t and t.beacon and t.beacon.valid, name .. " has no throttle")
-            -- playtest 2.12: the player opened a beacon and took its modules
-            assert_.falsy(t.beacon.prototype.selectable_in_game, "the beacon can be selected")
-            assert_.falsy(t.beacon.operable, name .. " beacon is operable")
-            assert_.falsy(t.beacon.minable_flag, name .. " beacon is minable")
-            assert_.equals(t.percent, 100, name .. " starts below full speed")
-          else
-            assert_.falsy(t, name .. " has a throttle")
-          end
-          city.destroy()
+      for i, def in ipairs(city_defs.list) do
+        local name = city_defs.entity_name(def.name)
+        local x = X + 300 + i * 24
+        h.clear_area({ { x - 10, -10 }, { x + 11, 11 } })
+        local city = h.place_city(name, { x + 0.5, 0.5 })
+        local t = remote.call("tt-city", "throttle", city)
+        local recipe = def.recipe
+        local expect = def.kind == "lab" or (city.type == "assembling-machine" and not city_defs.is_power(name)
+          and recipe and #recipe.ingredients > 0)
+        if expect then
+          assert(t and t.beacon and t.beacon.valid, name .. " has no throttle")
+          -- playtest 2.12: the player opened a beacon and took its modules
+          assert_.falsy(t.beacon.prototype.selectable_in_game, "the beacon can be selected")
+          assert_.falsy(t.beacon.operable, name .. " beacon is operable")
+          assert_.falsy(t.beacon.minable_flag, name .. " beacon is minable")
+          assert_.equals(t.percent, 100, name .. " starts below full speed")
+        else
+          assert_.falsy(t, name .. " has a throttle")
         end
+        city.destroy()
       end
     end,
   },
@@ -204,13 +200,13 @@ return {
     end,
   },
   {
-    name = "throttle: a tier 2 smelting city fed one yellow belt (half its 30/s) runs steadily at about 50%, unaided",
+    name = "throttle: an electric smelting city fed one lane of a yellow belt (half its 15/s) runs steadily at about 50%, unaided",
     fn = function(ctx)
       local x = X + 3300
       h.clear_area({ { x - 16, -16 }, { x + 18, 16 } })
-      local city = h.place_city("tt-city-iron-smelting-t2", { x + 0.5, 0.5 })
+      local city = h.place_city("tt-city-electric-iron-smelting", { x + 0.5, 0.5 })
       h.test_power({ x + 14, 0 }, 20e6)
-      h.belt_to_port(city, "iron-ore", "input", "transport-belt", 3)
+      h.lane_to_port(city, "iron-ore")
       h.belt_to_port(city, "iron-plate", "output", "fast-transport-belt", 3)
       -- the shown speed over the last 15 s, every 6 ticks (playtest 2.12: it jumped about)
       local seen, changes, last = {}, 0, nil

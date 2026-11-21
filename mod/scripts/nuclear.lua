@@ -2,7 +2,7 @@
 -- throttle. With fuel in, it burns at its full rate whether the power is used or not; the
 -- steam nobody draws is vented. A burner city only burns while crafting, so venting keeps it
 -- crafting. Checked every GOAL_TICK_INTERVAL (1 s): the steam output holds VOLUME, far more
--- than a tier 3 city makes in a second, so it never backs up between checks.
+-- than the city makes in a second, so it never backs up between checks.
 local city_defs = require("shared.city_defs")
 
 local M = {}
@@ -11,7 +11,7 @@ M.VOLUME = 4000 -- steam output box of the nuclear city (shared/city_defs.lua)
 M.VENT_ABOVE = 1000 -- steam above this is vented...
 M.KEEP = 400 -- ...down to this, a buffer for the generator
 
---- Is this a city that burns fuel flat out (the nuclear city, any tier)?
+--- Is this a city that burns fuel flat out (the nuclear city)?
 ---@param name string entity name
 function M.is_flat_out(name)
   local info = city_defs.by_entity[name]

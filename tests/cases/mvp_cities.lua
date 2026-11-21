@@ -79,7 +79,7 @@ return {
     end,
   },
   {
-    name = "mvp cities: only depot cities (any tier) make coal fuel",
+    name = "mvp cities: only depot cities make coal fuel",
     fn = function()
       local makers = {}
       for name, recipe in pairs(prototypes.recipe) do

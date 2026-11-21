@@ -24,7 +24,7 @@ end
 
 return {
   {
-    name = "oil: refinery city tier 1 takes 40 crude + 28 water/s, makes 26 light oil + 22 gas/s at 0.95 MW",
+    name = "oil: refinery city takes 40 crude + 28 water/s, makes 26 light oil + 22 gas/s at 0.95 MW",
     fn = function()
       local p = prototypes.entity[REFINERY]
       local r = p.fixed_recipe
@@ -37,7 +37,6 @@ return {
       assert_.equals(amounts["light-oil"], 26)
       assert_.equals(amounts["petroleum-gas"], 22)
       assert_.truthy(math.abs(p.get_max_energy_usage() * 60 - 0.95e6) < 1000, "power")
-      for tier = 2, 3 do assert_.truthy(prototypes.entity[REFINERY .. "-t" .. tier], "tier " .. tier) end
     end,
   },
   {

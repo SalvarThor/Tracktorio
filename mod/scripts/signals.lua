@@ -1,12 +1,10 @@
--- City signal points (PLAN 2.11). Two constant combinators in a city's door, in the middle
--- of its south wall (prototypes/signal_point.lua). Every second this module writes:
---   stock point: each item and fluid the city holds (inputs, outputs, fuel; whole units),
---     one status signal (config.SIGNAL, value 1) and its tier as signal T;
---   construction point (cities below max tier): each material the next tier still needs.
--- Two points, because a combinator sends the same signals on both wires and stock and needs
--- of the same item would add up.
+-- City signal point (PLAN 2.11). A constant combinator in a city's door, in the middle of
+-- its south wall (prototypes/signal_point.lua). Every second this module writes each item
+-- and fluid the city holds (inputs, outputs, fuel; whole units), one status signal
+-- (config.SIGNAL, value 1) and, while running, its speed. (2.15: the second point, for
+-- what the next tier needed, went with the tiers.)
 --
--- record.signal_points = { stock = LuaEntity, construction = LuaEntity? }
+-- record.signal_points = { stock = LuaEntity }
 local config = require("shared.config")
 local city_defs = require("shared.city_defs")
 local port_layout = require("shared.port_layout")
@@ -16,13 +14,13 @@ local throttle = require("scripts.throttle")
 
 local M = {}
 
---- Where the two points sit, relative to the city's centre: the two tiles of the door
---- (even sizes), or either side of the middle tile (the 9x9 silo).
+--- Where the point sits, relative to the city's centre: the west tile of the door (even
+--- sizes), or beside the middle tile (the 9x9 silo).
 ---@param size integer
 local function door(size)
   local y = size / 2 - 0.5
-  if size % 2 == 0 then return { -0.5, y }, { 0.5, y } end
-  return { -1, y }, { 1, y }
+  if size % 2 == 0 then return { -0.5, y } end
+  return { -1, y }
 end
 
 ---@param city LuaEntity
@@ -38,23 +36,13 @@ local function create(city, name, offset)
   return e
 end
 
---- Place a city's signal points (on placement and after an upgrade).
+--- Place a city's signal point (when the city is placed).
 ---@param city LuaEntity
 ---@param record table
 function M.attach(city, record)
   local info = city_defs.by_entity[city.name]
   if not info then return end
-  local size = port_layout.size(info.def, info.tier)
-  local west, east = door(size)
-  record.signal_points = { stock = create(city, config.SIGNAL_POINT, west) }
-  if info.tier < #info.def.tiers then
-    local point = create(city, config.CONSTRUCTION_SIGNAL_POINT, east)
-    record.signal_points.construction = point
-    if point then
-      rendering.draw_sprite({ sprite = config.CONSTRUCTION_ICON, target = { entity = point, offset = { 0, -0.1 } },
-        surface = city.surface, x_scale = 0.45, y_scale = 0.45, render_layer = "higher-object-above" })
-    end
-  end
+  record.signal_points = { stock = create(city, config.SIGNAL_POINT, door(port_layout.size(info.def))) }
   M.update(record)
 end
 
@@ -79,8 +67,8 @@ function M.save_wires(record)
   return out
 end
 
---- Reconnect saved wires to a record's new points (after an upgrade). A wire to something
---- that is gone (cleared from the bigger footprint) or now out of reach is dropped.
+--- Reconnect saved wires to a record's new points (after the upgrade planner swapped the
+--- city for its later kind). A wire to something that is gone is dropped.
 ---@param record table
 ---@param saved table
 function M.restore_wires(record, saved)
@@ -97,7 +85,7 @@ function M.restore_wires(record, saved)
   end
 end
 
---- Remove a city's points (upgrade).
+--- Remove a city's points.
 ---@param record table
 function M.detach(record)
   for _, point in pairs(record.signal_points or {}) do
@@ -172,21 +160,7 @@ function M.update(record)
     local s = status and (STATUS[status] or (city_info.STARVED[status] and config.SIGNAL.starved))
     if s then signals["virtual/" .. s] = 1 end
     if s == config.SIGNAL.running then signals["virtual/" .. config.SIGNAL.speed] = throttle.percent(record) end
-    local info = city_defs.by_entity[city.name]
-    signals["virtual/signal-T"] = info and info.tier or 1
     write(stock, signals)
-  end
-  local construction = points.construction
-  if construction and construction.valid then
-    local signals = {}
-    local upgrade = record.upgrade
-    if upgrade and not upgrade.complete then
-      for item, need in pairs(upgrade.cost) do
-        local left = need - (upgrade.delivered[item] or 0)
-        if left > 0 then signals["item/" .. item] = left end
-      end
-    end
-    write(construction, signals)
   end
 end
 
