@@ -1,8 +1,9 @@
 # Tracktorio (Factorio 2.1 mod + scenario)
 
-A Factorio mod where trains are the whole game. Production is handled by fixed-location
-"black box" cities that convert inputs to outputs automatically. The player mines raw
-resources, builds the rail network and designs the stations that feed and drain the cities.
+A Factorio mod where trains are the whole game. Production is handled by "black box"
+cities that convert inputs to outputs automatically. The player builds the cities for free,
+but only on plots the map provides, mines raw resources, builds the rail network and designs
+the stations that feed and drain the cities.
 
 The design spec is authoritative:
 

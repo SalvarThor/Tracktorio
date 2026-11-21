@@ -2,15 +2,16 @@
 
 ## Thesis
 
-Factorio with the factory turned into black boxes. Cities are fixed-location factories that convert inputs to outputs automatically at the rate they're supplied. The player mines raw resources, builds the train network and designs the stations that feed and drain the cities. The win condition is a rocket launch. The challenge is shipping, not production design.
+Factorio with the factory turned into black boxes. Cities are factories that convert inputs to outputs automatically at the rate they're supplied. The player builds them, for free once researched, but only on plots the map provides. Each city is modest, so a product comes from several cities, and a train goes to whichever stop of that name is nearest and has room, as in vanilla. The player mines raw resources, builds the cities, the train network and the stations that feed and drain them. The win condition is a rocket launch. The challenge is shipping, not production design.
 
-Cities chain across the map the same way a factory does, and the train network is the belts.
+Cities chain across the map the same way a factory does, and the train network is the belts. When a supply runs short, the answer is another city on another plot, and more rail.
 
 ## Rules
 
 - **Transformation belongs to cities only.** Furnaces, assemblers, refineries, chemical plants, boilers and steam engines are removed from the player.
 - **Transportation means trains, and only trains.** Cars, tanks, spidertrons, roboports and logistic robots are removed. Personal construction robots are allowed: building is free, so building fast is fine, and they never move cargo between places. Every player starts with power armor holding a fission reactor, two personal roboports and two batteries, and 20 construction robots; more robots are a free hand-craft. (User decision 2026-11-21.) Belts, pipes and inserters are station-local logistics for loading, unloading and feeding cities (through their belt ports), not the intended way to move cargo between locations.
   - Decided: no rule against long belt or pipe runs between locations. A player who wants miles of belts can build them; trains are simply the better tool.
+- **Cities are free**, gated by research, and can only be built on plots (see Plots).
 - **Train infrastructure, station logistics and extraction are free**, gated by research. That covers rails, signals, stops, trains, inserters, belts, chests (not logistic chests), pipes, pumps, tanks, poles, circuit entities, miners and pumpjacks. Default: extraction counts as free, since sourcing and mining ores is the player's job. Offshore pumps are removed: water comes only from water cities (post-MVP item 9).
 - **Everything else stays vanilla.** Trains, fuel, signals, schedules, interrupts, loading and unloading, circuits, ore patches.
 - Space Age is required for elevated rails, which come as late research. Quality, planets and platforms are off.
@@ -21,29 +22,38 @@ All black boxes are the same entity concept with different recipe profiles.
 
 - **Production cities** at middle-ground granularity: smelting, intermediates, science and rocket parts. Cities split at natural shipping boundaries, roughly 15-25 city types for a full rocket tree.
 - **Power city:** water + coal in, electricity out to the player's pole network. Several
-  on the map. Later: a separate nuclear power city (fuel cells + water in), fed by a
+  can be built. Later: a separate nuclear power city (fuel cells + water in), fed by a
   uranium city (uranium ore + iron in, fuel cells out). (User decision, 2026-11-20.)
-- **Depot city:** coal in, coal fuel (`tt-coal-fuel`) out. The only source of locomotive fuel. Fixed location like every other box.
-- **Research complex:** science packs in, research progress out. Upgradable throughput.
+- **Depot city:** coal in, coal fuel (`tt-coal-fuel`) out. The only source of locomotive fuel.
+- **Research complex:** science packs in, research progress out. More complexes, more research speed.
 - **Repair pack city:** feeds depot servicing.
 
 Shared behaviour:
 
-- Conversion runs at the rate of the slowest input, capped by tier.
+- Conversion runs at the rate of the slowest input, capped by the city's rate. Rates are modest (iron smelting 7.5 plates/s, half a yellow belt, to start): the way to more output is more cities. (User decision 2026-11-21, phase 2.15.)
 - A city fed (or drained) below its full rate runs steadily at that rate rather than in bursts: its speed and power draw drop together, down to 20%. (User decision 2026-11-21, phase 2.12.)
 - Decided: a city draws electricity from the player's pole network when its vanilla
   equivalent uses electric buildings. It draws what those buildings would need for the same
   output, runs slower on low power and stops without it. Cities whose equivalent burns fuel
   (the coal-fired smelting cities) take that fuel as an ingredient instead. Electric
-  smelting is a later upgrade that swaps coal for electricity. MVP: the depot counts as
+  smelting is a separate, later-researched city kind that runs on electricity instead
+  of coal; the upgrade planner swaps one for the other in place (phase 2.15). MVP: the depot counts as
   chemical plants (840 kW at full output); smelting cities and the goal box need no power.
   (User decision, playtest 1.10.)
 - A full output stalls the box and an empty input starves it, so backpressure works like a backed-up belt.
-- Tier upgrades happen by delivering construction materials to the box.
-- Placement is fixed by the world, never by the player, so every link in the chain is a real route.
-- Black boxes accept and give items only through belt ports in their walls, and fluids only through pipes: a belt runs straight into a port, as in Factorissimo. Inserters can't reach a city, and the player cannot hand-feed a city or take its output by hand. Construction materials and a depot's repair packs come in through ports too. Each port is clearly marked with its item and direction. (User decision 2026-11-20, phase 2.10; before that, inserters and pumps.)
-- Cities grow with tier: 8x8, 12x12 and 16x16 buildings. A port keeps its line through upgrades, so a belt built against a smaller city still meets it. One port per item; tier 3 smelting (60/s) gets two. (User decisions 2026-11-20.)
-- Every city has two signal points in its door for the circuit network: one sends what it holds, its status and tier; the other what its next tier still needs. They only send; train limits, interrupts and combinators are the player's. (User decision 2026-11-21, phase 2.11.)
+- Black boxes accept and give items only through belt ports in their walls, and fluids only through pipes: a belt runs straight into a port, as in Factorissimo. Inserters can't reach a city, and the player cannot hand-feed a city or take its output by hand. A depot's repair packs come in through a port too. Each port is clearly marked with its item and direction. (User decision 2026-11-20, phase 2.10; before that, inserters and pumps.)
+- Every city is a 12x12 building (the rocket silo keeps the vanilla 9x9), one port per item, all facing the same way: cities can't be rotated. (User decisions 2026-11-21, phase 2.15; before that cities grew 8x8 / 12x12 / 16x16 with tier upgrades delivered as construction materials.)
+- A city can be removed; everything inside it is lost (it can't go into the player's inventory: cities are hands-off).
+- Every city has a signal point in its door for the circuit network: it sends what the city holds, its status and speed. It only sends; train limits, interrupts and combinators are the player's. (User decision 2026-11-21, phase 2.11; the second point, for tier upgrade needs, went with the upgrades in 2.15.)
+
+## Plots
+
+(User decisions 2026-11-21, phase 2.15.)
+
+- Map generation paints plots: 12x12 building spots with a marked border, visible on the map. A city can only be built on a plot, and any city fits any plot. Plots can't be mined or covered with other tiles.
+- Plots come in small sites of 1-3, at least 300 tiles between sites, so belting between sites is clearly worse than rail. About 75 plots on a map. A starter site of 4 plots near spawn takes the first depot, power, water and smelting cities.
+- Each site has a map tag.
+- Rejected: buildings already on the map, unassigned, that the player gives a role once (no blueprints, and a wrong pick can't be undone).
 
 ## Reliability and depots
 
@@ -110,3 +120,5 @@ Default order, open to change:
     instead of inserters. (User decisions 2026-11-20.)
 11. City signals and locomotive tiers. (User decisions 2026-11-21.)
 12. Steady production and the coal fuel icon. (User decisions 2026-11-21.)
+13. Player-built cities on plots; tier growth removed. (User decisions 2026-11-21.)
+14. A recorded full run to the rocket, for tuning.

@@ -928,8 +928,9 @@ Decided with the user, the details (2026-11-21):
 6. The hand-made MVP scenario leaves the menu and stays only as the tests' fixed map.
 
 Items:
-- [ ] 2.15.1 SPEC, README and DECISIONS rewritten for player-built cities (Thesis, Rules,
-      Black boxes, the post-MVP list).
+- [x] 2.15.1 SPEC, CLAUDE.md and DECISIONS rewritten for player-built cities (Thesis, Rules,
+      Black boxes, a Plots section, the post-MVP list). The README follows in 2.15.10, once
+      the game plays that way.
 - [ ] 2.15.2 The plot: a tile with a painted border (visible on the map), not minable,
       and no other tile can be placed over it (concrete, landfill). Each city kind gets an
       item with a free recipe; the city entity requires plot tiles under all of it
@@ -951,6 +952,6 @@ Items:
 - [ ] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,
       research unlocks, plot counts and spacing on generated maps, several cities of one
       kind running at once.
-- [ ] 2.15.10 `/playtest`: build the start, add a second city of one kind, and give both
+- [ ] 2.15.10 README for the new game; `/playtest`: build the start, add a second city of one kind, and give both
       stops the same name.
 Stop. Report to the user. Then 2.14 resumes (the recorder and the full run).
