@@ -212,10 +212,25 @@ return {
       h.test_power({ x + 14, 0 }, 20e6)
       h.belt_to_port(city, "iron-ore", "input", "transport-belt", 3)
       h.belt_to_port(city, "iron-plate", "output", "fast-transport-belt", 3)
-      drive(ctx, city, 45, 15, function() end, function(samples)
+      -- the shown speed over the last 15 s, every 6 ticks (playtest 2.12: it jumped about)
+      local seen, changes, last = {}, 0, nil
+      local ticks = 0
+      drive(ctx, city, 45, 15, function(c)
+        ticks = ticks + 6
+        if ticks > 30 * 60 then
+          local pct = assert(remote.call("tt-city", "throttle", c)).percent
+          seen[#seen + 1] = pct
+          if last and pct ~= last then changes = changes + 1 end
+          last = pct
+        end
+      end, function(samples)
         local t = assert(remote.call("tt-city", "throttle", city))
         assert_.truthy(t.percent >= 40 and t.percent <= 60, "speed " .. t.percent .. "%")
         assert_.truthy(samples.other <= 2, "not working all the time: " .. serpent.line(samples.statuses))
+        local lo, hi = math.huge, -math.huge
+        for _, v in ipairs(seen) do lo, hi = math.min(lo, v), math.max(hi, v) end
+        assert_.truthy(changes <= 3 and hi - lo <= 10,
+          string.format("speed not calm over 15 s: %d changes, %d-%d%%", changes, lo, hi))
       end)
     end,
   },
@@ -264,6 +279,11 @@ return {
         local status = assert(p.gui.screen["tt_city_frame"])["body"]["status"]
         assert_.equals(status.caption[1], "tt-gui.city-status-running-at")
         assert_.equals(status.caption[2], "60")
+        -- the window's max is the full rate, not the throttled one (playtest 2.12)
+        local per_tick = full_rate(city)
+        local info = remote.call("tt-city", "info", city)
+        assert_.truthy(math.abs(info.recipe.ingredients[1].per_min_max - per_tick * 3600) < 1e-6,
+          "max per minute " .. info.recipe.ingredients[1].per_min_max .. ", full rate " .. per_tick * 3600)
         p.opened = nil
         remote.call("tt-city", "signals_tick")
         ctx:wait(1, function()

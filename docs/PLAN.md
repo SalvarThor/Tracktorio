@@ -798,3 +798,9 @@ Items:
       lane balancing (2.10.19) when several new items reached an output port at once, as
       when the player picked items off a backed-up belt (stacks were read after moving
       another item invalidated them). Tests for both.
+- [x] 2.12.10 Playtest 2026-11-21, second try: all five checks passed and both fixes held.
+      Findings fixed: the window's "max per minute" swung with the throttle (now the full
+      rate); the speed jumped about (now rates averaged over ~10 s, at most one 5% step
+      every 2 s, wobbles under a step ignored, faster only when about to run dry). Tests:
+      a fixed max under the throttle; the shown speed stays calm on a real belt.
+- [ ] 2.12.11 `/playtest` of 2.12.10: the window's max stays put; the speed settles calmly.

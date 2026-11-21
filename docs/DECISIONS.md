@@ -4,6 +4,18 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.12.10 throttle momentum
+- User asked for more momentum, and whether a city could wait for a big enough buffer and
+  then use it at a rate set by its size. The engine caps what a crafting machine takes in
+  (about 1.2 s at full speed; loaders respect it), so the stock inside a city stays
+  small; the belt in front of the port is the real buffer and backs up while the city
+  runs slower than it is fed. So instead: fed and taken rates are averaged over ~10 s;
+  the speed moves at most one 5% step every 2 s and only when the wanted speed is more
+  than a step away (or at the 100% / 20% ends); under 0.2 s of stock it may slow a step
+  every run, so it doesn't fall back into stop-start.
+- The window's "max per minute" uses the prototype's full crafting speed; the entity's
+  crafting speed includes the throttle.
+
 ## 2026-11-21: 2.12.9 playtest bugs
 - 2.1: moving an item on a transport line (remove_item / insert_at_back) invalidates the
   LuaItemStack references from an earlier get_detailed_contents of that line. The lane

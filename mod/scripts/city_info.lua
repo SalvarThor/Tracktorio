@@ -217,7 +217,8 @@ function M.info(entity)
   if entity.type == "rocket-silo" then out.silo = silo.status(entity) end
   if not recipe then out.status = "other"; return out end
 
-  local speed = entity.crafting_speed
+  -- the building's full speed, not the throttled one (playtest 2.12: "max" swung with it)
+  local speed = entity.prototype.get_crafting_speed()
   local crafts_per_min_max = 60 * speed / recipe.energy
   out.recipe = {
     name = recipe.name,
