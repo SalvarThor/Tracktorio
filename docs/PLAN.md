@@ -838,5 +838,6 @@ Items:
 - [x] 2.13.4 Tests updated (they read captions by element name); a test per city kind that
       the window opens and shows its status, flows, ports and tier.
 - [x] 2.13.5 README and DECISIONS updated.
-- [ ] 2.13.6 `/playtest`: the window for a smelting city, the depot, a power city, the
-      research complex and the silo, running and starved.
+- [x] 2.13.6 `/playtest`: the window for a smelting city, the depot, a power city, the
+      research complex and the silo, running and starved. Playtest 2026-11-21: "much
+      better"; clean log.
