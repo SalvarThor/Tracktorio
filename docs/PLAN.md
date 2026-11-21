@@ -669,7 +669,7 @@ south wall has the door in the middle on every building):
       (tier 1 at one yellow belt per item, tier 3 smelting at two blue belts); upgrade
       keeps a belt connected.
 - [x] 2.10.11 SPEC, README and DECISIONS updated.
-- [ ] 2.10.12 `/playtest`: building a station on belt ports, an upgrade growing a city with
+- [x] 2.10.12 `/playtest`: building a station on belt ports, an upgrade growing a city with
       its belts still connected, the new art at all three tiers. Playtest 2026-11-21:
       stations, the inserter rule, upgrades and pipes passed; the fixes below came out of it.
       Dump: 30 cities; the depot grew to tier 3 with its 3 ports; 1 inserter refused.
@@ -687,4 +687,7 @@ south wall has the door in the middle on every building):
       (the hidden generator not seen on the network after 2.10's size change).
 - [x] 2.10.19 Output port lanes: decide with the user how an output port fills the belt
       (it filled one lane, then the other).
-- [ ] 2.10.20 `/playtest` of 2.10.13-2.10.19.
+- [x] 2.10.20 `/playtest` of 2.10.13-2.10.19. Playtest 2026-11-21: all eight passed. Fixed
+      during it: no alt-mode recipe icon over the roof icon, a slightly stronger outline,
+      the window's construction text names the steel chest marker. Dump: the depot
+      upgraded on a network with no power city and the message said so.
