@@ -4,6 +4,26 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.11.1-2.11.3 city signal points
+- Signal points are copies of the vanilla constant combinator, kept visible (the plain
+  combinator look says "wire here"), with an empty collision mask so they sit inside the
+  building, selection priority above the city, protected and not operable (the player
+  can't edit them; script writes one section every second).
+- 2.1 surprise: a constant combinator filter needs a quality on every signal, not only
+  items. Without `quality = "normal"` fluid and virtual signals are silently not sent.
+- A combinator's output reaches the network one tick after it is written (tests wait a
+  tick).
+- Upgrades: the player's wires (origin "player") on the old points are saved and
+  reconnected to the new points, with a reach check; wires to things cleared from the
+  bigger footprint go with them.
+- Status signals are custom virtual signals (running, starved, output full, no power);
+  low power counts as running. Tier is the vanilla signal T. Silo: rocket parts as the
+  rocket-part item signal.
+- Clicking a signal point opens its city's window, except with something in the cursor
+  (a wire being connected).
+- Not verifiable by test: a player dragging a wire by hand onto a non-operable point.
+  The playtest (2.11.8) checks it.
+
 ## 2026-11-21: 2.10.20 playtest round 2
 - Cities don't show the engine's recipe icon in alt mode (`show_recipe_icon = false`; the
   map icon stays): it drew the product and the source building's icon over the roof icon.

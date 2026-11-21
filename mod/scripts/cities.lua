@@ -118,6 +118,9 @@ local function on_object_destroyed(e)
       for _, loader in ipairs(record.belt_ports or {}) do -- 2.10.4
         if loader.valid then loader.destroy() end
       end
+      for _, point in pairs(record.signal_points or {}) do -- 2.11
+        if point.valid then point.destroy() end
+      end
     end
     storage.tt_cities[e.useful_id] = nil
   end

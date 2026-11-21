@@ -145,7 +145,8 @@ end
 --- and the belt it needs at full output (pipes: the flow).
 ---@param body LuaGuiElement
 ---@param ports table[]?
-local function add_ports(body, ports)
+---@param has_next boolean the city has a next tier (and so a construction signal point)
+local function add_ports(body, ports, has_next)
   if not ports or #ports == 0 then return end
   body.add({ type = "line", direction = "horizontal" })
   body.add({ type = "label", caption = { "tt-gui.city-ports" }, style = "caption_label" })
@@ -164,6 +165,8 @@ local function add_ports(body, ports)
       { p.flow == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" },
       { "tt-gui.city-pipe-pos-" .. p.side .. "-" .. along }, extra }, false, "port-" .. i)
   end
+  -- 2.11: the signal points in the door
+  add_text(body, { has_next and "tt-gui.city-signals" or "tt-gui.city-signals-top", "[img=item/constant-combinator]" }, false, "signals")
 end
 
 --- A depot's servicing: packs in the service port and locomotives serviced (2.3.3).
@@ -209,7 +212,7 @@ local function fill_lab(body, entity, info)
     add_line(body, p, { "tt-gui.lab-pack-line", tostring(p.count) })
   end
   add_text(body, { "tt-gui.lab-speed", tostring(math.floor(info.lab.speed + 0.5)) })
-  add_ports(body, info.ports)
+  add_ports(body, info.ports, city_defs.next_tier(entity.name) ~= nil)
   add_tiers(body, entity)
 end
 
@@ -245,7 +248,7 @@ local function fill_city(body, entity)
     add_text(body, { "tt-gui.silo-how", tostring(info.silo.required) })
     add_text(body, { "tt-gui.silo-launched", tostring(info.silo.launched) })
   end
-  add_ports(body, info.ports)
+  add_ports(body, info.ports, city_defs.next_tier(entity.name) ~= nil)
   add_service(body, entity)
   add_tiers(body, entity)
 end
@@ -265,6 +268,9 @@ local function city_of_belt_port(port)
   for _, record in pairs(storage.tt_cities) do
     for _, loader in ipairs(record.belt_ports or {}) do
       if loader == port and record.entity.valid then return record.entity end
+    end
+    for _, point in pairs(record.signal_points or {}) do -- 2.11
+      if point == port and record.entity.valid then return record.entity end
     end
   end
   return nil
@@ -361,8 +367,15 @@ local function on_open_input(e)
   local player = game.get_player(e.player_index)
   if not player then return end
   local selected = player.selected
-  -- a belt port (2.10) opens its city's window
-  if selected and (selected.name == config.BELT_PORT or selected.name == config.BOX_PORT or selected.name == config.SERVICE_BOX_PORT) then
+  -- with a wire in hand, a click on a signal point connects the wire: no window
+  local cursor = player.cursor_stack
+  if selected and (selected.name == config.SIGNAL_POINT or selected.name == config.CONSTRUCTION_SIGNAL_POINT)
+      and cursor and cursor.valid_for_read then
+    return
+  end
+  -- a belt port (2.10) or signal point (2.11) opens its city's window
+  if selected and (selected.name == config.BELT_PORT or selected.name == config.BOX_PORT or selected.name == config.SERVICE_BOX_PORT
+      or selected.name == config.SIGNAL_POINT or selected.name == config.CONSTRUCTION_SIGNAL_POINT) then
     selected = city_of_belt_port(selected)
   end
   if selected and M.has_window(selected) then

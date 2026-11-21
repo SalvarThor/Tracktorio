@@ -73,7 +73,7 @@ local function missing_inputs(entity, recipe)
   return #absent > 0 and absent or short
 end
 
-local STARVED = {
+M.STARVED = {
   [defines.entity_status.item_ingredient_shortage] = true,
   [defines.entity_status.fluid_ingredient_shortage] = true,
   [defines.entity_status.no_ingredients] = true,
@@ -272,7 +272,7 @@ function M.info(entity)
   elseif status == defines.entity_status.full_output then
     out.status = "output_full"
     out.full = full_products(entity, recipe)
-  elseif status and STARVED[status] then
+  elseif status and M.STARVED[status] then
     out.status = "starved"
     out.missing = missing_inputs(entity, recipe)
   else

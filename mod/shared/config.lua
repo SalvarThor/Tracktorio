@@ -51,6 +51,12 @@ M.BELT_PORT = "tt-belt-port" -- 2.10.4: hidden loader under a city wall
 M.BOX_PORT = "tt-belt-port-box" -- 2.10.6: construction port, feeding the hidden chest two tiles in
 M.SERVICE_BOX_PORT = "tt-belt-port-service" -- 2.10.14: the same for a depot's repair packs
 M.CONSTRUCTION_ICON = "item/steel-chest" -- 2.10.14: marks the construction port everywhere
+M.SIGNAL_POINT = "tt-signal-point" -- 2.11: a city's stock and status, for the circuit network
+M.CONSTRUCTION_SIGNAL_POINT = "tt-signal-point-construction" -- 2.11: materials its next tier still needs
+M.SIGNAL = { -- 2.11: status signals of the stock point (value 1 while true)
+  running = "tt-city-running", starved = "tt-city-starved",
+  output_full = "tt-city-output-full", no_power = "tt-city-no-power",
+}
 M.PORT_SLOTS = 4
 M.PORT_CLOSED_ITEM = "tt-port-closed"
 M.PORT_HEADS_UP = 0.9 -- progress fraction for the "upgrade coming" message (2.1.4)

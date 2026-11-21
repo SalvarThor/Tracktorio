@@ -4,6 +4,7 @@
 local cities = require("scripts.cities")
 local ports = require("scripts.ports")
 local belt_ports = require("scripts.belt_ports")
+local signals = require("scripts.signals")
 local city_defs = require("shared.city_defs")
 local port_layout = require("shared.port_layout")
 
@@ -107,6 +108,8 @@ function M.upgrade(record)
     if record[key] and record[key].valid then record[key].destroy() end
   end
   belt_ports.detach(record)
+  local wires = signals.save_wires(record) -- 2.11: the player's wires follow the new points
+  signals.detach(record)
   old.destroy()
 
   local city = cities.place(target, surface, position, force)
@@ -114,6 +117,7 @@ function M.upgrade(record)
   -- service chest further out: the packs move to the new chest and the old one goes.
   local new_record = storage.tt_cities[city.unit_number]
   if record.service and new_record then new_record.service = record.service end
+  if new_record then signals.restore_wires(new_record, wires) end
   local old_service = record.service_port
   if old_service and old_service.valid and new_record and new_record.service_port ~= old_service then
     local to = new_record.service_port and new_record.service_port.valid and new_record.service_port.get_inventory(defines.inventory.chest)

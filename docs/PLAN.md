@@ -721,12 +721,12 @@ Decided with the user (2026-11-21):
   key off the locomotive type, not its name).
 
 Items:
-- [ ] 2.11.1 Spike: a hidden-in-the-wall constant combinator on a city can be selected
+- [x] 2.11.1 Spike: a hidden-in-the-wall constant combinator on a city can be selected
       and wired by the player, survives the city's protection, and its section can be
       rewritten by script each second. Note what 2.1 requires in DECISIONS.md.
-- [ ] 2.11.2 Signal point prototypes (stock, construction), markers on the wall, placed
+- [x] 2.11.2 Signal point prototypes (stock, construction), markers on the wall, placed
       with the city, moved on upgrade, removed with the city. Tooltips explain them.
-- [ ] 2.11.3 Signals: input and output stock, fluids, status, tier on the stock point;
+- [x] 2.11.3 Signals: input and output stock, fluids, status, tier on the stock point;
       missing construction materials on the construction point. Custom virtual signals
       with locale names. City window lists the signal points.
 - [ ] 2.11.4 Tests: a decider wired to a city's signal point sees its stock, status

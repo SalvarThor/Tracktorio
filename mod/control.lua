@@ -12,6 +12,7 @@ local map = require("scripts.map")
 local ports = require("scripts.ports")
 local belt_ports = require("scripts.belt_ports") -- 2.10.4: registers its placement hook
 local upgrade = require("scripts.upgrade")
+local signals = require("scripts.signals") -- 2.11: registers its placement hook
 local notify = require("scripts.notify")
 local tier_marks = require("scripts.tier_marks")
 local reliability = require("scripts.reliability")
@@ -78,6 +79,12 @@ city_remote.alerts_pending = function() return #(storage.tt_alerts or {}) end
 city_remote.check_inserter = function(entity, player_index) belt_ports.check_inserter(entity, player_index) end
 city_remote.inserters_refused = function() return storage.tt_inserters_refused or 0 end
 city_remote.network_warning = function(entity) return notify.network_warning(entity) end
+-- Tests: a city's signal points (2.11) and an immediate rewrite of their signals.
+city_remote.signal_points = function(entity)
+  local record = assert(storage.tt_cities[entity.unit_number])
+  return record.signal_points or {}
+end
+city_remote.signals_tick = function() signals.tick() end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.
 city_remote.migrate = function(from_schema)
@@ -208,6 +215,7 @@ script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   map.tick_tags()
   map.retry_blocked()
   notify.tick()
+  signals.tick()
 end)
 
 script.on_nth_tick(config.LIMP_INTERVAL, limp.tick)
