@@ -188,7 +188,7 @@ function M.make_city(def)
     graphics_set = graphics_set,
     working_sound = working_sound(src, def.art),
     fixed_recipe = name,
-    show_recipe_icon = true,
+    show_recipe_icon = false, -- playtest 2.10: the roof icon says it; alt mode drew more icons on top
     show_recipe_icon_on_map = true,
     crafting_categories = { name },
     crafting_speed = def.crafting_speed or 1,

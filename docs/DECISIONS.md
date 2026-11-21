@@ -4,6 +4,13 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.10.20 playtest round 2
+- Cities don't show the engine's recipe icon in alt mode (`show_recipe_icon = false`; the
+  map icon stays): it drew the product and the source building's icon over the roof icon.
+- Footprint outline a little stronger: 15% grey at 20% opacity (was 12%/12%).
+- The window's construction text points at the steel chest marker instead of "top-left
+  corner (west side)", which ports no longer follow.
+
 ## 2026-11-21: 2.10 playtest fixes (2.10.13-2.10.18)
 - Tier pips: radius 0.2 (was 0.34), 0.55 apart, centred on the top edge between the port
   markers. They never scaled with the building; they were just big next to the markers.

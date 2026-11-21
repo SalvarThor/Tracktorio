@@ -64,7 +64,7 @@ local function draw_footprint(city, def, size)
     local a, b = corners[i], corners[i % 4 + 1]
     rendering.draw_line({
       -- playtest 2.10: visible, not prominent
-      color = { r = 0.12, g = 0.12, b = 0.12, a = 0.12 }, width = 1, dash_length = 0.5, gap_length = 0.5,
+      color = { r = 0.15, g = 0.15, b = 0.15, a = 0.2 }, width = 1, dash_length = 0.5, gap_length = 0.5,
       from = { entity = city, offset = a }, to = { entity = city, offset = b },
       surface = city.surface, render_layer = "decals",
     })
