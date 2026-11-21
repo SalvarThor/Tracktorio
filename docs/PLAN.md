@@ -806,3 +806,37 @@ Items:
 - [x] 2.12.11 `/playtest` of 2.12.10: the window's max stays put; the speed settles calmly.
       Playtest 2026-11-21: both passed; clean log. Finding for later: the city window has
       become information dense and needs a clearer layout.
+
+### Phase 2.13: a clearer city window (DRAFT, waiting for the user's approval)
+
+Why (playtest 2.12, user): the city window grew a section per phase and is now dense:
+explanations sit between live numbers, flow columns are described in a header instead of
+laid out, facts repeat (power in the description and the tier line), and the status
+looks like any other line.
+
+Decided with the user (2026-11-21): one compact page (not tabs), in this order:
+1. Title; the city's description moves to the title's tooltip.
+2. Status first, coloured (running green, slowed "Running at N%" green, starved red,
+   output full orange, no or low power yellow). Its hint line only when something is
+   wrong, and short ("Belt coal into its port, top left").
+3. Flows as a real table: item, in/out, now per minute, max per minute, held in the city.
+   Fuel counts as an input row. "One cycle takes ... at speed 1" goes.
+4. Ports: one short line each (item icon, in/out arrow, where on the wall, a belt icon in
+   the colour it needs at full output, its rate in the tooltip). Construction and service
+   ports by their markers. Signals as one line ("Signals at the door"); what they send in
+   its tooltip.
+5. Servicing (depots): one line, "N packs, N serviced"; the rules in its tooltip.
+6. Tier: "Tier 1 of 3" and the next tier in one line ("next: x2, 1.68 MW"); each
+   material with its count and progress bar on one row; where to deliver in the tooltip.
+Same for the research complex, the rocket silo, power and water cities (their own rows
+where they differ: the power city's output in MW, the silo's parts).
+
+Items:
+- [ ] 2.13.1 Layout: status block and flows table (all city kinds).
+- [ ] 2.13.2 Ports, signals and servicing lines with tooltips.
+- [ ] 2.13.3 Tier block: one-line summary, inline progress bars, tooltip.
+- [ ] 2.13.4 Tests updated (they read captions by element name); a test per city kind that
+      the window opens and shows its status, flows, ports and tier.
+- [ ] 2.13.5 README and DECISIONS updated.
+- [ ] 2.13.6 `/playtest`: the window for a smelting city, the depot, a power city, the
+      research complex and the silo, running and starved.
