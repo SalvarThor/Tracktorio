@@ -691,3 +691,50 @@ south wall has the door in the middle on every building):
       during it: no alt-mode recipe icon over the roof icon, a slightly stronger outline,
       the window's construction text names the steel chest marker. Dump: the depot
       upgraded on a network with no power city and the message said so.
+
+### Phase 2.11: city signals and locomotive tiers (DRAFT, waiting for the user's approval)
+
+Proposed (2026-11-21), to confirm with the user:
+- Every city gets one signal point: a small combinator-like entity in the middle of its
+  south wall, at the door (no port spot uses it, and it stays put through upgrades the
+  way ports do). The player wires to it with red or green wire. It only sends signals.
+- It sends what the city holds: each input and output item and fluid (fluids in whole
+  units), a status signal (running, starved, output full, no power: one custom virtual
+  signal each, value 1) and its tier (signal T). Open: also send the materials still
+  missing for the next tier, so construction deliveries can be automated. They can't go
+  on the same signals as stock (iron plates in stock and iron plates needed would add
+  up), so they'd need a second signal point beside the first (a combinator sends the
+  same signals on both wires).
+- Updated every second (the city window's sampling rate); vanilla train limits,
+  interrupts and combinators do the rest. Script only fills the signal values.
+- Locomotive tiers: the vanilla locomotive is tier 1. Tier 2 and tier 3 are free like
+  every train entity, unlocked by research (tier 2: red + green; tier 3: red + green +
+  blue, after Advanced circuits). Each tier: more power, a higher top speed, burns fuel
+  better and wears out slower.
+  | Tier | Power | Top speed | Fuel effectivity | Wear per minute driving |
+  |---|---|---|---|---|
+  | 1 (vanilla) | 600 kW | 259 km/h | 100% | 7.5% |
+  | 2 | 900 kW | 290 km/h | 125% | 5% |
+  | 3 | 1.2 MW | 324 km/h | 150% | 3% |
+  Look: the vanilla locomotive with a tier badge on the icon and a tint, no new art.
+- Limp mode, breakdowns and depot servicing work the same on every tier (they already
+  key off the locomotive type, not its name).
+
+Items:
+- [ ] 2.11.1 Spike: a hidden-in-the-wall constant combinator on a city can be selected
+      and wired by the player, survives the city's protection, and its section can be
+      rewritten by script each second. Note what 2.1 requires in DECISIONS.md.
+- [ ] 2.11.2 Signal point prototype, marker on the wall (a combinator icon), placed with
+      the city, moved on upgrade, removed with the city. Tooltip explains it.
+- [ ] 2.11.3 Signals: input and output stock, fluids, status, tier. Custom virtual
+      signals with locale names. City window lists the signal point.
+- [ ] 2.11.4 Tests: a decider wired to a city's signal point sees its stock, status
+      changes (starve it, fill it), and the signals follow an upgrade; a train stop
+      limit set from a city's signal works end to end.
+- [ ] 2.11.5 Locomotive tiers 2 and 3: prototypes (copied from the vanilla locomotive),
+      free recipes, technologies, icons; wear per tier in config.
+- [ ] 2.11.6 Tests: stats per tier, research gating, wear rate per tier, limp and
+      breakdown on tier 2/3, a tier 3 train beats a tier 1 train over the same run.
+- [ ] 2.11.7 SPEC, README and DECISIONS updated.
+- [ ] 2.11.8 `/playtest`: a station whose train limit comes from a city's signals; tier
+      2 and 3 locomotives researched, built and driven.
