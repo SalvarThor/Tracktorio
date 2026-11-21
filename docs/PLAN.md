@@ -738,5 +738,10 @@ Items:
 - [x] 2.11.6 Tests: stats per tier, research gating, wear rate per tier, limp and
       breakdown on tier 2/3, a tier 3 train beats a tier 1 train over the same run.
 - [x] 2.11.7 SPEC, README and DECISIONS updated.
-- [ ] 2.11.8 `/playtest`: a station whose train limit comes from a city's signals; tier
+- [x] 2.11.8 `/playtest`: a station whose train limit comes from a city's signals; tier
+      2 and 3 locomotives researched, built and driven. Playtest 2026-11-21: all seven
+      passed (wiring by hand works on the locked combinators). Dump: 30 cities, all with
+      signal points; clean log. Findings for later: a city runs flat out, then idles, so
+      its power draw and status signals blink (see 2.12 discussion); the coal fuel flame
+      badge gets lost on a busy belt; the user wants a primer on using city signals.
       2 and 3 locomotives researched, built and driven.
