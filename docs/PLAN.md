@@ -841,3 +841,39 @@ Items:
 - [x] 2.13.6 `/playtest`: the window for a smelting city, the depot, a power city, the
       research complex and the silo, running and starved. Playtest 2026-11-21: "much
       better"; clean log.
+
+### Phase 2.14: the full run (DRAFT, waiting for the user's approval)
+
+Why: nobody has played from the start to the rocket. Upgrade costs, research counts,
+distances, breakdown rates and power budgets were each set by a test, never against a
+whole game. A real run, recorded, lets the tuning come from data instead of feel.
+
+Proposed (2026-11-21), to confirm with the user:
+- A milestone recorder, always on and invisible to the player (it costs next to nothing;
+  it stays in the released mod): storage.tt_timeline, a list of { tick, kind, detail }.
+  Kinds: first locomotive built, first train under way, each city's first output, each
+  city upgrade, each research finished, each locomotive tier first built, breakdowns and
+  services (counted per hour, not one entry each), the rocket launch.
+- A snapshot every 10 minutes of game time: per city the share of that time running,
+  slowed (average speed), starved and output full; trains and locomotives by tier;
+  average reliability; power drawn against power available per network; science packs
+  used.
+- The timeline goes into /tt-dump and is also written to script-output/tt-timeline.json
+  every 10 minutes and at the launch, so a crash or a forgotten dump loses little.
+  /tt-timeline prints a short summary in chat (elapsed time, milestones so far).
+- The run is played in the playtest instance (.factorio-play), saved and loaded there
+  across as many sessions as the user likes; the user's own Factorio saves are untouched.
+
+Items:
+- [ ] 2.14.1 Recorder: milestones (events and polls), storage, /tt-timeline, the file.
+- [ ] 2.14.2 Snapshots every 10 minutes.
+- [ ] 2.14.3 Tests: each milestone kind is recorded once, a snapshot has every city, the
+      file is written, a long game doesn't grow the timeline without bound (per-hour
+      counters, snapshots capped at one per 10 minutes).
+- [ ] 2.14.4 The full run: the user plays toward the rocket in sessions, with a dump
+      after each. No checklist: play as a player would.
+- [ ] 2.14.5 Analysis: a report on the run (time to each milestone, where it stalled,
+      cities idle or starved, power and reliability), with tuning proposals for the user
+      to accept or reject.
+- [ ] 2.14.6 The accepted tuning, with tests; SPEC, README and DECISIONS updated.
+- [ ] 2.14.7 `/playtest` of the tuning (a shorter run, or loading the run's save).
