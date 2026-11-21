@@ -894,7 +894,7 @@ to change. The recorder and the run come back on the new design.
 - [ ] 2.14.6 The accepted tuning, with tests; SPEC, README and DECISIONS updated.
 - [ ] 2.14.7 `/playtest` of the tuning (a shorter run, or loading the run's save).
 
-### Phase 2.15: the player builds the cities, on plots (proposed 2026-11-21)
+### Phase 2.15: the player builds the cities, on plots (approved by the user 2026-11-21)
 
 Why (user, after playing 2.14.0): with one city per product, the best part of Factorio
 trains is gone: several stops with the same name, where a train goes to the nearest one
@@ -915,25 +915,19 @@ Decided with the user (2026-11-21):
 - Plots come in small sites far apart, so belting from one site to the next is clearly
   worse than rail.
 
-Open, for the user (my recommendation first):
-1. City size, one for all: **12x12** (room for the ports; looks right next to a train), or
-   8x8 (more plots fit, but small next to a train).
-2. What today's tiers become. Some tiers change what a city is, not only its speed
-   (tier 1 smelting burns coal, tiers 2-3 run on electricity). **Those become their own
-   city kinds, researched later** ("Electric iron smelting city"), on the same plot size,
-   and the upgrade planner can swap one for the other in place (vanilla next_upgrade). Tiers
-   that only add speed go.
-3. Output per city: **half of today's tier 1** (iron smelting 7.5 plates/s, half a yellow
-   belt; power and inputs scale with it), tuned later in the full run. Or a third.
-4. Plots: **sites of 1-3 plots, at least 300 tiles between sites, and about three plots
-   for every city today's map has (~75)**, with a starter site of 4 plots near spawn
-   (depot, power, water, smelting). Any city can go on any plot.
-5. Removing a city: **allowed, and its contents are lost** (contents can't go into the
-   player's inventory: cities are hands-off). Or cities can't be removed once built.
-6. The hand-made MVP scenario: **convert it to plots** (the tests keep their fixed map),
-   or retire it from the menu and keep it only for tests.
+Decided with the user, the details (2026-11-21):
+1. Every city is 12x12 (the rocket silo keeps the vanilla 9x9).
+2. Tiers that change what a city is (coal-fired smelting -> electric) become their own city
+   kinds, researched later, on the same plot size; the upgrade planner swaps one for the
+   other in place (vanilla next_upgrade). Tiers that only add speed go.
+3. Output per city: half of today's tier 1, for a start (iron smelting 7.5 plates/s);
+   power and inputs scale with it. Tuned in the full run.
+4. Plots: sites of 1-3 plots, at least 300 tiles between sites, about 75 plots, a starter
+   site of 4 near spawn. Any city on any plot.
+5. A city can be removed; everything inside it is lost.
+6. The hand-made MVP scenario leaves the menu and stays only as the tests' fixed map.
 
-Items (the breakdown, once the open questions are answered):
+Items:
 - [ ] 2.15.1 SPEC, README and DECISIONS rewritten for player-built cities (Thesis, Rules,
       Black boxes, the post-MVP list).
 - [ ] 2.15.2 The plot: a tile with a painted border (visible on the map), not minable,
@@ -953,7 +947,7 @@ Items (the breakdown, once the open questions are answered):
 - [ ] 2.15.6 Map generation: the layout plans plot sites instead of cities (decision 4).
       Land finding (sites.lua) is reused; each site gets a map tag.
 - [ ] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.
-- [ ] 2.15.8 The MVP scenario (decision 6).
+- [ ] 2.15.8 The MVP scenario off the menu (decision 6); the tests keep loading it.
 - [ ] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,
       research unlocks, plot counts and spacing on generated maps, several cities of one
       kind running at once.
