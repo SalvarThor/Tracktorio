@@ -746,14 +746,14 @@ Items:
       badge gets lost on a busy belt; the user wants a primer on using city signals.
       2 and 3 locomotives researched, built and driven.
 
-### Phase 2.12: steady production and the coal fuel icon (DRAFT, waiting for the user's approval)
+### Phase 2.12: steady production and the coal fuel icon (approved by the user 2026-11-21)
 
 Why (playtest 2.11, user): a city stands in for many machines but runs as one. Given less
 than its full input it crafts flat out until the input runs dry, then idles, so its power
 draw jumps between full and nothing and its status signal blinks. A steady input should
 give a steady output.
 
-Proposed (2026-11-21), to confirm with the user:
+Decided with the user (2026-11-21): 5% steps with the 20% floor, and the speed signal.
 - Each city gets a hidden beacon holding hidden "throttle" modules. A module lowers speed
   and power draw together (each step -5% speed and -5% consumption), so a city at 60%
   makes 60% of its output on 60% of its power. The engine floors both at 20%: below
