@@ -966,7 +966,9 @@ Items:
 - [x] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.
       Done: city_defs.RATE = 0.5 on everything but the silo; the throttle's stock targets
       got a floor in crafts so slow cities don't run short.
-- [ ] 2.15.8 The MVP scenario off the menu (decision 6); the tests keep loading it.
+- [x] 2.15.8 The MVP scenario off the menu (decision 6); the tests keep loading it.
+      Already so since 2.8.10 (the hand-made map is built only through the tt-map remote);
+      the scenario's description and welcome now speak of plots and building cities.
 - [ ] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,
       research unlocks, plot counts and spacing on generated maps, several cities of one
       kind running at once.
