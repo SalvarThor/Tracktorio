@@ -4,6 +4,18 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.10 a site's map tag names the city built on it
+- User, playtest 2.15.10: without names the map is hard to read. Building a city on a plot
+  sets its site's tag to the city's name and its item icon; removing it sets "City plot"
+  back. The starter pair reads "Power city + Water city" (or "+ free plot"). The new city
+  stands on the plot when the tag is worked out, so the upgrade planner's swap retags too.
+- Chart tag text is a plain string, not a LocalisedString, so the names are English, in
+  `map.TAG_NAMES` (a test checks every buildable city has one).
+- A tag whose text the player changed is left alone: only a tag still showing the text the
+  mod last set is updated.
+- New hook `cities.on_removed(record)`, run from on_object_destroyed after the parts go
+  (not for an in-place replace, which the new city's placed hooks cover).
+
 ## 2026-11-21: 2.15.10 one plot per site; a starter pair
 - User, playtest 2.15.10: sites of 1-3 plots go against the mod, since 3-4 cities side by
   side trade by 10 tiles of belt. Now every site is a single plot, at least 300 tiles from

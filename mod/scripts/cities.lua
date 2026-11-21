@@ -41,6 +41,15 @@ function M.on_replace(fn)
   replace_hooks[#replace_hooks + 1] = fn
 end
 
+-- functions(record) run after a city is gone (mined, destroyed), its parts removed. Not
+-- for a city replaced in place: the new one's placed hooks cover that.
+local removed_hooks = {}
+
+---@param fn fun(record: table)
+function M.on_removed(fn)
+  removed_hooks[#removed_hooks + 1] = fn
+end
+
 ---@param name string?
 function M.is_city_name(name)
   return name ~= nil and string.sub(name, 1, #M.PREFIX) == M.PREFIX
@@ -179,8 +188,11 @@ end
 local function on_object_destroyed(e)
   if e.type == defines.target_type.entity and e.useful_id then
     local record = storage.tt_cities[e.useful_id]
-    if record then remove_parts(record) end
     storage.tt_cities[e.useful_id] = nil
+    if record then
+      remove_parts(record)
+      for _, fn in ipairs(removed_hooks) do fn(record) end
+    end
   end
 end
 

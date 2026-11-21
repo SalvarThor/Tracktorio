@@ -255,4 +255,18 @@ return {
       end)
     end,
   },
+  {
+    -- playtest 2.15.10: a site's map tag names the city built on it (tag text is not
+    -- localised, so the names live in scripts/map.lua)
+    name = "plots: every buildable city kind has a map tag name",
+    fn = function()
+      local names = remote.call("tt-map", "tag_names")
+      for name, recipe in pairs(prototypes.recipe) do
+        if string.sub(name, 1, #"tt-build-") == "tt-build-" then
+          local city = recipe.products[1].name
+          assert_.truthy(names[city], city .. " has no tag name")
+        end
+      end
+    end,
+  },
 }

@@ -326,7 +326,7 @@ return {
   },
   {
     -- 2.8.5 (changed by the user in playtest 2.8.7: on the map from the start); 2.15.6 sites
-    name = "mapgen: every plot site has its map tag from the start; the land between stays dark",
+    name = "mapgen: every plot site has its map tag from the start, naming the city built on it; the land between stays dark",
     fn = function(ctx)
       local mgs = game.surfaces["nauvis"].map_gen_settings
       mgs.seed = 161803
@@ -350,7 +350,35 @@ return {
         force.chart(s, { { c.x - 8, c.y - 8 }, { c.x + 8, c.y + 8 } })
         ctx:wait(60, function()
           assert_.equals(#force.find_chart_tags(s), #result.placed, "tags after charting again")
-          game.delete_surface(s)
+          -- playtest 2.15.10: a site's tag names the city built on it, and goes back when
+          -- it is removed; a tag the player edited is left alone
+          local function tag_of(site) return force.find_chart_tags(s, { { site.x - 1, site.y - 1 }, { site.x + 2, site.y + 2 } })[1] end
+          local function build(name, site, o)
+            return assert(s.create_entity({ name = name, position = { site.x + o[1], site.y + o[2] }, force = "player", raise_built = true }))
+          end
+          local single, starter
+          for _, p in ipairs(result.placed) do
+            if p.starter then starter = p elseif not single then single = p end
+          end
+          local steel = build("tt-city-steel", single, { 0, 0 })
+          assert_.equals(tag_of(single).text, "Steel city", "single plot tag")
+          assert_.equals(tag_of(single).icon.name, "tt-city-steel", "single plot icon")
+          local offs = remote.call("tt-map", "offsets", 2)
+          build("tt-city-power", starter, offs[1])
+          assert_.equals(tag_of(starter).text, "Power city + free plot", "starter, one built")
+          build("tt-city-water", starter, offs[2])
+          assert_.equals(tag_of(starter).text, "Power city + Water city", "starter, both built")
+          -- the player names another site's tag; building there leaves their name
+          local other = result.placed[#result.placed]
+          tag_of(other).text = "My steel"
+          build("tt-city-steel", other, { 0, 0 })
+          assert_.equals(tag_of(other).text, "My steel", "edited tag kept")
+          steel.destroy()
+          ctx:wait(2, function()
+            assert_.equals(tag_of(single).text, single.label, "tag after the city is removed")
+            assert_.equals(tag_of(single).icon.name, "refined-hazard-concrete", "icon after the city is removed")
+            game.delete_surface(s)
+          end)
         end)
       end)
     end,

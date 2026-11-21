@@ -414,8 +414,8 @@ function M.on_chunk_charted(e)
   for _, c in ipairs(placed) do
     local x, y = c.x + 0.5, c.y + 0.5
     if not (c.tagged and c.tagged[e.force.index]) and x >= lt.x and x < rb.x and y >= lt.y and y < rb.y then
-      local text = c.label
-      local tag = e.force.add_chart_tag(surface, { position = { x = x, y = y }, icon = { type = "item", name = c.tag_icon }, text = text })
+      local tag = e.force.add_chart_tag(surface, { position = { x = x, y = y },
+        icon = { type = "item", name = c.auto_icon or c.tag_icon }, text = c.auto_text or c.label })
       if tag then
         c.tagged = c.tagged or {}
         c.tagged[e.force.index] = true
@@ -423,6 +423,103 @@ function M.on_chunk_charted(e)
     end
   end
 end
+
+-- Map tag names of the cities (playtest 2.15.10: a site's tag names the city built on it).
+-- Chart tag text is a plain string, not localised, so these are the English names from
+-- locale/en (a test checks every buildable city has one).
+M.TAG_NAMES = {
+  ["tt-city-iron-smelting"] = "Iron smelting city",
+  ["tt-city-copper-smelting"] = "Copper smelting city",
+  ["tt-city-electric-iron-smelting"] = "Electric iron smelting city",
+  ["tt-city-electric-copper-smelting"] = "Electric copper smelting city",
+  ["tt-city-depot"] = "Coal fuel depot",
+  ["tt-city-power"] = "Power city",
+  ["tt-city-water"] = "Water city",
+  ["tt-city-nuclear-power"] = "Nuclear power city",
+  ["tt-city-uranium"] = "Uranium city",
+  ["tt-city-circuits"] = "Circuit city",
+  ["tt-city-red-science"] = "Red science city",
+  ["tt-city-green-science"] = "Green science city",
+  ["tt-city-blue-science"] = "Blue science city",
+  ["tt-city-research"] = "Research complex",
+  ["tt-city-repair-packs"] = "Repair pack city",
+  ["tt-city-refinery"] = "Refinery city",
+  ["tt-city-solid-fuel-depot"] = "Solid fuel depot",
+  ["tt-city-rocket-fuel-depot"] = "Rocket fuel depot",
+  ["tt-city-steel"] = "Steel city",
+  ["tt-city-plastic"] = "Plastic city",
+  ["tt-city-sulfur"] = "Sulfur city",
+  ["tt-city-sulfuric-acid"] = "Sulfuric acid city",
+  ["tt-city-advanced-circuits"] = "Advanced circuit city",
+  ["tt-city-processing-units"] = "Processing unit city",
+  ["tt-city-low-density-structure"] = "Low density structure city",
+  ["tt-city-rocket-silo"] = "Rocket silo",
+}
+
+--- The laid-out site whose plots hold `position`, if any.
+---@param surface LuaSurface
+---@param position MapPosition
+local function site_at(surface, position)
+  for _, c in ipairs(storage.tt_layout and storage.tt_layout[surface.name] or {}) do
+    for _, o in ipairs(layout.offsets(c.plots)) do
+      local a = plots.area({ c.x + o[1], c.y + o[2] })
+      if position.x >= a.left_top.x and position.x < a.right_bottom.x
+          and position.y >= a.left_top.y and position.y < a.right_bottom.y then
+        return c
+      end
+    end
+  end
+end
+
+--- Text and icon of a site's tag for the cities standing on its plots now: the plot label
+--- while empty; a single city's name and item; on the starter pair, what stands on each.
+---@param surface LuaSurface
+---@param c table site
+local function tag_for(surface, c)
+  local names = {}
+  for _, o in ipairs(layout.offsets(c.plots)) do
+    local found
+    for _, e in pairs(surface.find_entities_filtered({ area = plots.area({ c.x + o[1], c.y + o[2] }) })) do
+      if cities.is_city(e) then found = e.name end
+    end
+    names[#names + 1] = found or false
+  end
+  local built = {}
+  for _, n in ipairs(names) do if n then built[#built + 1] = n end end
+  if #built == 0 then return c.label, c.tag_icon end
+  local icon = #built == 1 and built[1] or c.tag_icon
+  if #names == 1 then return M.TAG_NAMES[built[1]] or "City", icon end
+  local parts = {}
+  for _, n in ipairs(names) do parts[#parts + 1] = n and (M.TAG_NAMES[n] or "City") or "free plot" end
+  return table.concat(parts, " + "), icon
+end
+
+--- Bring the tag of the site under `position` up to date with what stands on it. A tag the
+--- player has edited (its text is no longer the last one set here) is left alone.
+---@param surface LuaSurface
+---@param position MapPosition
+function M.retag_at(surface, position)
+  local c = site_at(surface, position)
+  if not c then return end
+  local was = c.auto_text or c.label
+  local text, icon = tag_for(surface, c)
+  c.auto_text, c.auto_icon = text, icon
+  local x, y = c.x + 0.5, c.y + 0.5
+  for _, force in pairs(game.forces) do
+    for _, tag in pairs(force.find_chart_tags(surface, { { x - 1, y - 1 }, { x + 1, y + 1 } })) do
+      if tag.text == was then
+        tag.text = text
+        tag.icon = { type = "item", name = icon }
+      end
+    end
+  end
+end
+
+cities.on_any_placed(function(entity) M.retag_at(entity.surface, entity.position) end)
+cities.on_removed(function(record)
+  local surface = game.get_surface(record.surface_index)
+  if surface then M.retag_at(surface, record.position) end
+end)
 
 --- Move a player to the map and give the starting items (once).
 ---@param player LuaPlayer
@@ -450,6 +547,7 @@ function M.remote_interface()
     plan = function(seed, spacing) return layout.plan(seed, spacing or layout.spacing()) end,
     spacing = function() return layout.spacing() end,
     offsets = function(n) return layout.offsets(n) end,
+    tag_names = function() return M.TAG_NAMES end,
     place_procedural = function(surface_name, seed, spacing)
       local placed, missing = M.place_procedural(assert(game.get_surface(surface_name)), seed, spacing or layout.spacing())
       return { placed = placed, missing = missing }
