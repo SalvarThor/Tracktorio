@@ -42,10 +42,12 @@ Shared behaviour:
 - Placement is fixed by the world, never by the player, so every link in the chain is a real route.
 - Black boxes accept and give items only through belt ports in their walls, and fluids only through pipes: a belt runs straight into a port, as in Factorissimo. Inserters can't reach a city, and the player cannot hand-feed a city or take its output by hand. Construction materials and a depot's repair packs come in through ports too. Each port is clearly marked with its item and direction. (User decision 2026-11-20, phase 2.10; before that, inserters and pumps.)
 - Cities grow with tier: 8x8, 12x12 and 16x16 buildings. A port keeps its line through upgrades, so a belt built against a smaller city still meets it. One port per item; tier 3 smelting (60/s) gets two. (User decisions 2026-11-20.)
+- Every city has two signal points in its door for the circuit network: one sends what it holds, its status and tier; the other what its next tier still needs. They only send; train limits, interrupts and combinators are the player's. (User decision 2026-11-21, phase 2.11.)
 
 ## Reliability and depots
 
 - Each locomotive has a reliability % that decays with use. Newer tiers decay more slowly.
+- Locomotive tiers: the vanilla locomotive, Mk2 and Mk3, free and unlocked by research. Each tier has more power, a higher top speed and better fuel use, and wears 7.5% / 5% / 3% per minute of driving. (User decision 2026-11-21, phase 2.11.)
 - Low reliability means a higher chance of random breakdowns.
 - A broken-down train goes into limp mode: it keeps running at reduced speed and slows everything behind it. It stays that way until cured. (Limp mode itself ships in MVP for fuel-empty trains; see MVP.)
 - The only cures are a depot visit (service bay) or a manual repair by the engineer on site using repair packs.
@@ -105,3 +107,4 @@ Default order, open to change:
    (User request, playtest 1.10.)
 10. Factorissimo buildings and belt ports: the art, cities growing with tier, belt ports
     instead of inserters. (User decisions 2026-11-20.)
+11. City signals and locomotive tiers. (User decisions 2026-11-21.)

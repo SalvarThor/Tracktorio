@@ -69,6 +69,10 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
   ports still reach them. Pips on the city show its tier.
 - **Windows:** click a city or a port to see its recipe and rates, what it holds and
   what it's missing, its ports and the belt each needs, and what the next tier costs.
+- **Signals:** wire the two combinators in a city's door. The left one sends what the
+  city holds, whether it is running, starved, output full or without power, and its
+  tier (T); the right one what its next tier still needs. Use them for train limits,
+  interrupts or construction trains.
 
 **Trains**
 - **Limp mode:** a locomotive that runs out of fuel crawls instead of stopping dead.
@@ -78,6 +82,9 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 - **Repair:** repair a locomotive by hand with repair packs, or stop it at any train
   stop within 30 tiles of a depot. Depots repair it using packs delivered to their
   **service port**.
+- **Locomotive Mk2 and Mk3:** researched with green and then blue science. More power,
+  a higher top speed and better fuel use, and they wear out slower (5% and 3% per minute
+  of driving, against 7.5%).
 - **Better fuels:** solid fuel and rocket fuel give trains more acceleration and top speed
   (vanilla values).
 

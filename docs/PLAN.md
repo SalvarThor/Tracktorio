@@ -737,6 +737,6 @@ Items:
       free recipes, technologies, icons; wear per tier in config.
 - [x] 2.11.6 Tests: stats per tier, research gating, wear rate per tier, limp and
       breakdown on tier 2/3, a tier 3 train beats a tier 1 train over the same run.
-- [ ] 2.11.7 SPEC, README and DECISIONS updated.
+- [x] 2.11.7 SPEC, README and DECISIONS updated.
 - [ ] 2.11.8 `/playtest`: a station whose train limit comes from a city's signals; tier
       2 and 3 locomotives researched, built and driven.
