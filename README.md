@@ -69,9 +69,12 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
   ports still reach them. Pips on the city show its tier.
 - **Windows:** click a city or a port to see its recipe and rates, what it holds and
   what it's missing, its ports and the belt each needs, and what the next tier costs.
+- **Steady production:** a city fed below its full rate (or whose output is taken away
+  slower) runs steadily at that rate, down to 20%, using less power to match. Its window
+  says "Running at 60%".
 - **Signals:** wire the two combinators in a city's door. The left one sends what the
-  city holds, whether it is running, starved, output full or without power, and its
-  tier (T); the right one what its next tier still needs. Use them for train limits,
+  city holds, whether it is running, starved, output full or without power, its speed
+  in percent and its tier (T); the right one what its next tier still needs. Use them for train limits,
   interrupts or construction trains.
 
 **Trains**

@@ -6,11 +6,12 @@ data:extend({
   {
     type = "item",
     name = "tt-coal-fuel",
-    -- coal with a flame badge (playtest 2.10: it read as plain coal on the depot's ports)
-    icons = {
-      { icon = "__base__/graphics/icons/coal.png", tint = { r = 1, g = 0.62, b = 0.3, a = 1 } },
-      { icon = "__base__/graphics/icons/signal/signal-fire.png", scale = 0.3, shift = { 9, -9 }, floating = true },
-    },
+    -- Briquettes (2.12.6, user's pick): Space Age's carbon art in a warm tint, a different
+    -- shape from coal so the two tell apart on a busy belt. Players never see carbon itself
+    -- (planets are off). Before: coal with a small flame badge, lost at belt size.
+    icons = { { icon = "__space-age__/graphics/icons/carbon.png", tint = { r = 1, g = 0.72, b = 0.5, a = 1 } } },
+    pictures = { { size = 64, filename = "__space-age__/graphics/icons/carbon.png", scale = 0.5, mipmap_count = 4,
+      tint = { r = 1, g = 0.72, b = 0.5, a = 1 } } },
     subgroup = "raw-resource",
     order = "z[tt-coal-fuel]",
     stack_size = 50,

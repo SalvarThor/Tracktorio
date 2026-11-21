@@ -4,6 +4,12 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.12.6 coal fuel icon
+- Coal fuel is drawn as briquettes: Space Age's carbon icon (also as its belt picture) in a
+  warm tint. User's pick from mock-ups of briquettes, glowing coal and coal with a big
+  flame. A different shape reads apart from coal at belt size; a small badge didn't.
+  Carbon itself never appears in play (planets are off).
+
 ## 2026-11-21: 2.12.2-2.12.5 throttle controller
 - Every crafting city with ingredients and the research complex gets a throttle beacon at
   its centre; power cities (is_power: power and nuclear), water cities and the silo don't.

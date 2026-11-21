@@ -30,6 +30,7 @@ All black boxes are the same entity concept with different recipe profiles.
 Shared behaviour:
 
 - Conversion runs at the rate of the slowest input, capped by tier.
+- A city fed (or drained) below its full rate runs steadily at that rate rather than in bursts: its speed and power draw drop together, down to 20%. (User decision 2026-11-21, phase 2.12.)
 - Decided: a city draws electricity from the player's pole network when its vanilla
   equivalent uses electric buildings. It draws what those buildings would need for the same
   output, runs slower on low power and stops without it. Cities whose equivalent burns fuel
@@ -108,3 +109,4 @@ Default order, open to change:
 10. Factorissimo buildings and belt ports: the art, cities growing with tier, belt ports
     instead of inserters. (User decisions 2026-11-20.)
 11. City signals and locomotive tiers. (User decisions 2026-11-21.)
+12. Steady production and the coal fuel icon. (User decisions 2026-11-21.)

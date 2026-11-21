@@ -789,7 +789,7 @@ Items:
       idle gaps over a minute (power draw stays within a narrow band); full input gives
       full speed; cutting the input still starves it; a slow output belt gives a steady,
       slower city; a drill at the wall is unaffected; upgrades keep it working.
-- [ ] 2.12.6 Coal fuel icon: mock-ups for the user, then the chosen one in game.
-- [ ] 2.12.7 SPEC, README and DECISIONS updated.
+- [x] 2.12.6 Coal fuel icon: mock-ups for the user, then the chosen one in game.
+- [x] 2.12.7 SPEC, README and DECISIONS updated.
 - [ ] 2.12.8 `/playtest`: power graph and signals of a city fed below its full rate;
       the new coal fuel icon on a busy belt.
