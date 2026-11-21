@@ -28,11 +28,11 @@ return {
     fn = converts("tt-city-depot", 280, { { name = "coal", count = 50 } }, "tt-coal-fuel", true),
   },
   {
-    name = "mvp cities: depot needs electricity (840 kW at full output)",
+    name = "mvp cities: depot needs electricity (420 kW at full output: half of 840, 2.15.7)",
     fn = function(ctx)
       local p = prototypes.entity["tt-city-depot"]
       local watts = p.get_max_energy_usage() * 60
-      assert_.truthy(math.abs(watts - 840000) < 1000, "max usage " .. watts .. " W")
+      assert_.truthy(math.abs(watts - 420000) < 1000, "max usage " .. watts .. " W")
       local city = h.city_rig("tt-city-depot", 3000, { { name = "coal", count = 50 } }, false)
       ctx:wait(60 * 10, function()
         assert_.equals(city.products_finished, 0, "crafted without power")

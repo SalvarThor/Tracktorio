@@ -16,7 +16,7 @@ end
 return {
   {
     -- 2.9.1
-    name = "water: 600 water/s, no ingredients, no power",
+    name = "water: 300 water/s (half of 600, 2.15.7), no ingredients, no power",
     fn = function()
       local name = WATER
       local p = assert(prototypes.entity[name], name)
@@ -24,12 +24,12 @@ return {
       assert_.equals(#r.ingredients, 0, name .. " ingredients")
       local per_s = p.get_crafting_speed() / r.energy
       assert_.equals(r.products[1].name, "water", name .. " product")
-      assert_.equals(r.products[1].amount * per_s, 600, name .. " water/s")
+      assert_.equals(r.products[1].amount * per_s, 300, name .. " water/s")
       assert_.falsy(p.electric_energy_source_prototype, name .. " draws power")
     end,
   },
   {
-    name = "water: with nothing but a pipe out of it, a water city makes 600 water/s",
+    name = "water: with nothing but a pipe out of it, a water city makes 300 water/s",
     fn = function(ctx)
       local city = place(X)
       h.pipe_at(city, "water", "output", false)
@@ -37,7 +37,7 @@ return {
         local start = city.products_finished
         ctx:wait(600, function()
           local crafts = city.products_finished - start
-          assert_.truthy(crafts >= 9 and crafts <= 11, "crafts in 10 s: " .. crafts)
+          assert_.truthy(crafts >= 4 and crafts <= 6, "crafts in 10 s: " .. crafts)
           assert_.equals(info(city).status, "running")
         end)
       end)

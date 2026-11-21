@@ -17,6 +17,8 @@ local function inputs_per_s(name)
   return out
 end
 
+-- Full rates of the vanilla equivalent; since 2.15.7 a city runs at defs.RATE of them.
+local R = defs.RATE
 local CASES = {
   { city = "tt-city-circuits", product = "electronic-circuit", per_min = 300, watts = 1.25e6,
     inputs = { ["iron-plate"] = 5, ["copper-plate"] = 7.5 } },
@@ -39,12 +41,12 @@ local tests = {
       for _, c in ipairs(CASES) do
         local p = prototypes.entity[c.city]
         assert_.equals(p.fixed_recipe.products[1].name, c.product, c.city)
-        assert_.truthy(math.abs(per_min(c.city) - c.per_min) < 0.01, c.city .. " makes " .. per_min(c.city))
+        assert_.truthy(math.abs(per_min(c.city) - c.per_min * R) < 0.01, c.city .. " makes " .. per_min(c.city))
         local w = p.get_max_energy_usage() * 60
-        assert_.truthy(math.abs(w - c.watts) < 1000, c.city .. " draws " .. w)
+        assert_.truthy(math.abs(w - c.watts * R) < 1000, c.city .. " draws " .. w)
         local got = inputs_per_s(c.city)
         for item, rate in pairs(c.inputs) do
-          assert_.truthy(math.abs((got[item] or 0) - rate) < 0.001, c.city .. " " .. item .. " " .. tostring(got[item]))
+          assert_.truthy(math.abs((got[item] or 0) - rate * R) < 0.001, c.city .. " " .. item .. " " .. tostring(got[item]))
         end
         for item in pairs(got) do assert_.truthy(c.inputs[item], c.city .. " has extra input " .. item) end
       end

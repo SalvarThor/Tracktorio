@@ -26,14 +26,14 @@ end
 
 return {
   {
-    name = "research: the complex is a lab taking red, green and blue, 20 labs, 1.2 MW",
+    name = "research: the complex is a lab taking red, green and blue, 10 labs, 0.6 MW (half of 20, 2.15.7)",
     fn = function()
       local name = "tt-city-research"
       local p = assert(prototypes.entity[name], "missing " .. name)
       assert_.equals(p.type, "lab")
-      assert_.equals(p.get_researching_speed(), 20)
+      assert_.equals(p.get_researching_speed(), 10)
       local w = p.get_max_energy_usage() * 60
-      assert_.truthy(math.abs(w - 1.2e6) < 1000, name .. " draws " .. w)
+      assert_.truthy(math.abs(w - 0.6e6) < 1000, name .. " draws " .. w)
       local inputs = {}
       for _, i in ipairs(p.lab_inputs) do inputs[i] = true end
       assert_.truthy(inputs[RED] and inputs[GREEN] and inputs["chemical-science-pack"] and #p.lab_inputs == 3, name .. " inputs")

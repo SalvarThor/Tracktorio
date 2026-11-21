@@ -2,6 +2,9 @@
 -- run with infinity pipes at their fluid ports (supply in, drain out) and items inserted.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
+-- 2.15.7: cities run at RATE of the full rates worked out from vanilla
+local R = require("__tracktorio__/shared/city_defs").RATE
+local function near(a, b) return math.abs(a - b) < 1e-6 end
 
 local X = 9400
 
@@ -53,11 +56,11 @@ local tests = {
       for _, c in ipairs(CASES) do
         local got = rates(c.city)
         for name, want in pairs(c.rates) do
-          assert_.truthy(got[name] and math.abs(got[name] - want) < 1e-6, c.city .. " " .. name .. ": " .. tostring(got[name]))
+          assert_.truthy(got[name] and math.abs(got[name] - want * R) < 1e-6, c.city .. " " .. name .. ": " .. tostring(got[name]))
         end
         for name in pairs(got) do assert_.truthy(c.rates[name], c.city .. " has extra " .. name) end
         local w = prototypes.entity[c.city].get_max_energy_usage() * 60
-        assert_.truthy(math.abs(w - c.watts) < 1000, c.city .. " draws " .. w)
+        assert_.truthy(math.abs(w - c.watts * R) < 1000, c.city .. " draws " .. w)
       end
     end,
   },

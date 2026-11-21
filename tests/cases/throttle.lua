@@ -200,20 +200,22 @@ return {
     end,
   },
   {
-    name = "throttle: an electric smelting city fed one lane of a yellow belt (half its 15/s) runs steadily at about 50%, unaided",
+    name = "throttle: an electric smelting city fed 3.75 ore/s (half its 7.5/s) runs steadily at about 50%, unaided",
     fn = function(ctx)
       local x = X + 3300
       h.clear_area({ { x - 16, -16 }, { x + 18, 16 } })
       local city = h.place_city("tt-city-electric-iron-smelting", { x + 0.5, 0.5 })
       h.test_power({ x + 14, 0 }, 20e6)
-      h.lane_to_port(city, "iron-ore")
+      h.slow_feed_to_port(city, "iron-ore")
       h.belt_to_port(city, "iron-plate", "output", "fast-transport-belt", 3)
-      -- the shown speed over the last 15 s, every 6 ticks (playtest 2.12: it jumped about)
+      -- the shown speed over the last 15 s, every 6 ticks (playtest 2.12: it jumped about).
+      -- 2.15.7: a craft takes 2.7 s at 50% here, so it settles slower than a fast city: it
+      -- swings 40-60% for about 50 s after an empty start, then holds 50%.
       local seen, changes, last = {}, 0, nil
       local ticks = 0
-      drive(ctx, city, 45, 15, function(c)
+      drive(ctx, city, 90, 15, function(c)
         ticks = ticks + 6
-        if ticks > 30 * 60 then
+        if ticks > 75 * 60 then
           local pct = assert(remote.call("tt-city", "throttle", c)).percent
           seen[#seen + 1] = pct
           if last and pct ~= last then changes = changes + 1 end
@@ -222,8 +224,7 @@ return {
       end, function(samples)
         local t = assert(remote.call("tt-city", "throttle", city))
         assert_.truthy(t.percent >= 40 and t.percent <= 60, "speed " .. t.percent .. "%")
-        -- one side-loaded lane arrives in clumps: a few short samples (under 3%) while it settles
-        assert_.truthy(samples.other <= 4, "not working all the time: " .. serpent.line(samples.statuses))
+        assert_.truthy(samples.other <= 2, "not working all the time: " .. serpent.line(samples.statuses))
         local lo, hi = math.huge, -math.huge
         for _, v in ipairs(seen) do lo, hi = math.min(lo, v), math.max(hi, v) end
         assert_.truthy(changes <= 3 and hi - lo <= 10,

@@ -86,7 +86,8 @@ city_remote.signals_tick = function() signals.tick() end
 city_remote.throttle = function(entity)
   local record = assert(storage.tt_cities[entity.unit_number])
   local t = record.throttle
-  return t and { steps = t.steps, fraction = t.fraction, percent = throttle.percent(record), beacon = t.beacon } or nil
+  return t and { steps = t.steps, fraction = t.fraction, percent = throttle.percent(record), beacon = t.beacon,
+    fed = t.fed, want = t.want, stock_s = t.stock_s, target_s = t.target_s } or nil
 end
 city_remote.throttle_tick = function() throttle.tick() end
 -- Tests: give a player the start kit again (personal construction robots, 2026-11-21).

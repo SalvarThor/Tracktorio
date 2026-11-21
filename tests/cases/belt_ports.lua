@@ -69,7 +69,7 @@ return {
         h.test_power({ h.edges(city).right + 1.5, 0 }, 20e6)
         rigs[1] = { city = city, out = out }
       end
-      ctx:wait(300, function()
+      ctx:wait(600, function() -- a craft is 5 s at half speed (2.15.7)
         for _, r in ipairs(rigs) do
           for _, fluid in ipairs({ "crude-oil", "water" }) do
             assert_.truthy(r.city.get_fluid_count(fluid) > 0, r.city.name .. ": no " .. fluid .. " came in")
@@ -110,7 +110,7 @@ return {
     end,
   },
   {
-    name = "belt ports: one yellow belt per item runs a smelting city at its full 15/s",
+    name = "belt ports: one yellow belt per item runs a smelting city at its full 7.5/s",
     fn = function(ctx)
       local x = X + 700
       h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
@@ -122,7 +122,7 @@ return {
         local start = city.products_finished
         ctx:wait(600, function()
           local plates = (city.products_finished - start) * 10
-          assert_.truthy(plates >= 140, "plates in 10 s: " .. plates .. " (want 150)")
+          assert_.truthy(plates >= 70, "plates in 10 s: " .. plates .. " (want 75)")
         end)
       end)
     end,
@@ -227,9 +227,9 @@ return {
       end
       local t1 = by(h.place_city("tt-city-iron-smelting", { x + 0.5, 0.5 }))
       assert_.equals(t1["item/iron-ore/input"][1].belt, "yellow")
-      assert_.equals(t1["item/iron-ore/input"][1].per_s, 15)
+      assert_.equals(t1["item/iron-ore/input"][1].per_s, 7.5)
       assert_.equals(t1["item/coal/input"][1].belt, "yellow")
-      assert_.equals(t1["item/iron-plate/output"][1].per_s, 15)
+      assert_.equals(t1["item/iron-plate/output"][1].per_s, 7.5)
       assert_.falsy(t1["construction/nil/input"], "a construction port")
       local e = by(h.place_city("tt-city-electric-iron-smelting", { x + 30.5, 0.5 }))
       assert_.equals(#e["item/iron-ore/input"], 1, "electric ore ports")
@@ -239,7 +239,7 @@ return {
   },
   {
     -- 2.10.19 (user): a slow output still fills both lanes evenly
-    name = "belt ports: a slow output port (depot, 2/s) fills both lanes of its belt evenly",
+    name = "belt ports: a slow output port (depot, 1/s) fills both lanes of its belt evenly",
     fn = function(ctx)
       local x = X + 1300
       h.clear_area({ { x - 14, -14 }, { x + 16, 40 } })
@@ -249,7 +249,7 @@ return {
       local s = h.port_spots(city, "tt-coal-fuel", "output")[1]
       local belts = {}
       for k = 0, 6 do belts[#belts + 1] = h.create("transport-belt", { s.pos[1], s.pos[2] + k }, { direction = s.dir }) end
-      ctx:wait(60 * 10, function()
+      ctx:wait(60 * 16, function()
         local a, b = 0, 0
         for _, bt in ipairs(belts) do
           a = a + bt.get_transport_line(1).get_item_count()

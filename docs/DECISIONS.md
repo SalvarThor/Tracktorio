@@ -4,12 +4,30 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.7 cities at half rate
+- `city_defs.RATE = 0.5` scales every city's crafting speed, research speed, power,
+  burner power and steam (generator usage) after the list, so the derivations in the file
+  ("speed 2 = 2 refineries") stay as written for the full rate. Iron smelting 7.5
+  plates/s (half a yellow belt), depot 1 fuel/s at 420 kW, water 300/s, research complex
+  like 10 labs, nuclear 10 MW (a cell lasts 800 s). The rocket silo keeps its rate: its
+  output is the win, not a flow (my call). City descriptions quote the new numbers.
+- Throttle (found by the tests at half rate): a slow city's 0.6 s stock target was less
+  than one craft's ingredients, so the depot ran short. Stock targets now never go below
+  1.2 crafts (target), 2 (plenty) and 0.4 (low), what they were for the depot before. The
+  stock correction is relative to the target (0.3 per target's worth off; the same as 0.5
+  per second at the 0.6 s target), so a long target doesn't push a slow city harder.
+- A slow city settles slower: an electric smelting city fed half its rate from an empty
+  start swings 40-60% for about 50 s, then holds 50% (the test now samples 75-90 s). A
+  test-only loader at a quarter of yellow speed gives that exact feed.
+- Tests: rate expectations are the full vanilla-equivalent numbers times RATE where the
+  test derives them; fixed numbers (water, nuclear, research) state the halves.
+
 ## 2026-11-21: 2.15.6 map generation lays out plot sites
 - scripts/layout.lua plans sites, not cities: the starter site (4 plots) 40-80 tiles from
   spawn, then sites of 1-3 plots (equally likely) on rings stepping outward, each with its
   own elbow room of 1-2 spacings (skewed low; two sites keep the larger of their two), until
   there are at least 75 plots. Spacing = 300 x the "City spacing" startup setting (it was
-  500 between cities). Typical game: ~36 sites, ~76 plots, furthest site ~2,000 tiles out.
+  500 between cities). Typical game: 34-38 sites, 75-76 plots (smoke runs).
 - A site's plots sit in a 2 x 2 grid at a 22-tile pitch: 12-tile plots with 10 tiles of
   ground between (room for a belt run or a rail; a tuning value). 1 plot alone, 2 side by
   side, 3 in an L, 4 in a square. A site is at most 34 x 34, which sites.lua checks (plus

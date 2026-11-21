@@ -34,7 +34,9 @@ local cities = require("scripts.cities")
 local M = {}
 
 local TARGET_S = 0.6     -- input stock to keep, in seconds of full-speed crafting
-local GAIN = 0.5         -- per second of stock off target, fraction of full speed
+local GAIN = 0.3         -- per target's worth of stock off target, fraction of full speed
+                         -- (2.15.7: relative, so a slow city with a long target isn't
+                         -- pushed harder; 0.5 per second at the 0.6 s target before)
 local OUTPUT_HIGH_S = 1  -- output stock past which the drain rate limits the speed
 local IDLE_TICKS = 120   -- nothing fed (or taken) for this long: stop throttling for that side
 local PLENTY_S = 1       -- input stock at which it runs flat out (the insertion cap is about 1.2 s)
@@ -42,6 +44,10 @@ local AVERAGE_S = 10     -- time constant of the averaged rates
 local HOLD_TICKS = 120   -- at least this long between two steps
 local LOW_S = 0.2        -- input stock under which it may slow down every run
 local MIN_FRACTION = 1 - config.THROTTLE_STEP * config.THROTTLE_MAX_STEPS
+-- 2.15.7: at half rates a slow city's TARGET_S is less than one craft's ingredients, and it
+-- ran short. The stock targets never go below these, in crafts (what TARGET_S, PLENTY_S
+-- and LOW_S were for the depot at 2 crafts/s).
+local MIN_TARGET_CRAFTS, MIN_PLENTY_CRAFTS, MIN_LOW_CRAFTS = 1.2, 2, 0.4
 
 --- Does this city get a throttle? Crafting cities with ingredients and the research
 --- complex; not power cities (they follow demand), water cities (no inputs), the silo.
@@ -132,13 +138,16 @@ local function control_crafter(city, t)
   t.fed = (t.fed or fed_crafts / seconds) + (fed_crafts / seconds - (t.fed or fed_crafts / seconds)) * k
   t.taken = (t.taken or taken_crafts / seconds) + (taken_crafts / seconds - (t.taken or taken_crafts / seconds)) * k
   local stock_s = input / full
+  local target_s = math.max(TARGET_S, MIN_TARGET_CRAFTS / full)
+  local plenty_s = math.max(PLENTY_S, MIN_PLENTY_CRAFTS / full)
+  local low_s = math.max(LOW_S, MIN_LOW_CRAFTS / full)
   local want
   if game.tick - (t.fed_tick or 0) >= IDLE_TICKS then
     want = 1 -- nothing coming in: use up what is there and say starved, rather than crawl
-  elseif stock_s >= PLENTY_S then
-    want = 1 -- a full second stocked: no reason to hold back
+  elseif stock_s >= plenty_s then
+    want = 1 -- plenty stocked: no reason to hold back
   else
-    want = t.fed / full + GAIN * (stock_s - TARGET_S)
+    want = t.fed / full + GAIN * (stock_s - target_s) / target_s
   end
   if output / full > OUTPUT_HIGH_S and game.tick - (t.taken_tick or 0) < IDLE_TICKS then
     -- output piling up but still taken away: match the rate it goes (nothing taken at all:
@@ -146,9 +155,10 @@ local function control_crafter(city, t)
     want = math.min(want, t.taken / full)
   end
   want = math.max(MIN_FRACTION, math.min(1, want))
+  t.want, t.stock_s, t.target_s = want, stock_s, target_s -- for tests and /tt-dump
   local wanted_steps = math.floor((1 - want) / config.THROTTLE_STEP + 0.5)
   local diff = wanted_steps - t.steps
-  local urgent = diff > 0 and stock_s < LOW_S -- about to run dry: slow down now
+  local urgent = diff > 0 and stock_s < low_s -- about to run dry: slow down now
   if urgent or (math.abs(diff) >= 2 and game.tick - (t.moved_tick or -HOLD_TICKS) >= HOLD_TICKS)
       or (math.abs(diff) == 1 and (wanted_steps == 0 or wanted_steps == config.THROTTLE_MAX_STEPS)
         and game.tick - (t.moved_tick or -HOLD_TICKS) >= HOLD_TICKS) then

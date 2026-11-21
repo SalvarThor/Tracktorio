@@ -15,3 +15,10 @@ data:extend(blackbox.make_city({
     results = { { type = "item", name = "iron-plate", amount = 1 } },
   },
 }))
+
+-- 2.15.7: a loader at a quarter of yellow belt speed (3.75 items/s), for an exact slow feed.
+local slow = table.deepcopy(data.raw["loader-1x1"]["loader-1x1"])
+slow.name = "tt-test-slow-loader"
+slow.speed = data.raw["loader-1x1"]["loader-1x1"].speed / 4
+slow.next_upgrade = nil
+data:extend({ slow })

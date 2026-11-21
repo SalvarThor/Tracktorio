@@ -144,28 +144,18 @@ local BACK = {
   [defines.direction.east] = defines.direction.west, [defines.direction.west] = defines.direction.east,
 }
 
--- Turning a direction a quarter clockwise.
-local RIGHT = {
-  [defines.direction.north] = defines.direction.east, [defines.direction.east] = defines.direction.south,
-  [defines.direction.south] = defines.direction.west, [defines.direction.west] = defines.direction.north,
-}
-
---- One lane of a yellow belt (7.5 items/s) into a city's input port for `name`: three belt
---- tiles towards the port, fed from the side onto the middle one (side-loading fills only
---- the near lane) by a loader from an infinity chest.
+--- A slow, exact feed into a city's input port for `name`: two belt tiles towards the
+--- port, fed by the test mod's slow loader (3.75 items/s, a quarter of a yellow belt) from
+--- an infinity chest.
 ---@param city LuaEntity
 ---@param name string
-function M.lane_to_port(city, name)
+function M.slow_feed_to_port(city, name)
   local s = M.port_spots(city, name, "input")[1]
   local d = STEP[s.dir]
   local toward = BACK[s.dir]
-  for k = 0, 2 do M.create("transport-belt", { s.pos[1] + d[1] * k, s.pos[2] + d[2] * k }, { direction = toward }) end
-  local side = RIGHT[s.dir]
-  local sd = STEP[side]
-  local mid = { s.pos[1] + d[1], s.pos[2] + d[2] }
-  local function at(k) return { mid[1] + sd[1] * k, mid[2] + sd[2] * k } end
-  M.create("transport-belt", at(1), { direction = BACK[side] })
-  M.create("loader-1x1", at(2), { direction = BACK[side], type = "output" })
+  local function at(k) return { s.pos[1] + d[1] * k, s.pos[2] + d[2] * k } end
+  for k = 0, 1 do M.create("transport-belt", at(k), { direction = toward }) end
+  M.create("tt-test-slow-loader", at(2), { direction = toward, type = "output" })
   local chest = M.create("infinity-chest", at(3))
   chest.set_infinity_container_filter(1, { name = name, count = 100, mode = "exactly" })
 end

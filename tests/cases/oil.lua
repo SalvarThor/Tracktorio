@@ -1,6 +1,9 @@
 -- 2.4.3: refinery city (several fluid inputs and outputs, 2.4.2).
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
+-- 2.15.7: cities run at RATE of the full rates worked out from vanilla
+local R = require("__tracktorio__/shared/city_defs").RATE
+local function near(a, b) return math.abs(a - b) < 1e-6 end
 
 local REFINERY = "tt-city-refinery"
 local X = 8600
@@ -24,7 +27,7 @@ end
 
 return {
   {
-    name = "oil: refinery city takes 40 crude + 28 water/s, makes 26 light oil + 22 gas/s at 0.95 MW",
+    name = "oil: refinery city takes 20 crude + 14 water/s, makes 13 light oil + 11 gas/s at 0.475 MW (half of 2 refineries)",
     fn = function()
       local p = prototypes.entity[REFINERY]
       local r = p.fixed_recipe
@@ -32,11 +35,10 @@ return {
       local amounts = {}
       for _, i in ipairs(r.ingredients) do amounts[i.name] = i.amount * per_s end
       for _, o in ipairs(r.products) do amounts[o.name] = o.amount * per_s end
-      assert_.equals(amounts["crude-oil"], 40)
-      assert_.equals(amounts["water"], 28)
-      assert_.equals(amounts["light-oil"], 26)
-      assert_.equals(amounts["petroleum-gas"], 22)
-      assert_.truthy(math.abs(p.get_max_energy_usage() * 60 - 0.95e6) < 1000, "power")
+      for name, full in pairs({ ["crude-oil"] = 40, water = 28, ["light-oil"] = 26, ["petroleum-gas"] = 22 }) do
+        assert_.truthy(near(amounts[name], full * R), name .. " " .. amounts[name])
+      end
+      assert_.truthy(math.abs(p.get_max_energy_usage() * 60 - 0.95e6 * R) < 1000, "power")
     end,
   },
   {
@@ -86,7 +88,7 @@ return {
     end,
   },
   {
-    name = "oil: fuel depots: 2 solid fuel/s from 20 light oil (0.42 MW); 0.2 rocket fuel/s from 2 solid + 2 light (0.6 MW)",
+    name = "oil: fuel depots: 1 solid fuel/s from 10 light oil (0.21 MW); 0.1 rocket fuel/s from 1 solid + 1 light (0.3 MW)",
     fn = function()
       local function rates(name)
         local p = prototypes.entity[name]
@@ -98,12 +100,12 @@ return {
         return out, p.get_max_energy_usage() * 60
       end
       local s, sw = rates("tt-city-solid-fuel-depot")
-      assert_.equals(s["light-oil"], 20); assert_.equals(s["solid-fuel"], 2)
-      assert_.truthy(math.abs(sw - 420e3) < 1000, "solid power " .. sw)
+      assert_.truthy(near(s["light-oil"], 20 * R) and near(s["solid-fuel"], 2 * R), serpent.line(s))
+      assert_.truthy(math.abs(sw - 420e3 * R) < 1000, "solid power " .. sw)
       local r, rw = rates("tt-city-rocket-fuel-depot")
-      assert_.truthy(math.abs(r["rocket-fuel"] - 0.2) < 1e-9, "rocket " .. r["rocket-fuel"])
-      assert_.truthy(math.abs(r["solid-fuel"] - 2) < 1e-9 and math.abs(r["light-oil"] - 2) < 1e-9, serpent.line(r))
-      assert_.truthy(math.abs(rw - 600e3) < 1000, "rocket power " .. rw)
+      assert_.truthy(near(r["rocket-fuel"], 0.2 * R), "rocket " .. r["rocket-fuel"])
+      assert_.truthy(near(r["solid-fuel"], 2 * R) and near(r["light-oil"], 2 * R), serpent.line(r))
+      assert_.truthy(math.abs(rw - 600e3 * R) < 1000, "rocket power " .. rw)
     end,
   },
   {
@@ -201,7 +203,8 @@ return {
     fn = function(ctx)
       local city = rig(X + 80)
       h.pipe_at(city, "light-oil", "output", false) -- light oil drained, gas not
-      ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function()
+      -- (2.15.7: half the rate, so the gas takes twice as long to fill up)
+      ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 120, function()
         local full = info(city).full
         assert_.truthy(contains(full, "petroleum-gas"), serpent.line(full))
         assert_.falsy(contains(full, "light-oil"), "light oil is drained: " .. serpent.line(full))

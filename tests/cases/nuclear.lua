@@ -105,7 +105,7 @@ return {
     end,
   },
   {
-    name = "nuclear: uranium city takes 1.43 ore + 0.01 iron/s, makes 0.01 fuel cells/s at 0.6 MW",
+    name = "nuclear: uranium city takes 0.715 ore + 0.005 iron/s, makes 0.005 fuel cells/s at 0.3 MW (half, 2.15.7)",
     fn = function()
       local p = prototypes.entity["tt-city-uranium"]
       local r = p.fixed_recipe
@@ -113,12 +113,12 @@ return {
       local got = {}
       for _, i in ipairs(r.ingredients) do got[i.name] = i.amount * per_s end
       for _, o in ipairs(r.products) do got[o.name] = o.amount * per_s end
-      assert_.truthy(math.abs(got["uranium-ore"] - 1.43) < 1e-6, "ore " .. tostring(got["uranium-ore"]))
-      assert_.truthy(math.abs(got["iron-plate"] - 0.01) < 1e-6, "iron " .. tostring(got["iron-plate"]))
-      assert_.truthy(math.abs(got["uranium-fuel-cell"] - 0.01) < 1e-6, "cells " .. tostring(got["uranium-fuel-cell"]))
+      assert_.truthy(math.abs(got["uranium-ore"] - 0.715) < 1e-6, "ore " .. tostring(got["uranium-ore"]))
+      assert_.truthy(math.abs(got["iron-plate"] - 0.005) < 1e-6, "iron " .. tostring(got["iron-plate"]))
+      assert_.truthy(math.abs(got["uranium-fuel-cell"] - 0.005) < 1e-6, "cells " .. tostring(got["uranium-fuel-cell"]))
       assert_.equals(table_size(got), 3)
       local w = p.get_max_energy_usage() * 60
-      assert_.truthy(math.abs(w - 600e3) < 1000, "draws " .. w)
+      assert_.truthy(math.abs(w - 300e3) < 1000, "draws " .. w)
     end,
   },
   {
@@ -132,7 +132,7 @@ return {
       city.insert({ name = "iron-plate", count = 1 })
       ctx:wait_until(function()
         return city.get_output_inventory().get_item_count("uranium-fuel-cell") >= 1
-      end, 60 * 120, function()
+      end, 60 * 210, function() -- one craft takes 200 s at half speed (2.15.7)
         assert_.equals(city.get_inventory(defines.inventory.crafter_input).get_item_count("uranium-ore"), 0, "ore left")
       end)
     end,
@@ -145,13 +145,13 @@ return {
     end,
   },
   {
-    name = "nuclear: nuclear power city makes 20 MW from 206 water/s; a cell lasts 400 s; no depleted cells",
+    name = "nuclear: nuclear power city makes 10 MW from 103 water/s; a cell lasts 800 s; no depleted cells",
     fn = function()
       local cell = prototypes.item["uranium-fuel-cell"]
       assert_.equals(cell.fuel_value, 8e9)
       assert_.equals(cell.burnt_result, nil, "fuel cell still leaves a depleted cell")
       do
-        local mw, name = 20, NUCLEAR
+        local mw, name = 10, NUCLEAR
         local p = assert(prototypes.entity[name], name)
         assert_.truthy(p.burner_prototype, name .. " has no burner")
         assert_.truthy(p.burner_prototype.fuel_categories["nuclear"], name .. " burns no nuclear fuel")
@@ -165,14 +165,14 @@ return {
         local out = gen.get_max_energy_production() * 60
         assert_.truthy(math.abs(out - mw * 1e6) < 1e3, name .. " generator " .. out)
         assert_.equals(gen.maximum_temperature, 500)
-        assert_.truthy(math.abs(cell.fuel_value / burn - 400) < 0.01, name .. " cell lasts " .. cell.fuel_value / burn)
+        assert_.truthy(math.abs(cell.fuel_value / burn - 800) < 0.01, name .. " cell lasts " .. cell.fuel_value / burn)
       end
     end,
   },
   {
-    name = "nuclear: a fuelled nuclear city delivers 18 MW to the pole network and burns fuel",
+    name = "nuclear: a fuelled nuclear city delivers 9 MW to the pole network and burns fuel",
     fn = function(ctx)
-      local city, eei = nuclear_rig(X + 120, 18e6, 2)
+      local city, eei = nuclear_rig(X + 120, 9e6, 2)
       ---@cast eei LuaEntity
       local gens = h.surface().find_entities_filtered({ name = "tt-nuclear-generator", position = city.position, radius = 1 })
       assert_.equals(#gens, 1, "generator count")
@@ -185,11 +185,11 @@ return {
           return n >= 60
         end, 120, function()
           local watts = sum / n * 60
-          assert_.truthy(watts > 0.95 * 18e6 and watts < 20.1e6, "generator put out " .. watts .. " W for an 18 MW demand")
+          assert_.truthy(watts > 0.95 * 9e6 and watts < 10.05e6, "generator put out " .. watts .. " W for a 9 MW demand")
           assert_.truthy(eei.energy > 0, "consumer got nothing")
           local used = start - fuel_left(city)
-          -- ~11 s at 18-20 MW
-          assert_.truthy(used > 150e6 and used < 260e6, "fuel used " .. used)
+          -- ~11 s at 9-10 MW
+          assert_.truthy(used > 75e6 and used < 130e6, "fuel used " .. used)
         end)
       end)
     end,
@@ -205,7 +205,7 @@ return {
         local fuel
         for _, ing in ipairs(i.recipe.ingredients) do if ing.name == "uranium-fuel-cell" then fuel = ing end end
         assert(fuel, "fuel not listed as an input")
-        assert_.truthy(fuel.fuel and math.abs(fuel.per_min_max - 0.15) < 1e-6, "fuel per min " .. tostring(fuel.per_min_max))
+        assert_.truthy(fuel.fuel and math.abs(fuel.per_min_max - 0.075) < 1e-6, "fuel per min " .. tostring(fuel.per_min_max))
         local conns = remote.call("tt-city", "info", city).connections
         assert_.equals(#conns, 1)
         assert_.equals(conns[1].fluid, "water")
@@ -222,20 +222,20 @@ return {
         local left = fuel_left(city)
         ctx:wait(60 * 20, function()
           local burned = left - fuel_left(city)
-          -- 20 s at 20 MW = 400 MJ
-          assert_.truthy(burned > 0.9 * 400e6 and burned < 1.1 * 400e6, "burned " .. burned .. " J in 20 s with no demand")
+          -- 20 s at 10 MW = 200 MJ
+          assert_.truthy(burned > 0.9 * 200e6 and burned < 1.1 * 200e6, "burned " .. burned .. " J in 20 s with no demand")
           local i = remote.call("tt-city", "info", city)
           assert_.equals(i.status, "running")
           assert_.truthy(i.power_use and i.power_use < 0.01, "power use " .. tostring(i.power_use))
-          assert_.truthy(city.get_fluid_count("steam") <= 1000 + 206 * 1.1, "steam not vented: " .. city.get_fluid_count("steam"))
+          assert_.truthy(city.get_fluid_count("steam") <= 1000 + 103 * 1.1, "steam not vented: " .. city.get_fluid_count("steam"))
         end)
       end)
     end,
   },
   {
-    name = "nuclear: the window says how much of its output is used (5 of 20 MW = 25%)",
+    name = "nuclear: the window says how much of its output is used (2.5 of 10 MW = 25%)",
     fn = function(ctx)
-      local city = nuclear_rig(X + 320, 5e6, 1)
+      local city = nuclear_rig(X + 320, 2.5e6, 1)
       ctx:wait(60 * 10, function()
         local i = remote.call("tt-city", "info", city)
         assert_.truthy(i.power_use and math.abs(i.power_use - 0.25) < 0.03, "power use " .. tostring(i.power_use))

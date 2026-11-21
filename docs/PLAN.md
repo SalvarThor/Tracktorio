@@ -963,7 +963,9 @@ Items:
       Done: a New Game has no cities, only ~36 sites / ~76 plots; the starter site of 4 is
       40-80 tiles from spawn. Plots of a site in a 2 x 2 grid, 10 tiles apart. The city
       planner, shore finder and starter pair rules are gone.
-- [ ] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.
+- [x] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.
+      Done: city_defs.RATE = 0.5 on everything but the silo; the throttle's stock targets
+      got a floor in crafts so slow cities don't run short.
 - [ ] 2.15.8 The MVP scenario off the menu (decision 6); the tests keep loading it.
 - [ ] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,
       research unlocks, plot counts and spacing on generated maps, several cities of one

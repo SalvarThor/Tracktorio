@@ -307,6 +307,28 @@ M.list = {
   },
 }
 
+-- 2.15.7 (user, phase 2.15): every city runs at half the rates worked out above, so a
+-- product needs several cities ("my steel is maxed out, I need another steel city"). The
+-- derivations above stay as written (full rates); speed, power, steam and research speed
+-- are all scaled here. The rocket silo keeps its rate: its output is the win, not a flow.
+M.RATE = 0.5
+do
+  local function power(str)
+    if not str then return nil end
+    local n, unit = string.match(str, "^([%d%.]+)(%a+)$")
+    return string.format("%g%s", tonumber(n) * M.RATE, unit)
+  end
+  for _, def in ipairs(M.list) do
+    if def.kind ~= "silo" then
+      if def.crafting_speed then def.crafting_speed = def.crafting_speed * M.RATE end
+      if def.researching_speed then def.researching_speed = def.researching_speed * M.RATE end
+      if def.generator_usage then def.generator_usage = def.generator_usage * M.RATE end
+      def.power = power(def.power)
+      def.burner_power = power(def.burner_power)
+    end
+  end
+end
+
 -- The technology that unlocks building each city kind (2.15.5, agreed with the user
 -- 2026-11-21): the vanilla technology for the same thing. Kinds not listed are there from
 -- the start: depot, coal power, water, iron and copper smelting, red science, the research

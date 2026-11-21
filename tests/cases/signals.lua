@@ -82,7 +82,7 @@ return {
       local x = X + 3050
       local city, pole = wired_city("tt-city-iron-smelting", x, "stock")
       city.get_inventory(defines.inventory.crafter_input).insert({ name = "iron-ore", count = 40 })
-      city.get_inventory(defines.inventory.crafter_output).insert({ name = "iron-plate", count = 25 })
+      city.get_inventory(defines.inventory.crafter_output).insert({ name = "iron-plate", count = 8 }) -- below output full at half speed (2.15.7)
       ctx:wait(10, function()
         after_signals(ctx, function()
           assert_.equals(read(pole, "item", "iron-ore"), 40, "iron ore")
@@ -91,7 +91,7 @@ return {
           assert_.truthy(plates > 0, "no plates left in the city")
           assert_.equals(read(pole, "item", "iron-plate"), plates, "iron plates")
           -- ore but no coal: starved
-          assert_.equals(read(pole, "virtual", "tt-city-starved"), 1, "starved")
+          assert_.equals(read(pole, "virtual", "tt-city-starved"), 1, "starved (status " .. h.status_name(city) .. ")")
           assert_.equals(read(pole, "virtual", "tt-city-running"), 0, "running while starved")
         end)
       end)
