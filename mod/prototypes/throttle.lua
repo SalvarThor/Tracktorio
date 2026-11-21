@@ -35,7 +35,9 @@ data:extend({
     max_health = 10000,
     collision_box = { { -0.4, -0.4 }, { 0.4, 0.4 } },
     collision_mask = { layers = {} },
-    selection_box = { { -0.5, -0.5 }, { 0.5, 0.5 } },
+    -- no selection box: the player must never open it (playtest 2.12: the modules could be
+    -- taken out of it)
+    selectable_in_game = false,
     allowed_effects = { "speed", "consumption" },
     allowed_module_categories = { config.THROTTLE_CATEGORY },
     supply_area_distance = 1, -- reaches the city around it and nothing past its walls

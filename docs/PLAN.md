@@ -793,3 +793,8 @@ Items:
 - [x] 2.12.7 SPEC, README and DECISIONS updated.
 - [ ] 2.12.8 `/playtest`: power graph and signals of a city fed below its full rate;
       the new coal fuel icon on a busy belt.
+- [x] 2.12.9 Playtest 2026-11-21, first try, two bugs fixed: the throttle beacon could be
+      selected and its modules taken (now no selection box, protected); a crash in output
+      lane balancing (2.10.19) when several new items reached an output port at once, as
+      when the player picked items off a backed-up belt (stacks were read after moving
+      another item invalidated them). Tests for both.

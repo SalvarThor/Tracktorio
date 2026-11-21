@@ -126,6 +126,10 @@ return {
             and recipe and #recipe.ingredients > 0)
           if expect then
             assert(t and t.beacon and t.beacon.valid, name .. " has no throttle")
+            -- playtest 2.12: the player opened a beacon and took its modules
+            assert_.falsy(t.beacon.prototype.selectable_in_game, "the beacon can be selected")
+            assert_.falsy(t.beacon.operable, name .. " beacon is operable")
+            assert_.falsy(t.beacon.minable_flag, name .. " beacon is minable")
             assert_.equals(t.percent, 100, name .. " starts below full speed")
           else
             assert_.falsy(t, name .. " has a throttle")

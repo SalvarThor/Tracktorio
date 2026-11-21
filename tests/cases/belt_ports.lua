@@ -389,6 +389,39 @@ return {
     end,
   },
   {
+    -- playtest 2.12: picking items off a backed-up output belt let several new items onto the
+    -- port at once; moving one invalidated the others' stacks, and the balancer crashed
+    name = "belt ports: several new items on an output port at once are balanced without error",
+    fn = function(ctx)
+      local x = X + 1350
+      h.clear_area({ { x - 14, -14 }, { x + 16, 40 } })
+      local city = h.place_city("tt-city-depot", { x + 0.5, 0.5 })
+      local s = h.port_spots(city, "tt-coal-fuel", "output")[1]
+      local step = ({ [defines.direction.north] = { 0, -1 }, [defines.direction.south] = { 0, 1 },
+        [defines.direction.east] = { 1, 0 }, [defines.direction.west] = { -1, 0 } })[s.dir]
+      local loader = assert(city.surface.find_entity("tt-belt-port", { s.pos[1] - step[1], s.pos[2] - step[2] }), "no output port loader")
+      local a, b = loader.get_transport_line(1), loader.get_transport_line(2)
+      local item = { name = "tt-coal-fuel", count = 1 }
+      -- one item first, so the port's tally leans to lane 1; then it is taken away
+      a.insert_at_back(item)
+      ctx:wait(3, function()
+        a.clear()
+        b.clear()
+        ctx:wait(3, function()
+          -- two new items at once on the busier lane
+          a.insert_at_back(item)
+          a.insert_at(0, item)
+          local before = a.get_item_count() + b.get_item_count()
+          assert_.equals(before, 2, "could not put 2 items on lane 1")
+          ctx:wait(4, function()
+            assert_.equals(a.get_item_count() + b.get_item_count(), before, "items lost")
+            assert_.equals(b.get_item_count(), 1, "one should have moved to lane 2")
+          end)
+        end)
+      end)
+    end,
+  },
+  {
     name = "roof icons: every city but the silo has a large icon of its product on the roof, at every tier",
     fn = function()
       local i = 0

@@ -54,7 +54,7 @@ function M.attach(city, record)
   local beacon = city.surface.create_entity({ name = config.THROTTLE_BEACON, position = city.position,
     force = city.force, create_build_effect_smoke = false })
   if not beacon then return end
-  beacon.destructible = false
+  cities.protect(beacon) -- not operable, minable or destructible, whatever reaches it
   record.throttle = { beacon = beacon, steps = 0, fraction = 1 }
 end
 

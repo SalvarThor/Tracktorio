@@ -4,6 +4,14 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.12.9 playtest bugs
+- 2.1: moving an item on a transport line (remove_item / insert_at_back) invalidates the
+  LuaItemStack references from an earlier get_detailed_contents of that line. The lane
+  balancer now copies name and quality when it takes its snapshot.
+- The "not-selectable-in-game" flag alone did not keep the player out of the throttle
+  beacon. It now has no selection box (selectable_in_game = false) and is protected like
+  the other hidden parts (not operable, minable or destructible).
+
 ## 2026-11-21: 2.12.6 coal fuel icon
 - Coal fuel is drawn as briquettes: Space Age's carbon icon (also as its belt picture) in a
   warm tint. User's pick from mock-ups of briquettes, glowing coal and coal with a big

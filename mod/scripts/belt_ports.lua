@@ -178,14 +178,18 @@ function M.balance()
         local fresh = {}
         for lane = 1, 2 do
           for _, d in pairs(lines[lane].get_detailed_contents()) do
-            if not t.seen[d.unique_id] then fresh[#fresh + 1] = { lane = lane, stack = d.stack } end
+            -- copy name and quality now: moving an item invalidates the other items' stacks
+            -- (playtest 2.12 crash)
+            if not t.seen[d.unique_id] then
+              fresh[#fresh + 1] = { lane = lane, name = d.stack.name, quality = d.stack.quality.name }
+            end
           end
         end
         for _, f in ipairs(fresh) do
           local lane = f.lane
           local busier = (lane == 1 and t.diff > 0) or (lane == 2 and t.diff < 0)
           local other = lines[3 - lane]
-          local stack = { name = f.stack.name, count = 1, quality = f.stack.quality }
+          local stack = { name = f.name, count = 1, quality = f.quality }
           local landed = lane
           if busier and other.can_insert_at_back() and lines[lane].remove_item(stack) == 1 then
             if other.insert_at_back(stack) then landed = 3 - lane else lines[lane].insert_at_back(stack) end
