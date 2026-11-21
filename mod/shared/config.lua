@@ -78,6 +78,7 @@ M.THROTTLE_MAX_STEPS = 16
 M.SIGNAL = { -- 2.11: status signals of the stock point (value 1 while true)
   running = "tt-city-running", starved = "tt-city-starved",
   output_full = "tt-city-output-full", no_power = "tt-city-no-power",
+  speed = "tt-city-speed", -- 2.12: its speed in percent
 }
 M.PORT_SLOTS = 4
 M.PORT_CLOSED_ITEM = "tt-port-closed"

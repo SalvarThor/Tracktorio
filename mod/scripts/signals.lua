@@ -12,6 +12,7 @@ local city_defs = require("shared.city_defs")
 local port_layout = require("shared.port_layout")
 local cities = require("scripts.cities")
 local city_info = require("scripts.city_info")
+local throttle = require("scripts.throttle")
 
 local M = {}
 
@@ -170,6 +171,7 @@ function M.update(record)
     local status = city.status
     local s = status and (STATUS[status] or (city_info.STARVED[status] and config.SIGNAL.starved))
     if s then signals["virtual/" .. s] = 1 end
+    if s == config.SIGNAL.running then signals["virtual/" .. config.SIGNAL.speed] = throttle.percent(record) end
     local info = city_defs.by_entity[city.name]
     signals["virtual/signal-T"] = info and info.tier or 1
     write(stock, signals)

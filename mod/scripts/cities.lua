@@ -121,6 +121,7 @@ local function on_object_destroyed(e)
       for _, point in pairs(record.signal_points or {}) do -- 2.11
         if point.valid then point.destroy() end
       end
+      if record.throttle and record.throttle.beacon.valid then record.throttle.beacon.destroy() end -- 2.12
     end
     storage.tt_cities[e.useful_id] = nil
   end

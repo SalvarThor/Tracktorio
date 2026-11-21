@@ -13,6 +13,7 @@ local ports = require("scripts.ports")
 local belt_ports = require("scripts.belt_ports") -- 2.10.4: registers its placement hook
 local upgrade = require("scripts.upgrade")
 local signals = require("scripts.signals") -- 2.11: registers its placement hook
+local throttle = require("scripts.throttle") -- 2.12: registers its placement hook
 local notify = require("scripts.notify")
 local tier_marks = require("scripts.tier_marks")
 local reliability = require("scripts.reliability")
@@ -85,6 +86,14 @@ city_remote.signal_points = function(entity)
   return record.signal_points or {}
 end
 city_remote.signals_tick = function() signals.tick() end
+-- Tests: a city's throttle (2.12) and one second of its control.
+city_remote.throttle = function(entity)
+  local record = assert(storage.tt_cities[entity.unit_number])
+  local t = record.throttle
+  return t and { steps = t.steps, fraction = t.fraction, percent = throttle.percent(record), beacon = t.beacon } or nil
+end
+city_remote.throttle_tick = function() throttle.tick() end
+city_remote.throttle_set = function(entity, steps) throttle.set(assert(storage.tt_cities[entity.unit_number]), steps) end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.
 city_remote.migrate = function(from_schema)
@@ -215,6 +224,7 @@ script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   map.tick_tags()
   map.retry_blocked()
   notify.tick()
+  throttle.tick()
   signals.tick()
 end)
 

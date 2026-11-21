@@ -7,6 +7,8 @@ local port_layout = require("shared.port_layout")
 local silo = require("scripts.silo")
 local nuclear = require("scripts.nuclear")
 
+local throttle = require("scripts.throttle")
+
 local M = {}
 
 -- storage.tt_cities[unit].samples = { { tick, products_finished }, ... } over RATE_WINDOW_TICKS
@@ -91,7 +93,8 @@ local LAB_STATUS = {
 --- Snapshot of the research complex (a lab, PLAN 2.2.3).
 ---@param entity LuaEntity
 local function lab_info(entity)
-  local out = { name = entity.name, unit_number = entity.unit_number, ports = M.ports(entity.name) }
+  local out = { name = entity.name, unit_number = entity.unit_number, ports = M.ports(entity.name),
+    speed = throttle.percent(storage.tt_cities[entity.unit_number]) }
   local inv = entity.get_inventory(defines.inventory.lab_input)
   local accepts = {}
   out.lab = { speed = entity.prototype.get_researching_speed(), packs = {} }
@@ -210,7 +213,7 @@ function M.info(entity)
   local record = storage.tt_cities[entity.unit_number] or {}
   local recipe = recipe_of(entity)
   local out = { name = entity.name, unit_number = entity.unit_number, connections = M.connections(entity.name),
-    ports = M.ports(entity.name) }
+    ports = M.ports(entity.name), speed = throttle.percent(record) }
   if entity.type == "rocket-silo" then out.silo = silo.status(entity) end
   if not recipe then out.status = "other"; return out end
 

@@ -83,7 +83,10 @@ end
 ---@param info table
 local function add_status(body, entity, info)
   local status, hint
-  if info.status == "running" then
+  if info.status == "running" and info.speed and info.speed < 100 then
+    -- 2.12: fed below its full rate, it runs steadily at that rate
+    status, hint = { "tt-gui.city-status-running-at", tostring(info.speed) }, { "tt-gui.city-hint-running-at" }
+  elseif info.status == "running" then
     status = { "tt-gui.city-status-running" }
   elseif info.status == "low_power" then
     status, hint = { "tt-gui.city-status-low-power" }, { "tt-gui.city-hint-low-power" }

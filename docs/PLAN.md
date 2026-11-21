@@ -780,12 +780,12 @@ Items:
       together, reaches nothing outside it (a drill at the wall keeps full speed), and
       can be re-filled by script each second without hiccups. Check the 20% floor and how
       2.1 stacks module effects in a beacon. Record what 2.1 does in DECISIONS.md.
-- [ ] 2.12.2 Throttle prototypes (beacon, modules) and the per-city beacon, placed with the
+- [x] 2.12.2 Throttle prototypes (beacon, modules) and the per-city beacon, placed with the
       city, replaced on upgrade (the bigger building), removed with it.
-- [ ] 2.12.3 Controller: buffer-based speed setting every second, for inputs and backed-up
+- [x] 2.12.3 Controller: buffer-based speed setting every second, for inputs and backed-up
       outputs; full input runs at 100%, no input still reads as starved.
-- [ ] 2.12.4 Window line and speed signal; status stays "running" at reduced speed.
-- [ ] 2.12.5 Tests: a steady half-rate belt gives a city that runs at about 50% with no
+- [x] 2.12.4 Window line and speed signal; status stays "running" at reduced speed.
+- [x] 2.12.5 Tests: a steady half-rate belt gives a city that runs at about 50% with no
       idle gaps over a minute (power draw stays within a narrow band); full input gives
       full speed; cutting the input still starves it; a slow output belt gives a steady,
       slower city; a drill at the wall is unaffected; upgrades keep it working.

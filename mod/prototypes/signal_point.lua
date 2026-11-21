@@ -43,4 +43,5 @@ data:extend({
   status(config.SIGNAL.starved, "signal-hourglass.png", "b"),
   status(config.SIGNAL.output_full, "signal-no-entry.png", "c"),
   status(config.SIGNAL.no_power, "signal-lightning.png", "d"),
+  status(config.SIGNAL.speed, "signal-clock.png", "e"),
 })

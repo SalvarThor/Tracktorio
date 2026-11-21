@@ -4,6 +4,26 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.12.2-2.12.5 throttle controller
+- Every crafting city with ingredients and the research complex gets a throttle beacon at
+  its centre; power cities (is_power: power and nuclear), water cities and the silo don't.
+  Replaced on upgrade, destroyed with the city.
+- Crafting cities, each second (rates over the real time since the last run):
+  fed = crafts done + change in input stock (scarcest ingredient, a craft under way counts
+  as stock); want = fed / full + 0.5 x (stock in seconds - 0.6). A second of stock or
+  more: 100%. Output past one second of stock and still being taken away: at most the
+  rate it is taken. Smoothed half-way per second, rounded to 5% steps, floor 20%.
+- A side where nothing moved for 2 s stops limiting: with no input at all a city uses up
+  its stock and reports starved; with nothing taken away it fills up and reports output
+  full. Crawling at 20% would only delay what the player needs to see (found by the
+  uranium and refinery tests).
+- Research complex: one step slower per second while short of a pack its research needs
+  (1 or fewer), one faster with 2 or more of each.
+- Measured: a tier 2 smelting city fed one yellow belt (half its 30/s) settles at about
+  50% and never stops over 15 s of sampling.
+- "Low power" flickers for a moment when the module count changes; the status signal
+  already counts it as running.
+
 ## 2026-11-21: 2.12.1 throttle spike
 - A hidden beacon (void energy, profile {1}, distribution effectivity 1, empty collision
   mask, supply area distance 1 around a 0.8-tile box at the city's centre) with N modules

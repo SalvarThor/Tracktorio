@@ -5,6 +5,7 @@ local cities = require("scripts.cities")
 local ports = require("scripts.ports")
 local belt_ports = require("scripts.belt_ports")
 local signals = require("scripts.signals")
+local throttle = require("scripts.throttle")
 local city_defs = require("shared.city_defs")
 local port_layout = require("shared.port_layout")
 
@@ -110,6 +111,7 @@ function M.upgrade(record)
   belt_ports.detach(record)
   local wires = signals.save_wires(record) -- 2.11: the player's wires follow the new points
   signals.detach(record)
+  throttle.detach(record)
   old.destroy()
 
   local city = cities.place(target, surface, position, force)
