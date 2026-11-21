@@ -832,11 +832,11 @@ Same for the research complex, the rocket silo, power and water cities (their ow
 where they differ: the power city's output in MW, the silo's parts).
 
 Items:
-- [ ] 2.13.1 Layout: status block and flows table (all city kinds).
-- [ ] 2.13.2 Ports, signals and servicing lines with tooltips.
-- [ ] 2.13.3 Tier block: one-line summary, inline progress bars, tooltip.
-- [ ] 2.13.4 Tests updated (they read captions by element name); a test per city kind that
+- [x] 2.13.1 Layout: status block and flows table (all city kinds).
+- [x] 2.13.2 Ports, signals and servicing lines with tooltips.
+- [x] 2.13.3 Tier block: one-line summary, inline progress bars, tooltip.
+- [x] 2.13.4 Tests updated (they read captions by element name); a test per city kind that
       the window opens and shows its status, flows, ports and tier.
-- [ ] 2.13.5 README and DECISIONS updated.
+- [x] 2.13.5 README and DECISIONS updated.
 - [ ] 2.13.6 `/playtest`: the window for a smelting city, the depot, a power city, the
       research complex and the silo, running and starved.

@@ -1,6 +1,7 @@
 -- 1.6: city UI data (recipe, rate, status) and the detail window.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
+local city_defs = require("__tracktorio__/shared/city_defs")
 
 local IRON = "tt-city-iron-smelting"
 
@@ -106,16 +107,17 @@ return {
     end,
   },
   {
-    name = "city ui: the window starts with the city's description",
+    name = "city ui: the window's title shows the city's description as its tooltip",
     fn = function()
       h.clear_area({ { 1230, -10 }, { 1250, 10 } })
       local city = h.place_city("tt-city-depot", { 1240.5, 0.5 })
       local p = assert(game.players[1])
       remote.call("tt-city", "open_gui", p.index, city)
-      local body = assert(p.gui.screen["tt_city_frame"])["body"]
-      local first = body.children[1].caption
-      -- the window shows the description without the tooltip's "click it" hint (playtest 2.2.8)
-      assert_.equals(type(first) == "table" and first[1], "tt-city-description.tt-city-depot")
+      local title = assert(p.gui.screen["tt_city_frame"])["titlebar"]["title"]
+      -- 2.13: the description moved to the title's tooltip, still without the hover
+      -- tooltip's "click it" hint (playtest 2.2.8)
+      local tip = title.tooltip
+      assert_.equals(type(tip) == "table" and tip[1], "tt-city-description.tt-city-depot")
       local tooltip = prototypes.entity["tt-city-depot"].localised_description
       assert_.equals(type(tooltip) == "table" and tooltip[1], "tt-gui.click-hint")
       p.opened = nil
@@ -159,7 +161,7 @@ return {
       remote.call("tt-city", "open_gui", p.index, box)
       local body = assert(p.gui.screen["tt_city_frame"])["body"]
       assert_.truthy(body["status"], "no status line")
-      assert_.truthy(#body.children >= 5, "rows " .. #body.children) -- description, line, status, 2 metals
+      assert_.truthy(#body.children >= 3, "rows " .. #body.children) -- status, 2 metals
       p.opened = nil
     end,
   },
@@ -181,6 +183,39 @@ return {
           assert_.falsy(p.gui.screen["tt_city_frame"], "window still open")
         end)
       end)
+    end,
+  },
+  {
+    -- 2.13: one compact page for every kind of city
+    name = "city ui: every city's window shows a coloured status, its flows (or packs, or parts), ports and tier",
+    fn = function()
+      local p = assert(game.players[1])
+      local i = 0
+      for _, def in ipairs(city_defs.list) do
+        local name = city_defs.entity_name(def.name, 1)
+        local x = 52000 + i * 24
+        i = i + 1
+        h.clear_area({ { x - 10, -10 }, { x + 11, 11 } })
+        local city = h.place_city(name, { x + 0.5, 0.5 })
+        remote.call("tt-city", "open_gui", p.index, city)
+        local frame = assert(p.gui.screen["tt_city_frame"], name .. ": no window")
+        local body = frame["body"]
+        local status = assert(body["status"], name .. ": no status")
+        assert_.truthy(status.style.font_color.r ~= nil, name .. ": status has no colour")
+        if def.kind == "lab" then
+          assert_.truthy(body["packs"], name .. ": no packs row")
+        else
+          local flows = assert(body["flows"], name .. ": no flows table")
+          assert_.truthy(#flows.children >= 10, name .. ": flows table has " .. #flows.children .. " cells")
+        end
+        if def.kind == "silo" then assert_.truthy(body["silo"], name .. ": no rocket parts") end
+        assert_.truthy(body["port-1"], name .. ": no ports")
+        assert_.truthy(body["signals"], name .. ": no signals line")
+        if #def.tiers > 1 then assert_.truthy(body["tier"], name .. ": no tier line") end
+        assert_.truthy(frame["titlebar"]["title"].tooltip, name .. ": no description on the title")
+        p.opened = nil
+        city.destroy()
+      end
     end,
   },
 }

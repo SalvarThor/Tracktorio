@@ -4,6 +4,23 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.13.1-2.13.5 a clearer city window
+- One compact page (user's pick over tabs). Order: coloured status (green running, red
+  starved, orange output full, yellow power or other) with a short hint only when
+  something is wrong (starved: "Belt X into its port, top left"); a flows table (item,
+  in/out/fuel, now/min, max/min, held); ports one line each with a belt icon for the belt
+  it needs (rate in the tooltip); "Signals at the door" with what they send in its
+  tooltip; servicing in one line; tier, next tier and one row per material (icon, count,
+  bar).
+- Explanations moved into tooltips: the description on the title, the port rules on
+  "Ports", servicing rules, where to deliver materials (tier lines), the silo's recipe.
+- Dropped: "One cycle takes N s of work at speed 1" (no use to a player) and the "per
+  cycle" amounts (the table shows rates).
+- Element names and locale keys tests rely on were kept (status, hint, port-i, tier,
+  service, silo, also_missing, power_use).
+- LuaLS mistypes LocalisedString tables assigned to GUI fields; such locals are typed
+  `any`, as elsewhere in the code.
+
 ## 2026-11-21: 2.12.10 throttle momentum
 - User asked for more momentum, and whether a city could wait for a big enough buffer and
   then use it at a rate set by its size. The engine caps what a crafting machine takes in

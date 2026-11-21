@@ -67,8 +67,10 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
   then the city upgrades in place and grows: 8x8, 12x12, 16x16. The dashed outline shows
   how big it gets; whatever you built inside it comes back to you, and belts into the
   ports still reach them. Pips on the city show its tier.
-- **Windows:** click a city or a port to see its recipe and rates, what it holds and
-  what it's missing, its ports and the belt each needs, and what the next tier costs.
+- **Windows:** click a city or a port. The status comes first, in colour, with a short
+  hint when something is wrong; then a table of what goes in and out (now, max, held),
+  its ports with the belt each needs, and its tier with the next tier's materials.
+  Hover the title and the headings for the explanations.
 - **Steady production:** a city fed below its full rate (or whose output is taken away
   slower) runs steadily at that rate, down to 20%, using less power to match. Its window
   says "Running at 60%".

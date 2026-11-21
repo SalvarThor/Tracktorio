@@ -38,8 +38,13 @@ return {
       local p, body = open(city)
       local tier = assert(body["tier"], "no tier line")
       assert_.equals(tier.caption[1], "tt-gui.tier-line")
+      -- 2.13: each material is one row (icon, count, bar)
       local bars = 0
-      for _, c in ipairs(body.children) do if c.type == "progressbar" then bars = bars + 1 end end
+      for _, c in ipairs(body.children) do
+        if c.name:find("^material%-") then
+          for _, x in ipairs(c.children) do if x.type == "progressbar" then bars = bars + 1 end end
+        end
+      end
       assert_.equals(bars, 1, "material progress bars")
       p.opened = nil
     end,

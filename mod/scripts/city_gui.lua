@@ -57,14 +57,17 @@ local function add_text(body, caption, bold, name)
   return label
 end
 
+-- Status colours (2.13): green running, red starved, orange output full, yellow power.
+local GREEN, RED, ORANGE, YELLOW = { 0.55, 0.9, 0.45 }, { 1, 0.45, 0.4 }, { 1, 0.7, 0.3 }, { 1, 0.88, 0.35 }
+local HINT = { 0.75, 0.75, 0.75 }
+
+--- A section heading after a separator, with its explanation as a tooltip.
 ---@param body LuaGuiElement
----@param entity LuaEntity
-local function add_description(body, entity)
-  -- Cities: their description without the tooltip's "click it" hint (playtest 2.2.8).
-  local text = city_defs.by_entity[entity.name] and { "tt-city-description." .. entity.name } or entity.localised_description
-  local desc = add_text(body, text)
-  desc.style.font_color = { 0.8, 0.8, 0.8 }
+---@param caption LocalisedString
+---@param tooltip LocalisedString?
+local function add_heading(body, caption, tooltip)
   body.add({ type = "line", direction = "horizontal" })
+  return body.add({ type = "label", caption = caption, style = "caption_label", tooltip = tooltip })
 end
 
 --- Rich-text icons for item or fluid names.
@@ -77,23 +80,44 @@ local function icon_list(names)
   return table.concat(out, " ")
 end
 
---- Status line (+ optional hint line) for a crafting city.
+--- Where on the wall a port is, as a locale key ("top left", "left side, top"...).
+---@param p table city_info.ports entry
+local function port_where(p)
+  local along = math.abs(p.offset) < 0.01 and "mid" or (p.offset < 0 and "a" or "b")
+  return { "tt-gui.city-pipe-pos-" .. p.side .. "-" .. along }
+end
+
+--- Short "what to do" for a starved city: where its first missing input goes in.
+---@param info table
+local function starved_hint(info)
+  local name = info.missing and info.missing[1]
+  if not name then return nil end
+  for _, p in ipairs(info.ports or {}) do
+    if p.flow == "input" and p.name == name then
+      local fluid = prototypes.fluid[name] ~= nil
+      return { fluid and "tt-gui.city-hint-starved-pipe" or "tt-gui.city-hint-starved-belt", icon_list({ name }), port_where(p) }
+    end
+  end
+  return nil
+end
+
+--- Status line, coloured, and a short hint only when something is wrong.
 ---@param body LuaGuiElement
 ---@param entity LuaEntity
 ---@param info table
 local function add_status(body, entity, info)
-  local status, hint
+  local status, hint, color, tip
   if info.status == "running" and info.speed and info.speed < 100 then
     -- 2.12: fed below its full rate, it runs steadily at that rate
-    status, hint = { "tt-gui.city-status-running-at", tostring(info.speed) }, { "tt-gui.city-hint-running-at" }
+    status, color, tip = { "tt-gui.city-status-running-at", tostring(info.speed) }, GREEN, { "tt-gui.city-hint-running-at" }
   elseif info.status == "running" then
-    status = { "tt-gui.city-status-running" }
+    status, color = { "tt-gui.city-status-running" }, GREEN
   elseif info.status == "low_power" then
-    status, hint = { "tt-gui.city-status-low-power" }, { "tt-gui.city-hint-low-power" }
+    status, hint, color = { "tt-gui.city-status-low-power" }, { "tt-gui.city-hint-low-power" }, YELLOW
   elseif info.status == "no_power" then
-    status, hint = { "tt-gui.city-status-no-power" }, { "tt-gui.city-hint-no-power" }
+    status, hint, color = { "tt-gui.city-status-no-power" }, { "tt-gui.city-hint-no-power" }, YELLOW
   elseif info.status == "output_full" and city_defs.is_power(entity.name) then
-    status, hint = { "tt-gui.city-status-power-idle" }, { "tt-gui.city-hint-power-idle" }
+    status, color, tip = { "tt-gui.city-status-power-idle" }, YELLOW, { "tt-gui.city-hint-power-idle" }
   elseif info.status == "output_full" then
     local names, fluid = {}, false
     for _, n in ipairs(info.full or {}) do
@@ -102,14 +126,16 @@ local function add_status(body, entity, info)
       names[#names + 1] = (is_fluid and "[fluid=" or "[item=") .. n .. "]"
     end
     status = #names > 0 and { "tt-gui.city-status-output-full-named", table.concat(names, " ") } or { "tt-gui.city-status-output-full" }
-    hint = fluid and { "tt-gui.city-hint-output-full-fluid" } or { "tt-gui.city-hint-output-full" }
+    hint, color = fluid and { "tt-gui.city-hint-output-full-fluid" } or { "tt-gui.city-hint-output-full" }, ORANGE
   elseif info.status == "starved" then
-    status = { "tt-gui.city-status-starved", icon_list(info.missing) }
+    status, hint, color = { "tt-gui.city-status-starved", icon_list(info.missing) }, starved_hint(info), RED
   else
-    status = { "tt-gui.city-status-other", info.status_detail or "?" }
+    status, color = { "tt-gui.city-status-other", info.status_detail or "?" }, YELLOW
   end
-  add_text(body, status, true, "status")
-  if hint then add_text(body, hint, false, "hint") end
+  local label = add_text(body, status, true, "status")
+  label.style.font_color = color
+  if tip then label.tooltip = tip end
+  if hint then add_text(body, hint, false, "hint").style.font_color = HINT end
   if info.power_use and info.status == "running" then
     add_text(body, { "tt-gui.city-power-use", tostring(math.floor(info.power_use * 100 + 0.5)) }, false, "power_use")
   end
@@ -118,72 +144,119 @@ local function add_status(body, entity, info)
   end
 end
 
---- Tier, next tier and the construction materials with progress bars.
+--- Flows as a table: item, in/out, now per minute, max per minute, held in the city.
+---@param body LuaGuiElement
+---@param entity LuaEntity
+---@param info table
+local function add_flows(body, entity, info)
+  body.add({ type = "line", direction = "horizontal" })
+  local t = body.add({ type = "table", name = "flows", column_count = 5 })
+  t.style.horizontal_spacing = 14
+  for i = 3, 5 do
+    ---@diagnostic disable-next-line: assign-type-mismatch
+    t.style.column_alignments[i] = "right"
+  end
+  for _, key in ipairs({ "", "", "tt-gui.flows-now", "tt-gui.flows-max", "tt-gui.flows-held" }) do
+    t.add({ type = "label", caption = key ~= "" and { key } or "", style = "caption_label" })
+  end
+  -- crafts per minute now, from the first product's measured rate
+  local first = info.recipe.products[1]
+  local crafts_now = first and first.amount > 0 and (first.per_min or 0) / first.amount or 0
+  local out_inv = entity.get_inventory(defines.inventory.crafter_output)
+  local function row(entry, flow, now, max, held)
+    local proto = entry.type == "fluid" and prototypes.fluid[entry.name] or prototypes.item[entry.name]
+    t.add({ type = "sprite", sprite = sprite_for(entry.type, entry.name), tooltip = proto and proto.localised_name or nil })
+    t.add({ type = "label", caption = { flow } })
+    t.add({ type = "label", caption = now and fmt(now) or "-" })
+    t.add({ type = "label", caption = fmt(max) })
+    t.add({ type = "label", caption = fmt(held) })
+  end
+  for _, ing in ipairs(info.recipe.ingredients) do
+    if ing.fuel then
+      row(ing, "tt-gui.flows-fuel", nil, ing.per_min_max, ing.have or 0)
+    else
+      row(ing, "tt-gui.city-pipe-in", crafts_now * ing.amount, ing.per_min_max, ing.have or 0)
+    end
+  end
+  for _, p in ipairs(info.recipe.products) do
+    local held = p.type == "fluid" and entity.get_fluid_count(p.name) or (out_inv and out_inv.get_item_count(p.name) or 0)
+    row(p, "tt-gui.city-pipe-out", p.per_min or 0, p.per_min_max, held)
+  end
+end
+
+--- Tier, next tier and the construction materials, each with its progress bar on one row.
 ---@param body LuaGuiElement
 ---@param city LuaEntity
 local function add_tiers(body, city)
   local s = ports.status(city)
   if not s or s.max_tier <= 1 then return end
   body.add({ type = "line", direction = "horizontal" })
-  add_text(body, { "tt-gui.tier-line", tostring(s.tier), tostring(s.max_tier), notify.describe(city.name) }, true, "tier")
+  local line = add_text(body, { "tt-gui.tier-line", tostring(s.tier), tostring(s.max_tier), notify.describe(city.name) }, true, "tier")
   if not s.next then
     add_text(body, { "tt-gui.tier-top" })
     return
   end
-  local next_tier = s.tier + 1
-  add_text(body, { "tt-gui.tier-next", tostring(next_tier), notify.describe(s.next, city.name) })
+  line.tooltip = { "tt-gui.tier-where" }
+  add_text(body, { "tt-gui.tier-next", tostring(s.tier + 1), notify.describe(s.next, city.name) }).tooltip = { "tt-gui.tier-where" }
   local items = {}
   for item in pairs(s.cost) do items[#items + 1] = item end
   table.sort(items)
   for _, item in ipairs(items) do
     local got, need = math.min(s.delivered[item] or 0, s.cost[item]), s.cost[item]
-    add_line(body, { type = "item", name = item }, { "tt-gui.tier-material", tostring(got), tostring(need) })
-    local bar = body.add({ type = "progressbar", value = got / need })
+    local row = body.add({ type = "flow", direction = "horizontal", name = "material-" .. item })
+    row.style.vertical_align = "center"
+    row.add({ type = "sprite", sprite = "item/" .. item, tooltip = prototypes.item[item].localised_name })
+    ---@type any
+    local caption = { "tt-gui.tier-material", tostring(got), tostring(need) }
+    local count = row.add({ type = "label", caption = caption })
+    count.style.minimal_width = 90
+    local bar = row.add({ type = "progressbar", value = got / need })
     bar.style.horizontally_stretchable = true
   end
-  add_text(body, { "tt-gui.tier-where" })
 end
 
---- Every port at this tier (2.10.9): what goes through it, which way, where on the wall,
---- and the belt it needs at full output (pipes: the flow).
+local BELT_ITEM = { yellow = "transport-belt", red = "fast-transport-belt", blue = "express-transport-belt", turbo = "turbo-transport-belt" }
+
+--- Every port at this tier: item, in/out, where on the wall and the belt it needs at full
+--- output (an icon; the rate in the tooltip). Signals as one line, explained in its tooltip.
 ---@param body LuaGuiElement
----@param ports table[]?
+---@param port_list table[]?
 ---@param has_next boolean the city has a next tier (and so a construction signal point)
-local function add_ports(body, ports, has_next)
-  if not ports or #ports == 0 then return end
-  body.add({ type = "line", direction = "horizontal" })
-  body.add({ type = "label", caption = { "tt-gui.city-ports" }, style = "caption_label" })
-  for i, p in ipairs(ports) do
-    -- "bottom left", "top right", "left side, top"... (playtest 2.4.6: no tile counts)
-    local along = math.abs(p.offset) < 0.01 and "mid" or (p.offset < 0 and "a" or "b")
+local function add_ports(body, port_list, has_next)
+  if not port_list or #port_list == 0 then return end
+  add_heading(body, { "tt-gui.city-ports" }, { "tt-gui.city-ports-tip" })
+  for i, p in ipairs(port_list) do
     local what = p.kind == "construction" and ("[img=" .. config.CONSTRUCTION_ICON .. "]") or p.kind == "service" and "[item=repair-pack]"
       or ("[" .. p.kind .. "=" .. p.name .. "]")
-    local key, arg = "", nil
-    if p.kind == "construction" then key = "tt-gui.city-port-construction"
-    elseif p.kind == "service" then key = "tt-gui.city-port-service"
-    elseif p.belt then key, arg = "tt-gui.city-port-belt-" .. p.belt, fmt(p.per_s)
-    elseif p.per_s then key, arg = "tt-gui.city-port-rate", fmt(p.per_s) end
-    local extra = { key, arg }
-    add_text(body, { "tt-gui.city-port-line", what,
-      { p.flow == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" },
-      { "tt-gui.city-pipe-pos-" .. p.side .. "-" .. along }, extra }, false, "port-" .. i)
+    ---@type any
+    local extra = ""
+    ---@type any
+    local tip = nil
+    if p.kind == "construction" then tip = { "tt-gui.city-port-construction-tip" }
+    elseif p.kind == "service" then tip = { "tt-gui.city-port-service-tip" }
+    elseif p.belt then
+      local belt = "[item=" .. BELT_ITEM[p.belt] .. "]"
+      extra, tip = belt, { "tt-gui.city-port-belt-tip", belt, fmt(p.per_s) }
+    elseif p.per_s then extra = { "tt-gui.city-port-rate", fmt(p.per_s) } end
+    local label = add_text(body, { "tt-gui.city-port-line", what,
+      { p.flow == "input" and "tt-gui.city-pipe-in" or "tt-gui.city-pipe-out" }, port_where(p), extra }, false, "port-" .. i)
+    if tip then label.tooltip = tip end
   end
   -- 2.11: the signal points in the door
-  add_text(body, { has_next and "tt-gui.city-signals" or "tt-gui.city-signals-top", "[img=item/constant-combinator]" }, false, "signals")
+  add_text(body, { "tt-gui.city-signals", "[img=item/constant-combinator]" }, false, "signals").tooltip =
+    { has_next and "tt-gui.city-signals-tip" or "tt-gui.city-signals-top-tip" }
 end
 
---- A depot's servicing: packs in the service port and locomotives serviced (2.3.3).
+--- A depot's servicing in one line; the rules in its tooltip (2.3.3).
 ---@param body LuaGuiElement
 ---@param city LuaEntity
 local function add_service(body, city)
   local s = service.status(city)
   if not s then return end
-  body.add({ type = "line", direction = "horizontal" })
-  add_text(body, { "tt-gui.service-title" }, true)
-  add_text(body, s.port and { "tt-gui.service-packs", "[item=" .. config.SERVICE_ITEM .. "]", tostring(s.packs) }
-    or { "tt-gui.service-no-port" }, false, "service")
-  add_text(body, { "tt-gui.service-count", tostring(s.serviced) })
-  add_text(body, { "tt-gui.service-how", tostring(config.SERVICE_RANGE) })
+  local how = { "tt-gui.service-how", tostring(config.SERVICE_RANGE) }
+  add_heading(body, { "tt-gui.service-title" }, how)
+  add_text(body, { "tt-gui.service-packs", "[item=" .. config.SERVICE_ITEM .. "]", tostring(s.packs or 0), tostring(s.serviced) },
+    false, "service").tooltip = how
 end
 
 --- The research complex: status, current research and the packs inside.
@@ -197,12 +270,12 @@ local function fill_lab(body, entity, info)
     return table.concat(out, " ")
   end
   if info.status == "no_research" then
-    add_text(body, { "tt-gui.lab-status-no-research" }, true, "status")
-    add_text(body, { "tt-gui.lab-hint-no-research" }, false, "hint")
+    add_text(body, { "tt-gui.lab-status-no-research" }, true, "status").style.font_color = YELLOW
+    add_text(body, { "tt-gui.lab-hint-no-research" }, false, "hint").style.font_color = HINT
   elseif info.unsupported and #info.unsupported > 0 then
-    add_text(body, { "tt-gui.lab-status-unsupported", icons(info.unsupported) }, true, "status")
+    add_text(body, { "tt-gui.lab-status-unsupported", icons(info.unsupported) }, true, "status").style.font_color = RED
   elseif info.status == "missing_packs" then
-    add_text(body, { "tt-gui.lab-status-missing", icons(info.missing) }, true, "status")
+    add_text(body, { "tt-gui.lab-status-missing", icons(info.missing) }, true, "status").style.font_color = RED
   else
     add_status(body, entity, info)
   end
@@ -210,9 +283,13 @@ local function fill_lab(body, entity, info)
     add_text(body, { "tt-gui.lab-research", "[technology=" .. info.research .. "]",
       prototypes.technology[info.research].localised_name }, false, "research")
   end
-  body.add({ type = "label", caption = { "tt-gui.lab-packs" }, style = "caption_label" })
+  body.add({ type = "line", direction = "horizontal" })
+  local packs = body.add({ type = "flow", direction = "horizontal", name = "packs" })
+  packs.style.vertical_align = "center"
+  packs.add({ type = "label", caption = { "tt-gui.lab-packs" }, style = "caption_label" })
   for _, p in ipairs(info.lab.packs) do
-    add_line(body, p, { "tt-gui.lab-pack-line", tostring(p.count) })
+    packs.add({ type = "sprite", sprite = "item/" .. p.name, tooltip = prototypes.item[p.name].localised_name })
+    packs.add({ type = "label", caption = tostring(p.count) })
   end
   add_text(body, { "tt-gui.lab-speed", tostring(math.floor(info.lab.speed + 0.5)) })
   add_ports(body, info.ports, city_defs.next_tier(entity.name) ~= nil)
@@ -229,26 +306,15 @@ local function fill_city(body, entity)
     return
   end
   add_status(body, entity, info)
-  body.add({ type = "label", caption = { "tt-gui.city-inputs" }, style = "caption_label" })
-  for _, ing in ipairs(info.recipe.ingredients) do
-    if ing.fuel then
-      -- burner fuel (nuclear): one item lasts this long at full output
-      add_line(body, ing, { "tt-gui.city-fuel-line", fmt(60 / ing.per_min_max), fmt(ing.have or 0) })
-    else
-      add_line(body, ing, { "tt-gui.city-input-line", fmt(ing.amount), fmt(ing.per_min_max), fmt(ing.have or 0) })
-    end
-  end
-  body.add({ type = "label", caption = { "tt-gui.city-outputs" }, style = "caption_label" })
-  for _, p in ipairs(info.recipe.products) do
-    add_line(body, p, { "tt-gui.city-output-line", fmt(p.amount), fmt(p.per_min), fmt(p.per_min_max) })
-  end
-  add_text(body, { "tt-gui.city-cycle", fmt(info.recipe.energy) })
+  add_flows(body, entity, info)
   if info.silo then
     body.add({ type = "line", direction = "horizontal" })
-    add_text(body, { "tt-gui.silo-parts", tostring(info.silo.parts), tostring(info.silo.required) }, true, "silo")
+    local parts = add_text(body, { "tt-gui.silo-parts", tostring(info.silo.parts), tostring(info.silo.required) }, true, "silo")
+    ---@type any
+    local how = { "tt-gui.silo-how", tostring(info.silo.required) }
+    parts.tooltip = how
     local bar = body.add({ type = "progressbar", value = info.silo.required > 0 and info.silo.parts / info.silo.required or 0 })
     bar.style.horizontally_stretchable = true
-    add_text(body, { "tt-gui.silo-how", tostring(info.silo.required) })
     add_text(body, { "tt-gui.silo-launched", tostring(info.silo.launched) })
   end
   add_ports(body, info.ports, city_defs.next_tier(entity.name) ~= nil)
@@ -297,7 +363,6 @@ end
 local function fill(frame, entity)
   local body = frame.body
   body.clear()
-  add_description(body, entity)
   if entity.name == config.CITY.goal then
     fill_goal(body)
   elseif entity.name == config.PORT then
@@ -330,9 +395,11 @@ end
 function M.open(player, entity)
   M.close(player)
   local frame = player.gui.screen.add({ type = "frame", name = FRAME, direction = "vertical" })
-  local titlebar = frame.add({ type = "flow", direction = "horizontal" })
+  local titlebar = frame.add({ type = "flow", name = "titlebar", direction = "horizontal" })
   titlebar.drag_target = frame
-  titlebar.add({ type = "label", caption = entity.localised_name, style = "frame_title", ignored_by_interaction = true })
+  -- 2.13: the description is the title's tooltip (cities: without the "click it" hint)
+  local description = city_defs.by_entity[entity.name] and { "tt-city-description." .. entity.name } or entity.localised_description
+  titlebar.add({ type = "label", name = "title", caption = entity.localised_name, style = "frame_title", tooltip = description })
   local filler = titlebar.add({ type = "empty-widget", style = "draggable_space_header", ignored_by_interaction = true })
   filler.style.horizontally_stretchable = true
   filler.style.height = 24
