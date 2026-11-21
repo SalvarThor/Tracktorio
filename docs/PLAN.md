@@ -729,7 +729,7 @@ Items:
 - [x] 2.11.3 Signals: input and output stock, fluids, status, tier on the stock point;
       missing construction materials on the construction point. Custom virtual signals
       with locale names. City window lists the signal points.
-- [ ] 2.11.4 Tests: a decider wired to a city's signal point sees its stock, status
+- [x] 2.11.4 Tests: a decider wired to a city's signal point sees its stock, status
       changes (starve it, fill it), the construction point counts down as materials
       arrive, and the signals follow an upgrade; a train stop
       limit set from a city's signal works end to end.

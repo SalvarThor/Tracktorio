@@ -186,4 +186,28 @@ return {
       end)
     end,
   },
+  {
+    name = "signals: a train stop wired to a city takes its train limit from the city's stock",
+    fn = function(ctx)
+      local x = X + 3250
+      local city, pole = wired_city("tt-city-iron-smelting", x, "stock")
+      local stop = h.create("train-stop", { x + 5, 13 }, { direction = defines.direction.north })
+      assert(stop.get_wire_connector(RED, true).connect_to(pole.get_wire_connector(RED, true), false), "could not wire the stop")
+      local cb = stop.get_or_create_control_behavior() --[[@as LuaTrainStopControlBehavior]]
+      cb.set_trains_limit = true
+      cb.trains_limit_signal = { type = "virtual", name = "signal-T" }
+      after_signals(ctx, function()
+        ctx:wait(1, function()
+          assert_.equals(stop.trains_limit, 1, "limit from the tier signal")
+          city.get_inventory(defines.inventory.crafter_input).insert({ name = "iron-ore", count = 3 })
+          cb.trains_limit_signal = { type = "item", name = "iron-ore", quality = "normal" }
+          after_signals(ctx, function()
+            ctx:wait(1, function()
+              assert_.equals(stop.trains_limit, 3, "limit from the iron ore in the city")
+            end)
+          end)
+        end)
+      end)
+    end,
+  },
 }
