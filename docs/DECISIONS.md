@@ -4,6 +4,18 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.10 city icons show the product
+- User, playtest 2.15.10: the city items all looked alike in the quickbar (the building art
+  with a tiny product badge). Now the product (or roof icon: steam engine, reactor, lab) is
+  the full-size icon, the city building a small mark top left; coal smelting gets a coal
+  mark and electric smelting a lightning mark bottom right. Entity and item share the icon.
+- Playtest finding: a stray copy of the scenario in `.factorio-play\data\scenarios\` (saved
+  at 18:03, old text) also shows as "Tracktorio"; started from there it is a user scenario,
+  so the mod's on_init skips the layout (no plots, no tags). Moved aside to
+  `.factorio-play\data\stray-scenario-tracktorio-1803`.
+- Rejected: keeping the building as the main icon with a bigger badge (still reads as
+  "a building" first).
+
 ## 2026-11-21: 2.15.7 cities at half rate
 - `city_defs.RATE = 0.5` scales every city's crafting speed, research speed, power,
   burner power and steam (generator usage) after the list, so the derivations in the file
