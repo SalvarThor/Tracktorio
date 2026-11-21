@@ -63,7 +63,7 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
   item is enough at tier 1, red at tier 2, blue at tier 3 (tier 3 smelting has two ports
   per item).
 - **Tiers:** most cities have 3 tiers (x1, x2, x4). Upgrade a city by belting materials
-  into its **construction port** (the green arrow). You get a heads-up message at 90%,
+  into its **construction port** (marked with a steel chest). You get a heads-up message at 90%,
   then the city upgrades in place and grows: 8x8, 12x12, 16x16. The dashed outline shows
   how big it gets; whatever you built inside it comes back to you, and belts into the
   ports still reach them. Pips on the city show its tier.

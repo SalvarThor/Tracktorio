@@ -92,7 +92,22 @@ return {
       local t0 = game.tick
       h.feed_port(city, "copper-plate", 2000)
       assert_.truthy(h.city_at(pos).name == "tt-city-iron-smelting-t2", "did not upgrade")
-      assert_.truthy(any_mentions(messages_since(t0), "tt-notify.weak-network"), "no weak-network warning")
+      assert_.truthy(any_mentions(messages_since(t0), "tt-notify.no-power-city"), "no no-power-city warning")
+    end,
+  },
+  {
+    -- playtest 2.10: a power city on the same poles counts (its hidden generator is on the network)
+    name = "upgrade ui: with a power city on its poles, the network check counts its output",
+    fn = function(ctx)
+      h.clear_area({ { 4140, -14 }, { 4200, 16 } })
+      local depot = h.place_city("tt-city-depot", { 4150.5, 0.5 })
+      local power = h.place_city("tt-city-power", { 4180.5, 0.5 })
+      for x = 4156.5, 4174.5, 6 do h.create("medium-electric-pole", { x, 0.5 }) end
+      ctx:wait(2, function()
+        local w = remote.call("tt-city", "network_warning", depot)
+        assert_.falsy(w, "warning with a 5.4 MW power city for a 0.84 MW depot: " .. serpent.line(w))
+        assert_.truthy(power.valid)
+      end)
     end,
   },
   {

@@ -152,7 +152,7 @@ local function add_ports(body, ports)
   for i, p in ipairs(ports) do
     -- "bottom left", "top right", "left side, top"... (playtest 2.4.6: no tile counts)
     local along = math.abs(p.offset) < 0.01 and "mid" or (p.offset < 0 and "a" or "b")
-    local what = p.kind == "construction" and "[img=utility/upgrade_mark]" or p.kind == "service" and "[item=repair-pack]"
+    local what = p.kind == "construction" and ("[img=" .. config.CONSTRUCTION_ICON .. "]") or p.kind == "service" and "[item=repair-pack]"
       or ("[" .. p.kind .. "=" .. p.name .. "]")
     local key, arg = "", nil
     if p.kind == "construction" then key = "tt-gui.city-port-construction"
@@ -362,7 +362,7 @@ local function on_open_input(e)
   if not player then return end
   local selected = player.selected
   -- a belt port (2.10) opens its city's window
-  if selected and (selected.name == config.BELT_PORT or selected.name == config.BOX_PORT) then
+  if selected and (selected.name == config.BELT_PORT or selected.name == config.BOX_PORT or selected.name == config.SERVICE_BOX_PORT) then
     selected = city_of_belt_port(selected)
   end
   if selected and M.has_window(selected) then

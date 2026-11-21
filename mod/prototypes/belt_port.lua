@@ -24,14 +24,26 @@ port.selection_priority = 60 -- above the city: hovering the port shows what it 
 port.speed = 0.125 -- as fast as the fastest belt (turbo, 60/s): the player's belt is the limit
 port.filter_count = 1
 port.structure = { direction_in = { sheet = empty }, direction_out = { sheet = empty } }
+-- No belt either (playtest 2.10: a sliver of moving belt showed at an unconnected port): a
+-- transparent sheet with the 20 belt directions, one frame each.
+port.belt_animation_set = {
+  animation_set = { filename = "__tracktorio__/graphics/empty-belt.png", priority = "extra-high",
+    width = 1, height = 1, frame_count = 1, direction_count = 20 },
+}
 port.next_upgrade = nil
 port.fast_replaceable_group = nil
 
 -- The construction and service ports (2.10.6) feed a hidden chest two tiles in, clear of
 -- the tile in front of every item port (on the 8x8 building the item ports at the corners
 -- share their front tiles).
+-- Construction and service ports are separate prototypes so each explains itself when
+-- hovered (2.10.14).
 local box_port = table.deepcopy(port)
 box_port.name = config.BOX_PORT
 box_port.container_distance = 2
+box_port.icon = "__base__/graphics/icons/steel-chest.png"
+local service_port = table.deepcopy(box_port)
+service_port.name = config.SERVICE_BOX_PORT
+service_port.icon = "__base__/graphics/icons/repair-pack.png"
 
-data:extend({ port, box_port })
+data:extend({ port, box_port, service_port })

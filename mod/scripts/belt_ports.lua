@@ -17,7 +17,7 @@ local M = {}
 local CHECK_TICKS = 10
 
 -- Marker icons of the ports that aren't for one recipe item or fluid.
-local SPRITE = { construction = "utility/upgrade_mark", service = "item/repair-pack" }
+local SPRITE = { construction = config.CONSTRUCTION_ICON, service = "item/repair-pack" }
 
 local INWARD = {
   [defines.direction.north] = defines.direction.south, [defines.direction.south] = defines.direction.north,
@@ -63,7 +63,8 @@ local function draw_footprint(city, def, size)
   for i = 1, 4 do
     local a, b = corners[i], corners[i % 4 + 1]
     rendering.draw_line({
-      color = { r = 0.6, g = 0.6, b = 0.6, a = 0.5 }, width = 2, dash_length = 1, gap_length = 0.5,
+      -- playtest 2.10: visible, not prominent
+      color = { r = 0.12, g = 0.12, b = 0.12, a = 0.12 }, width = 1, dash_length = 0.5, gap_length = 0.5,
       from = { entity = city, offset = a }, to = { entity = city, offset = b },
       surface = city.surface, render_layer = "decals",
     })
@@ -120,7 +121,7 @@ function M.attach(city, record)
         -- behind them (scripts/ports.lua, scripts/service.lua), whose slot filters decide
         -- what it takes
         local loader = city.surface.create_entity({
-          name = p.kind == "item" and config.BELT_PORT or config.BOX_PORT,
+          name = p.kind == "item" and config.BELT_PORT or p.kind == "service" and config.SERVICE_BOX_PORT or config.BOX_PORT,
           position = { city.position.x + spot.inside[1], city.position.y + spot.inside[2] },
           direction = inward and INWARD[spot.direction] or spot.direction,
           type = inward and "input" or "output",
@@ -157,7 +158,7 @@ cities.on_any_placed(M.attach)
 ---@param inserter LuaEntity
 local function reaches_city(inserter)
   local function is_city(t)
-    return t ~= nil and t.valid and (t.name == config.BELT_PORT or t.name == config.BOX_PORT
+    return t ~= nil and t.valid and (t.name == config.BELT_PORT or t.name == config.BOX_PORT or t.name == config.SERVICE_BOX_PORT
       or t.name == config.PORT or t.name == config.SERVICE_PORT or (cities.is_city(t) and t.name ~= config.CITY.goal))
   end
   return is_city(inserter.pickup_target) or is_city(inserter.drop_target)

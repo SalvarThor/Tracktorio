@@ -1,5 +1,5 @@
--- Tier pips (PLAN 2.1.7): one marker per tier along a city's top edge, filled up to the
--- city's tier. Drawn with LuaRendering attached to the city, so they vanish with it; an
+-- Tier pips (PLAN 2.1.7): one marker per tier in the middle of a city's top edge (2.10.13:
+-- small, and clear of the port markers at +-2.5), filled up to the city's tier. Drawn with LuaRendering attached to the city, so they vanish with it; an
 -- upgraded city is a new entity and gets fresh pips from the on_any_placed hook.
 --
 -- record.tier_marks = { <render object id>, ... }
@@ -8,8 +8,8 @@ local cities = require("scripts.cities")
 
 local M = {}
 
-M.RADIUS = 0.34 -- 75% of the first draft (0.45), playtest 2.1.7
-M.SPACING = 1.2
+M.RADIUS = 0.2 -- playtest 2.10: smaller (was 0.34)
+M.SPACING = 0.55
 M.FILLED = { r = 1, g = 0.78, b = 0.2, a = 1 }
 M.EMPTY = { r = 0.15, g = 0.15, b = 0.15, a = 0.8 }
 M.OUTLINE = { r = 0, g = 0, b = 0, a = 1 }
@@ -43,8 +43,8 @@ function M.draw(city, record)
   local info = city_defs.by_entity[record.name]
   if not (info and info.max_tier > 1) then return end
   local box, pos = city.bounding_box, city.position
-  local x0 = box.left_top.x - pos.x + 1
-  local y0 = box.left_top.y - pos.y + 0.9
+  local x0 = -(info.max_tier - 1) * M.SPACING / 2 -- centred on the top edge, between the ports
+  local y0 = box.left_top.y - pos.y + 0.6
   local ids = {}
   for i = 1, info.max_tier do
     local target = { entity = city, offset = { x0 + (i - 1) * M.SPACING, y0 } }

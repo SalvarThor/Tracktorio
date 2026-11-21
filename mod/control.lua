@@ -74,6 +74,7 @@ city_remote.alerts_pending = function() return #(storage.tt_alerts or {}) end
 -- Tests: queue an inserter as if `player_index` had built it (2.10.5).
 city_remote.check_inserter = function(entity, player_index) belt_ports.check_inserter(entity, player_index) end
 city_remote.inserters_refused = function() return storage.tt_inserters_refused or 0 end
+city_remote.network_warning = function(entity) return notify.network_warning(entity) end
 -- Tests: run the configuration-change migration, and turn a city back into its MVP-era form
 -- (no port, no upgrade progress), as a schema 1 save has it.
 city_remote.migrate = function(from_schema)

@@ -112,6 +112,8 @@ function M.network_warning(city)
       end
     end
   end
+  -- playtest 2.10: "power cities on it make up to 0 MW" read as nonsense
+  if supply <= 0 then return { "tt-notify.no-power-city", mw(demand) } end
   if demand > supply then return { "tt-notify.weak-network", mw(demand), mw(supply) } end
   return nil
 end

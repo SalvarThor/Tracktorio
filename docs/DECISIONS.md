@@ -4,6 +4,25 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.10 playtest fixes (2.10.13-2.10.18)
+- Tier pips: radius 0.2 (was 0.34), 0.55 apart, centred on the top edge between the port
+  markers. They never scaled with the building; they were just big next to the markers.
+- Construction port: marked with the steel chest icon everywhere (wall marker, window,
+  README); user choice over the upgrade arrow and a tier number. Construction and service
+  ports are separate loader prototypes, so hovering each shows its own name and
+  description.
+- Port loaders draw no belt: a transparent 1x20 sheet (20 belt directions, one frame)
+  replaces the belt animation, so an unconnected port shows no moving sliver.
+- Footprint outline: near-black at 12% opacity, 1 px, short dashes.
+- Coal fuel: the coal icon with a flame badge (the "fire" signal icon) in the corner; user
+  choice over tinted coal and a solid-fuel look.
+- Upgrade power warning: with no power city on the network it now says so ("No power city
+  is on its pole network yet") instead of "power cities on it make up to 0 MW"; the weak
+  case reads "... but the power cities on it make only Y MW". Checked it was not a fault:
+  a power city on the same poles is counted (new test).
+- Output lanes: measured, a port fills both lanes of a straight belt evenly (12/12,
+  27/27, ... 84/84 when backed up). One lane only comes from side-loading or a turn right
+  outside the port. Decision pending (2.10.19).
 ## 2026-11-20: roof icons (user, before the 2.10 playtest)
 - Every city but the silo has a large icon of what it makes painted on its roof, as in
   Factorissimo, so cities tell apart at a glance: its first product, or `roof_icon` in its

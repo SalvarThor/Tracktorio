@@ -6,7 +6,11 @@ data:extend({
   {
     type = "item",
     name = "tt-coal-fuel",
-    icons = { { icon = "__base__/graphics/icons/coal.png", tint = { r = 1, g = 0.62, b = 0.3, a = 1 } } },
+    -- coal with a flame badge (playtest 2.10: it read as plain coal on the depot's ports)
+    icons = {
+      { icon = "__base__/graphics/icons/coal.png", tint = { r = 1, g = 0.62, b = 0.3, a = 1 } },
+      { icon = "__base__/graphics/icons/signal/signal-fire.png", scale = 0.3, shift = { 9, -9 }, floating = true },
+    },
     subgroup = "raw-resource",
     order = "z[tt-coal-fuel]",
     stack_size = 50,
