@@ -4,6 +4,27 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.3 plots and city items
+- A plot is two tiles: tt-plot (a copy of refined concrete) inside a one-tile ring of
+  tt-plot-border (refined hazard concrete, the "painted border"), both bright yellow-orange
+  on the map. Not minable, no item places them.
+- Both carry a custom collision layer, tt_plot. Cities require it under their whole
+  footprint: `tile_buildability_rules = { { area = footprint, required_tiles = { layers =
+  { tt_plot = true } } } }` (2.1 rules take collision masks, not tile names). The engine
+  then shows the placement red off a plot and refuses it; `can_place_entity` with
+  build_check_type manual agrees (tested). `create_entity` by script checks nothing.
+- A tile item's `place_as_tile.condition` is a mask its target must not have: data-final-
+  fixes adds tt_plot to every tile item's (concrete, landfill, other mods' floors), so a plot
+  can't be covered. Rejected: re-painting plots by script after the fact.
+- Each city kind is an item of the same name (icon: the city's source building with its
+  product as a badge; subgroup "tt-cities" in Production, ordered by chain depth) and a free
+  hand-craft "tt-build-<entity>". The city entity drops "not-blueprintable", "not-
+  deconstructable" and "not-upgradable", mines into its item, and electric smelting is
+  the coal-fired kind's next_upgrade (same fast_replaceable_group).
+- Until map generation lays plots (2.15.6), the fixed map and the Nauvis layout paint a plot
+  under each city they place (scripts/plots.lua), only where nothing of the player's
+  stands. cities.snap gives the real position of an even-sized city for placement checks.
+
 ## 2026-11-21: 2.15.2 tier growth removed
 - City definitions are flat (crafting_speed, power, recipe, ... on the definition; no
   `tiers` list), at today's tier 1 numbers until 2.15.7 halves them. Entity names stay

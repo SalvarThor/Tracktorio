@@ -2,3 +2,4 @@
 require("prototypes.technology")
 require("prototypes.restrictions")
 require("prototypes.robots")
+require("prototypes.plot_fixes")

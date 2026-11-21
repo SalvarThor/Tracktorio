@@ -37,7 +37,7 @@ return {
       local inputs = {}
       for _, i in ipairs(p.lab_inputs) do inputs[i] = true end
       assert_.truthy(inputs[RED] and inputs[GREEN] and inputs["chemical-science-pack"] and #p.lab_inputs == 3, name .. " inputs")
-      assert_.falsy(prototypes.item["tt-city-research"], "the complex has an item")
+      assert_.truthy(prototypes.item["tt-city-research"], "the complex has no item (2.15)")
     end,
   },
   {

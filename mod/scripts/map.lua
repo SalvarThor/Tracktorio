@@ -7,6 +7,7 @@ local cities = require("scripts.cities")
 local city_defs = require("shared.city_defs")
 local layout = require("scripts.layout")
 local sites = require("scripts.sites")
+local plots = require("scripts.plots")
 
 local M = {}
 
@@ -204,7 +205,9 @@ local function place_cities(surface)
     if not city_present(surface, c) then
       local pos = { c.x + 0.5, c.y + 0.5 }
       local key = blocked_key(surface, c.name, c.x, c.y)
-      if surface.can_place_entity({ name = c.name, position = pos, force = "player" }) then
+      -- 2.15: a city stands on a plot; paint it only where nothing of the player's is
+      if plots.free(surface, pos) then plots.paint(surface, pos) end
+      if surface.can_place_entity({ name = c.name, position = cities.snap(c.name, pos), force = "player" }) then
         cities.place(c.name, surface, pos, "player")
         storage.tt_map_blocked[key] = nil
       elseif not storage.tt_map_blocked[key] then
@@ -364,7 +367,8 @@ function M.place_procedural(surface, seed, spacing)
   local function place_at(c, site)
     sites.clear(surface, site.x, site.y)
     local pos = { site.x + 0.5, site.y + 0.5 }
-    if not surface.can_place_entity({ name = c.name, position = pos, force = "player" }) then
+    plots.paint(surface, pos) -- 2.15: a city stands on a plot
+    if not surface.can_place_entity({ name = c.name, position = cities.snap(c.name, pos), force = "player" }) then
       local what = {}
       for _, e in pairs(surface.find_entities_filtered({ area = { { pos[1] - 5, pos[2] - 5 }, { pos[1] + 5, pos[2] + 5 } } })) do
         what[#what + 1] = e.name .. "/" .. e.type

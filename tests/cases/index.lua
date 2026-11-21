@@ -7,6 +7,7 @@ return {
     "__tracktorio-tests__/cases/debug",
     "__tracktorio-tests__/cases/restrictions",
     "__tracktorio-tests__/cases/start_kit",
+    "__tracktorio-tests__/cases/plots",
     "__tracktorio-tests__/cases/cities",
     "__tracktorio-tests__/cases/mvp_cities",
     "__tracktorio-tests__/cases/intermediates",

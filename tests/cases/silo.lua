@@ -14,7 +14,7 @@ return {
       local p = prototypes.entity[SILO]
       assert_.equals(p.type, "rocket-silo")
       assert_.equals(p.rocket_parts_required, 50)
-      assert_.falsy(p.mineable_properties.minable, "minable")
+      assert_.truthy(p.mineable_properties.minable, "not minable (2.15: the player builds it)")
       local r = assert(p.fixed_recipe, "no fixed recipe")
       assert_.equals(r.name, SILO) -- own recipe (user: base-game amounts)
       local need = {}

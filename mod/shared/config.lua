@@ -60,6 +60,12 @@ M.GOAL_ITEMS = { iron = "iron-plate", copper = "copper-plate" }
 M.GOAL_CLOSED_ITEM = "tt-goal-closed"
 
 -- Construction port beside each upgradable city (PLAN 2.1.2).
+-- Plots (2.15.3): the tiles a city must stand on, and their collision layer.
+M.PLOT_TILE = "tt-plot"
+M.PLOT_BORDER_TILE = "tt-plot-border"
+M.PLOT_LAYER = "tt_plot"
+M.CITY_SUBGROUP = "tt-cities"
+M.CITY_BUILD_RECIPE_PREFIX = "tt-build-" -- recipe "tt-build-<city entity name>" crafts its item
 M.BELT_PORT = "tt-belt-port" -- 2.10.4: hidden loader under a city wall
 M.SERVICE_BOX_PORT = "tt-belt-port-service" -- 2.10.14: the same for a depot's repair packs
 M.SIGNAL_POINT = "tt-signal-point" -- 2.11: a city's stock and status, for the circuit network

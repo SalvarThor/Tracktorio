@@ -1,6 +1,8 @@
 -- Data stage: prototypes only.
 require("prototypes.fuel")
+require("prototypes.plot")
 require("prototypes.cities")
+require("prototypes.city_items")
 require("prototypes.goal")
 require("prototypes.belt_port")
 require("prototypes.service_port")

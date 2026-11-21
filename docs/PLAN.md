@@ -937,11 +937,15 @@ Items:
       comes with 2.15.4). Gone: upgrade.lua, ports.lua (construction ports), tier_marks.lua,
       the construction port prototype, the second signal point, the window's tier section,
       upgrade messages, /tt-port-fill, tier map tags, the upgrade and migration tests.
-- [ ] 2.15.3 The plot: a tile with a painted border (visible on the map), not minable,
+- [x] 2.15.3 The plot: a tile with a painted border (visible on the map), not minable,
       and no other tile can be placed over it (concrete, landfill). Each city kind gets an
       item with a free recipe; the city entity requires plot tiles under all of it
       (tile_buildability_rules, as Space Age uses), so the engine shows red off-plot and
       refuses. Placing a city by script still works (tests).
+      Done: tt-plot (refined concrete) inside a ring of tt-plot-border (hazard stripes),
+      both on the tt_plot collision layer; every tile item's placement condition refuses
+      it. Items and "tt-build-<city>" recipes for every kind (enabled until 2.15.5). Until
+      2.15.6 the fixed map and the Nauvis layout paint a plot under each city they place.
 - [ ] 2.15.4 Building and removing: building a city (by hand, ghost or robot) sets up its
       ports, signal point and throttle through the existing "city placed" hook. Mining it
       (decision 5) removes all of them. Blueprints of a city and its station paste and build.
