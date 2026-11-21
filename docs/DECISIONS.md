@@ -4,6 +4,31 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: player-built cities on plots (user; phase 2.15 proposed)
+- Direction (user, after the 2.14.0 playtest): the player builds the cities, for free once
+  researched, but only on plots that map generation paints. There are many more plots
+  than today's cities, and each city is weaker, so a product comes from several cities
+  and the vanilla stops-with-one-name feature (a train goes to the nearest open stop)
+  matters again. Replaces the fixed city per product (SPEC "placement is fixed by the
+  world").
+- Rejected: unassigned buildings already on the map that the player gives a role once
+  (no blueprints; a scripted swap instead of normal building; a wrong pick can't be
+  undone).
+- Agreed with it: no tier growth (you scale by building more cities), no rotation, plots
+  in small sites far apart (so belts between sites don't replace trains). The open
+  details are in PLAN 2.15.
+- 2.14.1 onward is parked until 2.15 is done: a recorded full run would tune numbers
+  that are about to change.
+
+## 2026-11-21: 2.14.0 the user's QoL mods in the playtest
+- Playtest (~73 min, no errors in the log): Far Reach, Infinity Invo, Jetpack, Quick
+  Adjustable Inserters (with inserter-throughput-lib), Squeak Through 2 and Speedy Bot
+  Start load after the user updated them in the instance's mod manager. Even Distribution
+  2.1.0 crashes on init (it reads `fuel_category`) and is left out of
+  tools/playtest-mods.txt.
+- The round led to the personal robots rule (entry below) and the plots redesign
+  (entry above).
+
 ## 2026-11-21: personal construction robots (user)
 - Rule change (user): building is free, so building fast is fine. Personal construction
   robots are allowed; roboports on the ground and logistic robots stay out, so robots never

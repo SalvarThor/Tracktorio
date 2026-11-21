@@ -865,7 +865,7 @@ Decided with the user (2026-11-21): 10-minute snapshots; the recorder stays in t
   across as many sessions as the user likes; the user's own Factorio saves are untouched.
 
 Items:
-- [ ] 2.14.0 The user's QoL mods in the playtest instance (user, 2026-11-21): Speedy Bot
+- [x] 2.14.0 The user's QoL mods in the playtest instance (user, 2026-11-21): Speedy Bot
       Start, Even Distribution, Far Reach, Infinity Invo, Jetpack, Quick Adjustable
       Inserters (+ inserter-throughput-lib), Squeak Through 2. Listed in
       tools/playtest-mods.txt, copied from the user's mods folder. All eight are 2.0
@@ -873,6 +873,14 @@ Items:
       manager. Then a playtest: what loads, what works, what gets around Tracktorio's rules
       (robots from Speedy Bot Start; Jetpack can't be crafted while every non-free recipe
       is hidden). Fixes on our side, or a decision by the user.
+      Result (playtest, ~73 min, no errors): seven load after the user's updates; Even
+      Distribution 2.1.0 crashes on init and is left out. The round turned into a rule
+      change: personal construction robots from the start (start kit), flying 5x vanilla
+      speed. Nothing else found getting around the rules.
+
+Parked (user, 2026-11-21): 2.14.1 onward waits for phase 2.15. Playing in sessions changed
+the design (player-built cities on plots), and a full run would tune numbers that are about
+to change. The recorder and the run come back on the new design.
 - [ ] 2.14.1 Recorder: milestones (events and polls), storage, /tt-timeline, the file.
 - [ ] 2.14.2 Snapshots every 10 minutes.
 - [ ] 2.14.3 Tests: each milestone kind is recorded once, a snapshot has every city, the
@@ -885,3 +893,70 @@ Items:
       to accept or reject.
 - [ ] 2.14.6 The accepted tuning, with tests; SPEC, README and DECISIONS updated.
 - [ ] 2.14.7 `/playtest` of the tuning (a shorter run, or loading the run's save).
+
+### Phase 2.15: the player builds the cities, on plots (proposed 2026-11-21)
+
+Why (user, after playing 2.14.0): with one city per product, the best part of Factorio
+trains is gone: several stops with the same name, where a train goes to the nearest one
+that has room. And building the cities yourself is more fun than finding them. So the map
+gets many empty plots, the player builds cities on them for free once researched, and each
+city is weaker: "my steel is maxed out, I need another steel city" sends you to build one on
+a new plot and connect it by rail. More cities mean the rail challenge grows a bit at a time.
+
+Decided with the user (2026-11-21):
+- The player builds cities, but only on plots (option A). Rejected: buildings already on
+  the map, unassigned, that the player gives a role once (option B: no blueprints, a
+  scripted swap instead of normal building, and a wrong click can't be undone).
+- Cities are items, free and researched like other free buildings. Blueprints and ghosts
+  work, so the personal robots can build a city together with its station.
+- No more growing with tier: you scale by building more cities, not by delivering upgrade
+  materials. Construction ports, upgrades and the "what the next tier needs" signal point go.
+- No rotation: every city faces the same way, with ports where they are now.
+- Plots come in small sites far apart, so belting from one site to the next is clearly
+  worse than rail.
+
+Open, for the user (my recommendation first):
+1. City size, one for all: **12x12** (room for the ports; looks right next to a train), or
+   8x8 (more plots fit, but small next to a train).
+2. What today's tiers become. Some tiers change what a city is, not only its speed
+   (tier 1 smelting burns coal, tiers 2-3 run on electricity). **Those become their own
+   city kinds, researched later** ("Electric iron smelting city"), on the same plot size,
+   and the upgrade planner can swap one for the other in place (vanilla next_upgrade). Tiers
+   that only add speed go.
+3. Output per city: **half of today's tier 1** (iron smelting 7.5 plates/s, half a yellow
+   belt; power and inputs scale with it), tuned later in the full run. Or a third.
+4. Plots: **sites of 1-3 plots, at least 300 tiles between sites, and about three plots
+   for every city today's map has (~75)**, with a starter site of 4 plots near spawn
+   (depot, power, water, smelting). Any city can go on any plot.
+5. Removing a city: **allowed, and its contents are lost** (contents can't go into the
+   player's inventory: cities are hands-off). Or cities can't be removed once built.
+6. The hand-made MVP scenario: **convert it to plots** (the tests keep their fixed map),
+   or retire it from the menu and keep it only for tests.
+
+Items (the breakdown, once the open questions are answered):
+- [ ] 2.15.1 SPEC, README and DECISIONS rewritten for player-built cities (Thesis, Rules,
+      Black boxes, the post-MVP list).
+- [ ] 2.15.2 The plot: a tile with a painted border (visible on the map), not minable,
+      and no other tile can be placed over it (concrete, landfill). Each city kind gets an
+      item with a free recipe; the city entity requires plot tiles under all of it
+      (tile_buildability_rules, as Space Age uses), so the engine shows red off-plot and
+      refuses. Placing a city by script still works (tests).
+- [ ] 2.15.3 Building and removing: building a city (by hand, ghost or robot) sets up its
+      ports, signal point and throttle through the existing "city placed" hook. Mining it
+      (decision 5) removes all of them. Blueprints of a city and its station paste and build.
+- [ ] 2.15.4 Research: each city kind is unlocked by a technology. The starting research
+      gives the depot, coal power, water and both smelting cities; the rest go to the
+      vanilla technologies they match (a table for the user to check before it's built).
+- [ ] 2.15.5 Tier growth removed: upgrade.lua, construction ports, tier marks, the second
+      signal point and the window's tier section. Decision 2 for the tiers that change the
+      kind.
+- [ ] 2.15.6 Map generation: the layout plans plot sites instead of cities (decision 4).
+      Land finding (sites.lua) is reused; each site gets a map tag.
+- [ ] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.
+- [ ] 2.15.8 The MVP scenario (decision 6).
+- [ ] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,
+      research unlocks, plot counts and spacing on generated maps, several cities of one
+      kind running at once.
+- [ ] 2.15.10 `/playtest`: build the start, add a second city of one kind, and give both
+      stops the same name.
+Stop. Report to the user. Then 2.14 resumes (the recorder and the full run).
