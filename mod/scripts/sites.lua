@@ -1,17 +1,16 @@
--- City sites on real terrain (PLAN 2.8.3). A planned spot (scripts/layout.lua) moves to
--- the nearest land that fits the city and a margin, not an island. Trees, rocks, cliffs
+-- Plot sites on real terrain (PLAN 2.8.3 for cities, 2.15.6 for plot sites). A planned spot
+-- (scripts/layout.lua) moves to the nearest land that fits the site and a margin, not an
+-- island. Trees, rocks, cliffs
 -- and decoratives there are cleared.
 -- Cheap by design (probe, 2.1.24): water is read from the map generator's "elevation"
 -- property (below 0 is water on Nauvis), which needs no chunk generation: 10,000 points
 -- cost ~9 ms, a chunk ~3 ms. Positions in chunks that already exist use the real tile,
 -- so script-set tiles count. A planned spot that is fine is checked directly; otherwise one
 -- batched grid covers the whole search. Only the chunks under the chosen site are
--- generated, and its real tiles are checked again. 26 cities: ~3.4 s.
-local layout = require("shared.port_layout")
-
+-- generated, and its real tiles are checked again.
 local M = {}
 
-M.HALF = layout.MAX_SIZE / 2 -- room for the city (12 x 12, 2.15)
+M.HALF = require("scripts.layout").SITE_HALF -- room for a site of up to 2 x 2 plots (2.15.6)
 M.MARGIN = 4 -- room around it for the first belts and rails (ports are on the wall)
 M.STEP = 8 -- spacing of candidate spots on the search spiral
 M.SEARCH = 320 -- furthest a site moves from its planned spot
@@ -210,97 +209,11 @@ function M.find(surface, x, y, taken, apart, search)
   end
   return nil
 end
--- Lake shores (2.9.3): water cities stand on the shore of a real lake.
-M.SHORE_RING = 12 -- water must be within this many tiles outside the city's box
-M.LAKE_RADIUS = 40 -- the lake is measured within this radius of the city
-M.LAKE_MIN = 600 -- tiles of water there, or it's a puddle (tuning)
-M.SHORE_SEARCH = 640 -- furthest a shore site moves from its planned spot
 -- Searches go in stages: a grid only as wide as the stage, a wider one if nothing is found
 -- (2.9.4: one wide grid per search cost ~11 s for a whole layout).
 M.STAGES = { 96, 320 }
-M.SHORE_STAGES = { 160, 400, 640 }
-M.SHORE_GRID = 8 -- shore searches forecast on a coarser grid (a lake is big; the real tiles are checked)
 
---- Is there a real lake at the edge of the box around (x, y), on the forecast grid?
-local function shore_on(wet, x, y)
-  local inner, g = M.HALF + M.MARGIN, M.RAY_STEP
-  local outer = inner + M.SHORE_RING
-  local edge = false
-  for dx = -outer, outer, g do
-    for dy = -outer, outer, g do
-      if (math.abs(dx) > inner or math.abs(dy) > inner) and wet(x + dx, y + dy) then edge = true; break end
-    end
-    if edge then break end
-  end
-  if not edge then return false end
-  local n, r = 0, M.LAKE_RADIUS
-  for dx = -r, r, g do
-    for dy = -r, r, g do
-      if dx * dx + dy * dy <= r * r and wet(x + dx, y + dy) then n = n + 1 end
-    end
-  end
-  return n * g * g >= M.LAKE_MIN
-end
-
---- The same on the real tiles.
----@param surface LuaSurface
-local function shore_confirmed(surface, x, y)
-  local outer = M.HALF + M.MARGIN + M.SHORE_RING
-  local edge = surface.count_tiles_filtered({ area = { { x - outer, y - outer }, { x + outer, y + outer } },
-    collision_mask = "water_tile", limit = 1 })
-  if edge == 0 then return false end
-  return surface.count_tiles_filtered({ position = { x, y }, radius = M.LAKE_RADIUS, collision_mask = "water_tile" }) >= M.LAKE_MIN
-end
-
---- Nearest lake-shore spot to (x, y) (see find; `search` defaults to SHORE_SEARCH), or nil.
----@param surface LuaSurface
----@param x integer
----@param y integer
----@param taken table[]?
----@param apart (number|fun(t: table): number)?
----@param search number?
-function M.find_shore(surface, x, y, taken, apart, search)
-  search = search or M.SHORE_SEARCH
-  if blocked(x, y, taken, apart, search) then return nil end
-  local function free(cx, cy)
-    for _, t in ipairs(taken or {}) do
-      local need = type(apart) == "function" and apart(t) or apart or 0
-      if (t.x - cx) ^ 2 + (t.y - cy) ^ 2 < need * need then return false end
-    end
-    return true
-  end
-  local around = math.max(M.RAY_LENGTH, M.LAKE_RADIUS, M.HALF + M.MARGIN + M.SHORE_RING)
-  local done = -1
-  for _, stage in ipairs(M.SHORE_STAGES) do
-    local reach = math.min(stage, search)
-    local wet = grid(surface, x + 0.5, y + 0.5, reach + around + M.SHORE_GRID, M.SHORE_GRID)
-    for ring = done + 1, math.floor(reach / M.STEP) do
-      local r = ring * M.STEP
-      local n = ring == 0 and 1 or ring * 6
-      for i = 0, n - 1 do
-        local a = i * 2 * math.pi / n
-        local cx, cy = math.floor(x + r * math.cos(a)), math.floor(y + r * math.sin(a))
-        local px, py = cx + 0.5, cy + 0.5
-        if free(cx, cy) and usable_on(wet, px, py) and shore_on(wet, px, py) then
-          -- generate the chunks under the lake circle too, so the real check sees it
-          local r = M.LAKE_RADIUS
-          for chx = math.floor((px - r) / 32), math.floor((px + r) / 32) do
-            for chy = math.floor((py - r) / 32), math.floor((py + r) / 32) do
-              surface.request_to_generate_chunks({ chx * 32 + 16, chy * 32 + 16 }, 0)
-            end
-          end
-          surface.force_generate_chunk_requests()
-          if confirmed(surface, px, py) and shore_confirmed(surface, px, py) then return { x = cx, y = cy } end
-        end
-      end
-    end
-    done = math.floor(reach / M.STEP)
-    if reach >= search then break end
-  end
-  return nil
-end
-
---- Clear trees, rocks, cliffs and decoratives from the city's box around the centre tile.
+--- Clear trees, rocks, cliffs and decoratives from the site's box around the centre tile.
 ---@param surface LuaSurface
 ---@param x integer
 ---@param y integer

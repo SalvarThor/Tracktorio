@@ -1,12 +1,16 @@
--- 2.8: procedural maps.
+-- 2.8: procedural maps. 2.15.6: they lay out plot sites, not cities.
 local assert_ = require("__tracktorio-tests__/assert")
 local city_defs = require("__tracktorio__/shared/city_defs")
 local h = require("__tracktorio-tests__/helpers")
 
---- Pairs allowed under the minimum: within the starting trio (the coal fuel depot, the
---- starter power city and, since 2.9.5, the starter water city).
-local function trio(e) return e.name == "tt-city-depot" or e.starter or e.starter_water end
-local function exempt(a, b) return trio(a) and trio(b) end
+local SPACING = 300
+
+---@param plan table[]
+local function plots_in(plan)
+  local n = 0
+  for _, c in ipairs(plan) do n = n + c.plots end
+  return n
+end
 
 return {
   {
@@ -34,31 +38,31 @@ return {
     end,
   },
   {
-    -- 2.8.2
-    name = "mapgen: the planner places every city once, the depot near spawn, all at least the spacing apart",
+    -- 2.15.6 (user decisions): sites of 1-3 plots, a starter site of 4 near spawn, about
+    -- 75 plots, sites at least the spacing apart
+    name = "mapgen: the planner lays out about 75 plots in sites of 1-3, a starter site of 4 near spawn, all apart",
     fn = function()
-      local want = #remote.call("tt-map", "layout").cities
-      local spacing = remote.call("tt-map", "spacing")
-      assert_.equals(spacing, 500, "default minimum spacing (1x)")
-      for _, seed in ipairs({ 1, 42, 123456789, 4000000000 }) do
-        local plan = remote.call("tt-map", "plan", seed)
-        assert_.equals(#plan, want, "cities planned, seed " .. seed)
-        local depots = 0
-        for i, a in ipairs(plan) do
-          assert_.truthy(a.x == math.floor(a.x) and a.y == math.floor(a.y), "not on whole tiles")
-          if a.name == "tt-city-depot" then
-            depots = depots + 1
-            local d = math.sqrt(a.x ^ 2 + a.y ^ 2)
-            assert_.truthy(d >= 35 and d <= 90, "depot " .. d .. " from spawn, seed " .. seed)
+      for _, seed in ipairs({ 1, 42, 314159, 271828 }) do
+        local plan = remote.call("tt-map", "plan", seed, SPACING)
+        local n = plots_in(plan)
+        assert_.truthy(n >= 75 and n <= 77, n .. " plots, seed " .. seed)
+        local starters = 0
+        for i, c in ipairs(plan) do
+          if c.starter then
+            starters = starters + 1
+            assert_.equals(c.plots, 4, "starter plots")
+            local d = math.sqrt(c.x ^ 2 + c.y ^ 2)
+            assert_.truthy(d >= 40 and d <= 80, "starter site " .. d .. " from spawn")
+          else
+            assert_.truthy(c.plots >= 1 and c.plots <= 3, c.plots .. " plots in a site")
           end
           for j = i + 1, #plan do
-            local b = plan[j]
-            local d = math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
-            local need = remote.call("tt-map", "need", a, b, spacing)
-            assert_.truthy(d >= need, a.label .. " and " .. b.label .. " only " .. d .. " apart (need " .. need .. "), seed " .. seed)
+            local o = plan[j]
+            local d = math.sqrt((c.x - o.x) ^ 2 + (c.y - o.y) ^ 2)
+            assert_.truthy(d >= SPACING, "sites " .. d .. " apart, seed " .. seed)
           end
         end
-        assert_.equals(depots, 1, "depots")
+        assert_.equals(starters, 1, "starter sites")
       end
     end,
   },
@@ -66,142 +70,54 @@ return {
     name = "mapgen: the same seed gives the same layout and another seed a different one",
     fn = function()
       local a, b, c = remote.call("tt-map", "plan", 7), remote.call("tt-map", "plan", 7), remote.call("tt-map", "plan", 8)
-      assert_.equals(serpent.line(a), serpent.line(b), "same seed")
-      assert_.truthy(serpent.line(a) ~= serpent.line(c), "seeds 7 and 8 gave the same layout")
+      assert_.equals(serpent.line(a), serpent.line(b), "same seed differs")
+      assert_.truthy(serpent.line(a) ~= serpent.line(c), "seeds 7 and 8 give the same layout")
     end,
   },
   {
     name = "mapgen: the spacing multiplier scales the layout (0.5x and 3x)",
     fn = function()
-      local function stats(spacing)
-        local plan = remote.call("tt-map", "plan", 99, spacing)
-        local min_pair, max_r = math.huge, 0
-        for i, a in ipairs(plan) do
-          max_r = math.max(max_r, math.sqrt(a.x ^ 2 + a.y ^ 2))
-          for j = i + 1, #plan do
-            if not exempt(a, plan[j]) then
-              min_pair = math.min(min_pair, math.sqrt((a.x - plan[j].x) ^ 2 + (a.y - plan[j].y) ^ 2))
-            end
-          end
-        end
-        return min_pair, max_r
+      local function reach(spacing)
+        local far = 0
+        for _, c in ipairs(remote.call("tt-map", "plan", 99, spacing)) do far = math.max(far, math.sqrt(c.x ^ 2 + c.y ^ 2)) end
+        return far
       end
-      local p1, r1 = stats(1000)
-      local p05, r05 = stats(500)
-      local p3, r3 = stats(3000)
-      assert_.truthy(p05 >= 500 and p3 >= 3000 and p1 >= 1000, "pairs " .. p05 .. " / " .. p1 .. " / " .. p3)
-      assert_.truthy(r05 < r1 and r1 < r3, "radius " .. r05 .. " / " .. r1 .. " / " .. r3)
-      -- recorded for tuning: how big the map gets
-      log("mapgen: furthest city at spacing 500/1000/3000: " .. math.floor(r05) .. " / " .. math.floor(r1) .. " / " .. math.floor(r3))
+      local half, one, three = reach(SPACING / 2), reach(SPACING), reach(SPACING * 3)
+      assert_.truthy(half < one and one < three, string.format("reach %d / %d / %d", half, one, three))
+      assert_.truthy(three / one > 2 and three / one < 4, "3x spacing reaches " .. three / one .. "x as far")
     end,
   },
   {
-    name = "mapgen: deeper cities sit further from spawn on average (over 10 seeds)",
+    name = "mapgen: neighbour distances vary: some sites at the minimum, some well beyond it",
     fn = function()
-      local sum, n = {}, {}
-      for seed = 1, 10 do
-        for _, c in ipairs(remote.call("tt-map", "plan", seed)) do
-          if c.name ~= "tt-city-depot" then
-            sum[c.depth] = (sum[c.depth] or 0) + math.sqrt(c.x ^ 2 + c.y ^ 2)
-            n[c.depth] = (n[c.depth] or 0) + 1
+      local near, far = 0, 0
+      for _, seed in ipairs({ 3, 5, 11 }) do
+        local plan = remote.call("tt-map", "plan", seed, SPACING)
+        for i, c in ipairs(plan) do
+          local best = math.huge
+          for j, o in ipairs(plan) do
+            if i ~= j then best = math.min(best, math.sqrt((c.x - o.x) ^ 2 + (c.y - o.y) ^ 2)) end
           end
+          if best < SPACING * 1.25 then near = near + 1 end
+          if best > SPACING * 1.6 then far = far + 1 end
         end
       end
-      local mean = {}
-      for d in pairs(sum) do mean[d] = sum[d] / n[d] end
-      log("mapgen: mean distance by depth " .. serpent.line(mean))
-      assert_.truthy(mean[5] > mean[1] * 1.3, "depth 5 " .. mean[5] .. " vs depth 1 " .. mean[1])
-      assert_.truthy(mean[3] > mean[1], "depth 3 " .. mean[3] .. " vs depth 1 " .. mean[1])
+      assert_.truthy(near > 0 and far > 0, string.format("%d sites near the minimum, %d well beyond", near, far))
     end,
   },
   {
-    -- 2.8.12 (user, playtest 2.8.11: "too uniform"): the minimum is a floor, and the
-    -- distances between neighbours vary a lot
-    name = "mapgen: neighbour distances vary widely: some at the minimum, some several times it",
+    name = "mapgen: plots of a site sit side by side in a 2 x 2 grid, 10 tiles of ground between",
     fn = function()
-      local all = {}
-      for seed = 1, 10 do
-        local plan = remote.call("tt-map", "plan", seed, 500)
-        for i, a in ipairs(plan) do
-          local nearest = math.huge
-          for j, b in ipairs(plan) do
-            if i ~= j and not exempt(a, b) then nearest = math.min(nearest, math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)) end
-          end
-          all[#all + 1] = nearest
-        end
-      end
-      table.sort(all)
-      local p10, p50, p90 = all[math.floor(#all * 0.1)], all[math.floor(#all * 0.5)], all[math.floor(#all * 0.9)]
-      log(string.format("mapgen: nearest-neighbour distance at 500: min %d, p10 %d, median %d, p90 %d, max %d", all[1], p10, p50, p90, all[#all]))
-      assert_.truthy(all[1] >= 500, "below the minimum: " .. all[1])
-      assert_.truthy(p10 < 700, "few cities near the minimum: p10 " .. p10)
-      assert_.truthy(p90 > 2 * p10, "too uniform: p90 " .. p90 .. " vs p10 " .. p10)
-    end,
-  },
-  {
-    -- playtest 2.8.13: one power city by the start; power cities far apart
-    name = "mapgen: a starter power city sits by the depot; power cities keep 3x the minimum apart",
-    fn = function()
-      for seed = 1, 10 do
-        local plan = remote.call("tt-map", "plan", seed, 500)
-        local starters, power = 0, {}
-        for _, c in ipairs(plan) do
-          if c.starter then
-            starters = starters + 1
-            local d = math.sqrt(c.x ^ 2 + c.y ^ 2)
-            assert_.truthy(d >= 180 and d <= 400, "starter power city " .. d .. " from spawn, seed " .. seed)
-          end
-          if c.name == "tt-city-power" or c.name == "tt-city-nuclear-power" then power[#power + 1] = c end
-        end
-        assert_.equals(starters, 1, "starter power cities, seed " .. seed)
-        for i, a in ipairs(power) do
-          for j = i + 1, #power do
-            local b = power[j]
-            local d = math.sqrt((a.x - b.x) ^ 2 + (a.y - b.y) ^ 2)
-            assert_.truthy(d >= 1500, a.label .. " and " .. b.label .. " " .. d .. " apart, seed " .. seed)
+      for n = 1, 4 do
+        local o = remote.call("tt-map", "offsets", n)
+        assert_.equals(#o, n, n .. " offsets")
+        for i = 1, #o do
+          for j = i + 1, #o do
+            local dx, dy = math.abs(o[i][1] - o[j][1]), math.abs(o[i][2] - o[j][2])
+            assert_.truthy(math.max(dx, dy) >= 22, "plots " .. i .. " and " .. j .. " overlap or touch")
           end
         end
       end
-    end,
-  },
-  {
-    -- playtest 2.8.7: the four coal power cities spread out instead of all near spawn
-    name = "mapgen: only the first coal power city plans near the start; the others go further out",
-    fn = function()
-      local sum, n = {}, {}
-      for seed = 1, 10 do
-        local k = 0
-        for _, c in ipairs(remote.call("tt-map", "plan", seed, 1000)) do
-          if c.name == "tt-city-power" then
-            sum[c.copy] = (sum[c.copy] or 0) + math.sqrt(c.x ^ 2 + c.y ^ 2)
-            n[c.copy] = (n[c.copy] or 0) + 1
-            k = k + 1
-          end
-        end
-        assert_.equals(k, 4, "power cities, seed " .. seed)
-      end
-      local mean = {}
-      for i = 0, 3 do mean[i] = sum[i] / n[i] end
-      log("mapgen: power city mean distance by copy " .. serpent.line(mean))
-      for i = 1, 3 do
-        assert_.truthy(mean[i] > mean[i - 1], "copy " .. i .. " " .. mean[i] .. " not further out than copy " .. (i - 1) .. " " .. mean[i - 1])
-      end
-      assert_.truthy(mean[3] > mean[0] * 1.5, "last copy " .. mean[3] .. " vs first " .. mean[0])
-    end,
-  },
-  {
-    name = "mapgen: repeated cities are named for their direction from spawn; names are unique",
-    fn = function()
-      local placed = {
-        { name = "tt-city-power", label = "Power city", x = 0, y = -900 },
-        { name = "tt-city-power", label = "East power city", x = 800, y = 50 },
-        { name = "tt-city-power", label = "West power city", x = 900, y = -60 },
-        { name = "tt-city-power", label = "South power city", x = -700, y = 700 },
-        { name = "tt-city-depot", label = "Coal fuel depot", x = 50, y = 0 },
-      }
-      local named = remote.call("tt-map", "compass_names", placed)
-      local want = { "North power city", "East power city", "East power city 2", "South-west power city", "Coal fuel depot" }
-      for i, w in ipairs(want) do assert_.equals(named[i].label, w, "name " .. i) end
     end,
   },
   {
@@ -234,7 +150,7 @@ return {
     end,
   },
   {
-    name = "mapgen: on vanilla terrain every city gets a dry, clear mainland site near its planned spot",
+    name = "mapgen: on vanilla terrain every site gets dry, clear mainland, its plots painted and no ore on them",
     fn = function()
       -- 2.1: game.default_map_gen_settings mixes every planet (oil ocean, lava, ice); use
       -- Nauvis's own
@@ -242,25 +158,24 @@ return {
       mgs.seed = 314159
       mgs.no_enemies_mode = true
       local s = game.create_surface("tt-mapgen-vanilla", mgs)
-      local spacing = 1000
       local prof = helpers.create_profiler()
-      local result = remote.call("tt-map", "place_procedural", s.name, 314159, spacing)
+      local result = remote.call("tt-map", "place_procedural", s.name, 314159, SPACING)
       prof.stop()
       log({ "", "mapgen: placing the layout took ", prof }) ---@diagnostic disable-line: assign-type-mismatch
-      assert_.equals(#result.missing, 0, "no site for " .. serpent.line(result.missing))
-      assert_.equals(#result.placed, #remote.call("tt-map", "layout").cities, "placed")
+      assert_.equals(#result.missing, 0, "no land for " .. serpent.line(result.missing))
+      assert_.truthy(plots_in(result.placed) >= 75, "plots placed")
       local moved = 0
       for i, c in ipairs(result.placed) do
-        local x, y = c.x + 0.5, c.y + 0.5
-        local area = { { x - 10, y - 10 }, { x + 10, y + 10 } } -- sites.HALF + MARGIN (2.15: 6 + 4)
-        assert_.equals(s.count_tiles_filtered({ area = area, collision_mask = "water_tile" }), 0, c.label .. " has water")
-        assert_.equals(s.count_entities_filtered({ area = area, type = { "cliff", "tree", "simple-entity" } }), 0,
-          c.label .. " has cliffs, trees or rocks")
-        local city = s.find_entities_filtered({ name = c.name, position = { x, y }, radius = 1 })
-        assert_.equals(#city, 1, c.label .. " not built")
-        assert_.truthy(remote.call("tt-map", "mainland", s.name, x, y), c.label .. " on an island")
-        -- a site stays near its planned spot, or (no land there) at the same distance from
-        -- spawn, turned around it
+        assert_.truthy(remote.call("tt-map", "mainland", s.name, c.x + 0.5, c.y + 0.5), c.label .. " on an island")
+        for _, o in ipairs(remote.call("tt-map", "offsets", c.plots)) do
+          local px, py = c.x + o[1], c.y + o[2]
+          local area = { { px - 6, py - 6 }, { px + 6, py + 6 } }
+          assert_.equals(s.count_tiles_filtered({ area = area, name = { "tt-plot", "tt-plot-border" } }), 144, c.label .. " plot tiles")
+          assert_.equals(s.count_entities_filtered({ area = area, type = { "resource", "cliff", "tree", "simple-entity" } }), 0,
+            c.label .. " has ore, cliffs, trees or rocks on a plot")
+          assert_.truthy(s.can_place_entity({ name = "tt-city-depot", position = { px, py }, force = "player",
+            build_check_type = defines.build_check_type.manual }), c.label .. ": a city can't be built on its plot")
+        end
         local d = math.sqrt((c.x - c.planned.x) ^ 2 + (c.y - c.planned.y) ^ 2)
         local dr = math.abs(math.sqrt(c.x ^ 2 + c.y ^ 2) - math.sqrt(c.planned.x ^ 2 + c.planned.y ^ 2))
         assert_.truthy(d <= 330 or dr <= 330, c.label .. " moved " .. d .. ", " .. dr .. " in distance from spawn")
@@ -268,7 +183,7 @@ return {
         for j = i + 1, #result.placed do
           local o = result.placed[j]
           local apart = math.sqrt((c.x - o.x) ^ 2 + (c.y - o.y) ^ 2)
-          assert_.truthy(apart >= remote.call("tt-map", "need", c, o, spacing), c.label .. " and " .. o.label .. " " .. apart .. " apart")
+          assert_.truthy(apart >= SPACING, c.label .. " and " .. o.label .. " " .. apart .. " apart")
         end
       end
       log("mapgen: vanilla terrain, furthest move from the planned spot " .. math.floor(moved))
@@ -330,7 +245,7 @@ return {
       local near = { { -clear, -clear }, { clear, clear } }
       local before = s.count_entities_filtered({ area = near, type = "resource" })
       assert_.truthy(before > 0, "the seed has no resources near spawn to clear")
-      local result = remote.call("tt-nauvis", "prepare", s.name, 271828, 1000)
+      local result = remote.call("tt-nauvis", "prepare", s.name, 271828, SPACING)
       assert_.equals(#result.missing, 0, "missing " .. serpent.line(result.missing))
       assert_.truthy(s.peaceful_mode, "not peaceful")
       assert_.falsy(game.map_settings.enemy_expansion.enabled, "expansion on")
@@ -340,9 +255,9 @@ return {
         assert_.truthy(d > clear, r.name .. " " .. math.floor(d) .. " tiles from spawn")
       end
       local outer = s.count_entities_filtered({ area = { { -clear - 120, -clear - 120 }, { clear + 120, clear + 120 } }, type = "resource" })
-      local depot
-      for _, c in ipairs(result.placed) do if c.name == "tt-city-depot" then depot = c end end
-      assert_.truthy(depot and math.sqrt(depot.x ^ 2 + depot.y ^ 2) < 200, "depot not near spawn")
+      local starter
+      for _, c in ipairs(result.placed) do if c.starter then starter = c end end
+      assert_.truthy(starter and math.sqrt(starter.x ^ 2 + starter.y ^ 2) < 200, "starter site not near spawn")
       -- chunks generated later are cleaned as they appear
       s.request_to_generate_chunks({ 2000, 2000 }, 4)
       s.force_generate_chunk_requests()
@@ -370,7 +285,7 @@ return {
       game.delete_surface(control)
       assert_.truthy(nests > 0, "the control area has no nests, so it proves nothing")
       local s = game.create_surface("tt-mapgen-biters-off", mgs)
-      remote.call("tt-nauvis", "prepare", s.name, 141421, 500)
+      remote.call("tt-nauvis", "prepare", s.name, 141421, SPACING)
       local before = remote.call("tt-nauvis", "removed_later", s.name)
       s.request_to_generate_chunks({ 2000, 2000 }, 16)
       s.force_generate_chunk_requests()
@@ -393,7 +308,7 @@ return {
       mgs.seed = 577215
       local s = game.create_surface("tt-mapgen-wide", mgs)
       local prof = helpers.create_profiler()
-      local result = remote.call("tt-nauvis", "prepare", s.name, 577215, 3000)
+      local result = remote.call("tt-nauvis", "prepare", s.name, 577215, SPACING * 3)
       prof.stop()
       log({ "", "TT-TIMING budget_ms=10000 name=layout-3x ", prof }) ---@diagnostic disable-line: assign-type-mismatch
       assert_.equals(#result.missing, 0, "missing " .. serpent.line(result.missing))
@@ -402,35 +317,35 @@ return {
         if s.is_chunk_generated(chunk) then chunks = chunks + 1 end
       end
       log("mapgen: 3x layout generated " .. chunks .. " chunks")
-      assert_.truthy(chunks <= 26 * 9, chunks .. " chunks generated")
+      assert_.truthy(chunks <= #result.placed * 9 + 100, chunks .. " chunks generated for " .. #result.placed .. " sites")
       local far = 0
       for _, c in ipairs(result.placed) do far = math.max(far, math.sqrt(c.x ^ 2 + c.y ^ 2)) end
-      assert_.truthy(far > 6000, "furthest city only " .. far)
+      assert_.truthy(far > 3000, "furthest site only " .. far)
       game.delete_surface(s)
     end,
   },
   {
-    -- 2.8.5 (changed by the user in playtest 2.8.7: cities are on the map from the start)
-    name = "mapgen: every city has its map tag from the start; the land between stays dark",
+    -- 2.8.5 (changed by the user in playtest 2.8.7: on the map from the start); 2.15.6 sites
+    name = "mapgen: every plot site has its map tag from the start; the land between stays dark",
     fn = function(ctx)
       local mgs = game.surfaces["nauvis"].map_gen_settings
       mgs.seed = 161803
       local s = game.create_surface("tt-mapgen-tags", mgs)
-      local result = remote.call("tt-nauvis", "prepare", s.name, 161803, 1000)
+      local result = remote.call("tt-nauvis", "prepare", s.name, 161803, SPACING)
       local force = game.forces["player"]
       ctx:wait_until(function() return #force.find_chart_tags(s) >= #result.placed end, 600, function()
         local tags = force.find_chart_tags(s)
-        assert_.equals(#tags, #result.placed, "one tag per city")
+        assert_.equals(#tags, #result.placed, "one tag per site")
         for _, c in ipairs(result.placed) do
           local found = force.find_chart_tags(s, { { c.x - 1, c.y - 1 }, { c.x + 2, c.y + 2 } })
           assert_.equals(#found, 1, c.label .. " tags")
           assert_.equals(found[1].text, c.label, "tag text")
         end
-        -- only the cities are charted: halfway between the depot and the next city is dark
+        -- only the sites are charted: halfway between the starter site and the next is dark
         local a, b = result.placed[1], result.placed[2]
         local mx, my = (a.x + b.x) / 2, (a.y + b.y) / 2
-        assert_.falsy(force.is_chunk_charted(s, { math.floor(mx / 32), math.floor(my / 32) }), "land between cities charted")
-        -- charting a city again adds no second tag
+        assert_.falsy(force.is_chunk_charted(s, { math.floor(mx / 32), math.floor(my / 32) }), "land between sites charted")
+        -- charting a site again adds no second tag
         local c = result.placed[#result.placed]
         force.chart(s, { { c.x - 8, c.y - 8 }, { c.x + 8, c.y + 8 } })
         ctx:wait(60, function()

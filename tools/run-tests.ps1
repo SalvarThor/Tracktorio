@@ -104,18 +104,18 @@ foreach ($m in (Select-String -Path $TT.Log -Pattern 'TT-TIMING budget_ms=(\d+) 
 if ($slow) { exit 1 }
 
 # Smoke runs (2.8.10): the Tracktorio scenario (the way to play) and Freeplay with the mod
-# on (the fallback) must both load, run, and lay out Nauvis with every city.
+# on (the fallback) must both load, run, and lay out Nauvis with every plot site (2.15.6).
 # (--test-ticks exits 0 when the ticks run out, 1 on any error.)
 if (-not $Filter) {
     foreach ($run in @(@{ Scenario = 'tracktorio/tracktorio'; How = 'scenario' }, @{ Scenario = 'base/freeplay'; How = 'freeplay' })) {
         $s = Invoke-TTFactorio -TimeoutSec 300 -Arguments @(
             '--test-scenario', $run.Scenario, '--test-ticks', '300', '--disable-audio')
-        $line = Select-String -Path $TT.Log -Pattern "tracktorio: Nauvis layout \($($run.How)\): (\d+) cities placed, (\d+) without a site" | Select-Object -Last 1
-        if ($s.TimedOut -or $s.ExitCode -ne 0 -or -not $line -or $line.Matches[0].Groups[2].Value -ne '0') {
+        $line = Select-String -Path $TT.Log -Pattern "tracktorio: Nauvis layout \($($run.How)\): (\d+) plot sites, (\d+) plots, (\d+) without land" | Select-Object -Last 1
+        if ($s.TimedOut -or $s.ExitCode -ne 0 -or -not $line -or $line.Matches[0].Groups[3].Value -ne '0') {
             Write-Host "SMOKE FAILED: $($run.Scenario) (exit $($s.ExitCode)) $($line.Line)"
             Show-LogTail; exit 2
         }
-        Write-Host "smoke: $($run.Scenario) runs 300 ticks and lays out Nauvis ($($line.Matches[0].Groups[1].Value) cities, none missing)"
+        Write-Host "smoke: $($run.Scenario) runs 300 ticks and lays out Nauvis ($($line.Matches[0].Groups[1].Value) plot sites, $($line.Matches[0].Groups[2].Value) plots, none missing)"
     }
 }
 exit 0

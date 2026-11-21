@@ -62,8 +62,8 @@ local function clean(surface, area, spawn)
   return removed
 end
 
---- Make a surface a Tracktorio map: biters off, no resources near spawn, the city layout.
---- Returns the placed layout and any missing city labels (scripts/map.lua).
+--- Make a surface a Tracktorio map: biters off, no resources near spawn, the plot layout.
+--- Returns the placed sites and the labels of any that found no land (scripts/map.lua).
 ---@param surface LuaSurface
 ---@param seed integer?
 ---@param spacing number?
@@ -130,7 +130,9 @@ function M.on_init()
     local r = M.START_CHART
     game.forces["player"].chart(surface, { { spawn.x - r, spawn.y - r }, { spawn.x + r, spawn.y + r } })
   end
-  log(string.format("tracktorio: Nauvis layout (%s): %d cities placed, %d without a site", how, #placed, #missing))
+  local n = 0
+  for _, site in ipairs(placed) do n = n + site.plots end
+  log(string.format("tracktorio: Nauvis layout (%s): %d plot sites, %d plots, %d without land", how, #placed, n, #missing))
 end
 
 --- on_player_created: in the own scenario the mod gives the starting items (freeplay gives

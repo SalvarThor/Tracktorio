@@ -958,8 +958,11 @@ Items:
       Done with the user's table (city_defs.UNLOCK): circuits and red science start too;
       electric smelting on Advanced material processing. Rocket silo is no longer hidden: it
       gives the rocket silo city alone.
-- [ ] 2.15.6 Map generation: the layout plans plot sites instead of cities (decision 4).
+- [x] 2.15.6 Map generation: the layout plans plot sites instead of cities (decision 4).
       Land finding (sites.lua) is reused; each site gets a map tag.
+      Done: a New Game has no cities, only ~36 sites / ~76 plots; the starter site of 4 is
+      40-80 tiles from spawn. Plots of a site in a 2 x 2 grid, 10 tiles apart. The city
+      planner, shore finder and starter pair rules are gone.
 - [ ] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.
 - [ ] 2.15.8 The MVP scenario off the menu (decision 6); the tests keep loading it.
 - [ ] 2.15.9 Tests: placing on a plot and next to one, ghosts built by robots, mining,

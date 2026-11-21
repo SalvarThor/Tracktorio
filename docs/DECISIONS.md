@@ -4,6 +4,26 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.6 map generation lays out plot sites
+- scripts/layout.lua plans sites, not cities: the starter site (4 plots) 40-80 tiles from
+  spawn, then sites of 1-3 plots (equally likely) on rings stepping outward, each with its
+  own elbow room of 1-2 spacings (skewed low; two sites keep the larger of their two), until
+  there are at least 75 plots. Spacing = 300 x the "City spacing" startup setting (it was
+  500 between cities). Typical game: ~36 sites, ~76 plots, furthest site ~2,000 tiles out.
+- A site's plots sit in a 2 x 2 grid at a 22-tile pitch: 12-tile plots with 10 tiles of
+  ground between (room for a belt run or a rail; a tuning value). 1 plot alone, 2 side by
+  side, 3 in an L, 4 in a square. A site is at most 34 x 34, which sites.lua checks (plus
+  its margin) for every site.
+- Placement reuses the land finder (dry mainland near the planned spot, else turned around
+  spawn or a little further out). The site is cleared; painting a plot also removes ore and
+  anything else not the player's under it, so a plot is clean ground.
+- Each site is charted and tagged ("Start: 4 city plots", "3 city plots", "City plot"; icon
+  refined hazard concrete, the plot's border). The land between stays dark.
+- Gone with the city planner: depth-weighted distances, the starter depot / power / water
+  rules, water cities on lake shores (sites.find_shore), compass names for repeated cities,
+  and their tests. Chain depth stays: it orders the city items.
+- The smoke runs check the new log line (sites, plots, none without land).
+
 ## 2026-11-21: 2.15.5 cities unlocked by research (table approved by the user)
 - From the start: coal fuel depot, coal power, water, iron and copper smelting, red
   science, research complex, circuits (Electronics is a starting technology).

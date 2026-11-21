@@ -1,65 +1,35 @@
--- Procedural city layout (PLAN 2.8.2). Pure planning: positions only, nothing is placed
--- here. Seeded, so the same map seed always gives the same layout.
--- User decisions (DECISIONS.md, 2026-11-20): cities at least SPACING apart; deeper cities in
--- the production chain more likely far from spawn, but at random; the coal fuel depot near
--- spawn; cities take no account of resources.
-local config = require("shared.config")
-local city_defs = require("shared.city_defs")
+-- Procedural plot layout (PLAN 2.15.6; before that, of the cities themselves, 2.8.2). Pure
+-- planning: positions only, nothing is placed here. Seeded, so the same map seed always
+-- gives the same layout.
+-- User decisions (2026-11-21, phase 2.15): plots come in small sites of 1-3, at least
+-- SPACING apart (x the "City spacing" startup setting); about TARGET_PLOTS plots; a starter
+-- site of 4 near spawn for the first depot, power, water and smelting cities. Any city on
+-- any plot. Sites take no account of resources.
 
 local M = {}
 
--- Minimum tiles between any two cities at "City spacing" 1. Playtests: 1000 "a bit much",
--- 500 "too tight" with every city alike, 750 "too uniform". Since 2.8.12 the minimum is
--- 500 and the spread comes from GAP (user: "as low as 500 but the variance a lot higher").
-M.SPACING = 500
--- Each city's own elbow room, in spacings: 1 + GAP_SPREAD * random^GAP_SKEW (skewed to the
--- low end: 1x..4x, mean ~1.75x). Two cities stay at least the larger of their two gaps
--- apart, so some sit 500 tiles from a neighbour and others alone in open country.
-M.GAP_SPREAD, M.GAP_SKEW = 3, 2.5
-M.DEPOT_RADIUS = { 40, 80 } -- the coal fuel depot's distance from spawn
--- The first coal power city is the starter: power and fuel are what the start needs
--- (playtest 2.8.13), so it plans this far from spawn, next to the depot, and that one pair
--- is exempt from the minimum (they only keep STARTER_APART).
-M.STARTER_RADIUS = { 200, 350 }
-M.STARTER_APART = 100
--- Power cities (coal and nuclear) keep at least this many spacings apart (playtest 2.8.13);
--- so do water cities (2.9.4).
-M.POWER_APART = 3
-M.WATER_APART = 3
--- 2.9.5: the first water city is the starter water city. It stands by the starter power
--- city, close enough to pipe (filling a wagon needs an electric pump, so the first power
--- can't come by train): STARTER_PIPE tiles apart (scripts/map.lua places the pair).
-M.STARTER_PIPE = { 30, 80 }
-
-local POWER = { [config.CITY.power] = true, ["tt-city-nuclear-power"] = true }
-M.WATER = "tt-city-water"
-
---- Is this entry one of the starting trio (the depot, the starter power city, the starter
---- water city)?
-local function trio(e) return e.name == config.CITY.depot or e.starter or e.starter_water end
-
---- Distance two planned cities must keep apart (entries with name, gap, starter flags).
----@param a table
----@param b table
----@param spacing number
-function M.need(a, b, spacing)
-  -- the starting trio stands together near spawn: they only keep out of each other's way
-  if trio(a) and trio(b) then
-    if (a.starter and b.starter_water) or (b.starter and a.starter_water) then return M.STARTER_PIPE[1] end
-    return M.STARTER_APART
-  end
-  local need = math.max(a.gap or spacing, b.gap or spacing)
-  if POWER[a.name] and POWER[b.name] then need = math.max(need, M.POWER_APART * spacing) end
-  if a.name == M.WATER and b.name == M.WATER then need = math.max(need, M.WATER_APART * spacing) end
-  return need
-end
--- Distance from spawn, in spacings: MIN_R + SPREAD * (DEPTH_WEIGHT * depth share +
--- (1 - DEPTH_WEIGHT) * random). Crowding pushes a city further out.
-M.MIN_R, M.SPREAD, M.DEPTH_WEIGHT = 1.5, 5, 0.4
+-- Minimum tiles between two sites at "City spacing" 1.
+M.SPACING = 300
+-- Each site's own elbow room, in spacings: 1 + GAP_SPREAD * random^GAP_SKEW (skewed to the
+-- low end: 1x..2x, mean ~1.3x). Two sites stay at least the larger of their two gaps apart,
+-- so some sit at the minimum and others alone in open country (user, playtest 2.8.12:
+-- "the variance a lot higher").
+M.GAP_SPREAD, M.GAP_SKEW = 1, 2.5
+M.TARGET_PLOTS = 75
+M.STARTER_PLOTS = 4
+M.STARTER_RADIUS = { 40, 80 } -- the starter site's distance from spawn
+M.MAX_PLOTS = 3 -- an ordinary site has 1..MAX_PLOTS plots
 M.TRIES = 30 -- random angles per radius before stepping out
-M.STEP_OUT = 1.1
+M.STEP_OUT = 1.08
+M.FIRST_RING = 1.2 -- the first ordinary sites plan this many spacings out
 
---- Minimum distance between cities for this game: SPACING x the startup setting.
+-- Plots of a site: up to a 2 x 2 grid, PITCH tiles from plot centre to plot centre (a
+-- 12-tile plot and GAP tiles of ground between: room for a belt run or a rail).
+M.GAP = 10
+M.PITCH = 12 + M.GAP
+M.SITE_HALF = M.PITCH / 2 + 6 -- half the side of a full 2 x 2 site (17)
+
+--- Minimum distance between sites for this game: SPACING x the startup setting.
 function M.spacing()
   local s = settings.startup["tt-city-spacing"]
   return M.SPACING * (s and s.value --[[@as number]] or 1)
@@ -74,87 +44,59 @@ function M.mix_seed(seed)
   return h
 end
 
-local function depth_of(entity_name)
-  local info = city_defs.by_entity[entity_name]
-  return info and city_defs.depth[info.def.name] or 1
+--- Plot centres of a site of `n` plots, relative to the site's centre (a tile corner):
+--- 1 in the middle, 2 side by side, 3 in an L, 4 in a square.
+---@param n integer
+---@return number[][]
+function M.offsets(n)
+  local h = M.PITCH / 2
+  if n == 1 then return { { 0, 0 } } end
+  if n == 2 then return { { -h, 0 }, { h, 0 } } end
+  local square = { { -h, -h }, { h, -h }, { -h, h }, { h, h } }
+  if n == 3 then return { square[1], square[2], square[3] } end
+  return square
 end
 
---- Plan the layout. `cities` is a list of { name = entity name, ... } (map.CITIES); the
---- result is a copy of each entry with x, y (integers, spawn at 0, 0) and depth.
----@param cities table[]
+--- Plan the layout: a list of sites { x, y (integers, spawn at 0, 0), plots = n, starter =
+--- true? }, nearest spawn first; plots add up to at least TARGET_PLOTS.
 ---@param seed integer
----@param spacing number minimum distance between any two cities
+---@param spacing number minimum distance between two sites
 ---@return table[]
-function M.plan(cities, seed, spacing)
+function M.plan(seed, spacing)
   local rng = game.create_random_generator(M.mix_seed(seed))
-  local max_depth = 1
-  local todo = {}
-  -- Several cities of one type (the coal power cities): only the first plans at its own
-  -- depth; each further copy plans one deeper, so they spread outward instead of all
-  -- landing near spawn (playtest 2.8.7).
-  local copies = {}
-  for _, c in ipairs(cities) do
-    local e = {}
-    for k, v in pairs(c) do e[k] = v end
-    e.copy = copies[c.name] or 0
-    copies[c.name] = e.copy + 1
-    e.depth = depth_of(c.name) + e.copy
-    e.starter = c.name == config.CITY.power and e.copy == 0 or nil
-    e.starter_water = c.name == M.WATER and e.copy == 0 or nil
-    e.order = rng()
-    max_depth = math.max(max_depth, e.depth)
-    todo[#todo + 1] = e
-  end
-  -- the depot first, then the starter power city, then shallow before deep (ties random)
-  table.sort(todo, function(a, b)
-    local da, db = a.name == config.CITY.depot, b.name == config.CITY.depot
-    if da ~= db then return da end
-    local sa, sb = (a.starter or a.starter_water) and true or false, (b.starter or b.starter_water) and true or false
-    if sa ~= sb then return sa end
-    if sa and (a.starter_water or false) ~= (b.starter_water or false) then return a.starter_water or false end
-    if a.depth ~= b.depth then return a.depth < b.depth end
-    return a.order < b.order
-  end)
-
   local placed = {}
-  local function clear(x, y, e)
+  local function clear(x, y, gap)
     for _, p in ipairs(placed) do
-      local need = M.need(e, p, spacing)
+      local need = math.max(gap, p.gap)
       if (p.x - x) ^ 2 + (p.y - y) ^ 2 < need * need then return false end
     end
     return true
   end
-  for _, e in ipairs(todo) do
-    -- (the depot and the starter keep only the minimum, or they'd push the early game away)
-    local early = trio(e)
-    e.gap = early and spacing or spacing * (1 + M.GAP_SPREAD * rng() ^ M.GAP_SKEW)
-    local r
-    if e.name == config.CITY.depot then
-      r = M.DEPOT_RADIUS[1] + rng() * (M.DEPOT_RADIUS[2] - M.DEPOT_RADIUS[1])
-    elseif e.starter or e.starter_water then
-      r = M.STARTER_RADIUS[1] + rng() * (M.STARTER_RADIUS[2] - M.STARTER_RADIUS[1])
-    else
-      local share = max_depth > 1 and (e.depth - 1) / (max_depth - 1) or 0
-      r = spacing * (M.MIN_R + M.SPREAD * (M.DEPTH_WEIGHT * share + (1 - M.DEPTH_WEIGHT) * rng()))
-    end
-    while true do
-      local done = false
-      for _ = 1, M.TRIES do
-        local a = rng() * 2 * math.pi
-        local rr = r * (0.9 + 0.2 * rng())
-        local x, y = math.floor(rr * math.cos(a)), math.floor(rr * math.sin(a))
-        if clear(x, y, e) then
-          e.x, e.y = x, y
-          done = true
-          break
-        end
+  -- the starter site, close to spawn
+  local a = rng() * 2 * math.pi
+  local r0 = M.STARTER_RADIUS[1] + rng() * (M.STARTER_RADIUS[2] - M.STARTER_RADIUS[1])
+  placed[1] = { x = math.floor(r0 * math.cos(a)), y = math.floor(r0 * math.sin(a)), plots = M.STARTER_PLOTS,
+    starter = true, gap = spacing }
+  local total = M.STARTER_PLOTS
+  local r = spacing * M.FIRST_RING
+  while total < M.TARGET_PLOTS do
+    local gap = spacing * (1 + M.GAP_SPREAD * rng() ^ M.GAP_SKEW)
+    local done = false
+    for _ = 1, M.TRIES do
+      local ang = rng() * 2 * math.pi
+      local rr = r * (0.9 + 0.2 * rng())
+      local x, y = math.floor(rr * math.cos(ang)), math.floor(rr * math.sin(ang))
+      if clear(x, y, gap) then
+        local n = 1 + math.floor(rng() * M.MAX_PLOTS)
+        placed[#placed + 1] = { x = x, y = y, plots = n, gap = gap }
+        total = total + n
+        done = true
+        break
       end
-      if done then break end
-      r = r * M.STEP_OUT
     end
-    e.order = nil
-    placed[#placed + 1] = e
+    if not done then r = r * M.STEP_OUT end
   end
+  for _, p in ipairs(placed) do p.gap = nil end
   return placed
 end
 

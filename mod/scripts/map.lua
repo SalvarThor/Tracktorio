@@ -4,7 +4,6 @@
 local config = require("shared.config")
 local start_kit = require("scripts.start_kit")
 local cities = require("scripts.cities")
-local city_defs = require("shared.city_defs")
 local layout = require("scripts.layout")
 local sites = require("scripts.sites")
 local plots = require("scripts.plots")
@@ -316,114 +315,55 @@ function M.retry_blocked()
   end
 end
 
--- 2.8.3: a site may move up to sites.SEARCH from its planned spot; cities stay at least
+-- 2.8.3: a site may move up to sites.SEARCH from its planned spot; sites stay at least
 -- this share of the spacing apart (1 since 2.8.12: the minimum is a hard floor).
 M.MIN_APART = 1
-M.CHART_AROUND = 16 -- tiles charted around each city at the start (2.8.5)
+M.CHART_AROUND = 24 -- tiles charted around each site at the start (2.8.5)
 M.ALT_TURN = 15
 M.ALT_OUT, M.ALT_OUT_STEPS = 1.15, 4 -- then further out from spawn, up to 4 times
 M.ALT_SEARCH = 96 -- how far a fallback spot's site may move
--- 2.9.5: the starter water city looks for a lake shore this far from spawn; the starter
--- power city may move this far from its spot next to it.
-M.STARTER_SHORE_SEARCH = 600
-M.STARTER_PIPE_SEARCH = 16 -- degrees around spawn between alternative spots when a site finds no land
+M.TAG_ICON = { type = "item", name = "refined-hazard-concrete" } -- the plot's painted border
 
-M.COMPASS = { "East", "South-east", "South", "South-west", "West", "North-west", "North", "North-east" }
-
---- Cities of a type that appears more than once (the coal power cities) are named for the
---- direction they lie in from spawn, e.g. "North-east power city" (user, playtest 2.8.7);
---- two in the same direction are numbered ("East power city 2"). Others keep their label.
----@param placed table[] layout entries with name, label, x, y (spawn at 0, 0)
-function M.compass_names(placed)
-  local count, base = {}, {}
-  for _, c in ipairs(M.CITIES) do
-    count[c.name] = (count[c.name] or 0) + 1
-    base[c.name] = base[c.name] or c.label
-  end
-  local used = {}
-  for _, c in ipairs(placed) do
-    if count[c.name] > 1 then
-      -- screen y points south; 8 sectors of 45 degrees, sector 0 centred on east
-      local sector = math.floor((math.atan2(c.y, c.x) / (2 * math.pi) * 8 + 0.5)) % 8
-      local b = base[c.name]
-      local label = M.COMPASS[sector + 1] .. " " .. string.lower(string.sub(b, 1, 1)) .. string.sub(b, 2)
-      used[label] = (used[label] or 0) + 1
-      c.label = used[label] > 1 and (label .. " " .. used[label]) or label
-    end
-  end
+--- Map tag text of a site.
+---@param site table
+local function site_label(site)
+  local n = site.plots
+  local text = n == 1 and "City plot" or (n .. " city plots")
+  return site.starter and ("Start: " .. text) or text
 end
 
---- Place a procedural layout on a surface with real terrain (2.8.3): plan it from the
---- seed, move each city to the nearest usable land, clear it and place the city. The
---- placed layout is kept in storage.tt_layout[surface name] (for tags, 2.8.5). Returns the
---- placed entries and the labels of any city that found no site.
+--- Place a procedural plot layout on a surface with real terrain (2.15.6; cities until
+--- then, 2.8.3): plan the sites from the seed, move each to the nearest usable land, clear
+--- it and paint its plots. The placed sites are kept in storage.tt_layout[surface name]
+--- (for tags, 2.8.5). Returns the placed sites and the labels of any that found no land.
 ---@param surface LuaSurface
 ---@param seed integer
 ---@param spacing number
 function M.place_procedural(surface, seed, spacing)
   local placed, missing = {}, {}
-
-  --- Clear the site and place the city there; false if something still blocks it.
-  local function place_at(c, site)
-    sites.clear(surface, site.x, site.y)
-    local pos = { site.x + 0.5, site.y + 0.5 }
-    plots.paint(surface, pos) -- 2.15: a city stands on a plot
-    if not surface.can_place_entity({ name = c.name, position = cities.snap(c.name, pos), force = "player" }) then
-      local what = {}
-      for _, e in pairs(surface.find_entities_filtered({ area = { { pos[1] - 5, pos[2] - 5 }, { pos[1] + 5, pos[2] + 5 } } })) do
-        what[#what + 1] = e.name .. "/" .. e.type
-      end
-      log("tracktorio: site for " .. c.label .. " at " .. site.x .. "," .. site.y .. " is blocked by " .. serpent.line(what))
-      return false
-    end
-    cities.place(c.name, surface, pos, "player")
-    c.planned = { x = c.x, y = c.y }
-    c.x, c.y = site.x, site.y
-    placed[#placed + 1] = c
-    return true
-  end
-
-  --- A site STARTER_PIPE tiles from `other` (the starter pair: close enough to pipe),
-  --- trying 8 directions, the one towards spawn first.
-  local function next_to(c, other, apart)
-    local mid = (layout.STARTER_PIPE[1] + layout.STARTER_PIPE[2]) / 2
-    local base = math.atan2(-other.y, -other.x)
-    for k = 0, 7 do
-      local a = base + k * math.pi / 4
-      local site = sites.find(surface, math.floor(other.x + mid * math.cos(a)), math.floor(other.y + mid * math.sin(a)),
-        placed, apart, M.STARTER_PIPE_SEARCH)
-      if site then
-        local d = math.sqrt((site.x - other.x) ^ 2 + (site.y - other.y) ^ 2)
-        if d >= layout.STARTER_PIPE[1] and d <= layout.STARTER_PIPE[2] then return site end
-      end
-    end
-    return nil
-  end
-
-  --- The usual search: near the planned spot, else the same distance from spawn turned
-  --- around it in ALT_TURN steps (+15, -15, +30, ...), so the depth weighting holds; if
-  --- every turn is blocked (a crowded ring), a little further out (ALT_OUT), and again.
-  local function free(x, y, apart)
+  local function apart() return spacing * M.MIN_APART end
+  local function free(x, y)
     for _, t in ipairs(placed) do
-      local need = apart(t)
+      local need = apart()
       if (t.x - x) ^ 2 + (t.y - y) ^ 2 < need * need then return false end
     end
     return true
   end
-  local function near_plan(c, apart, finder)
-    local site = finder(surface, c.x, c.y, placed, apart)
-    -- fallback spots: only searched (a little) if the spot itself is free
+  --- Near the planned spot, else the same distance from spawn turned around it in
+  --- ALT_TURN steps (+15, -15, +30, ...); if every turn is blocked, a little further out.
+  local function near_plan(c)
+    local site = sites.find(surface, c.x, c.y, placed, apart)
     local function try_spot(x, y)
-      if not free(x, y, apart) then return nil end
-      return finder(surface, x, y, placed, apart, M.ALT_SEARCH)
+      if not free(x, y) then return nil end
+      return sites.find(surface, x, y, placed, apart, M.ALT_SEARCH)
     end
     local scale = 1
     for _ = 0, M.ALT_OUT_STEPS do
       local turn = 0
       while not site and turn < 360 / M.ALT_TURN - 1 do
         turn = turn + 1
-        local a = math.rad(M.ALT_TURN * math.ceil(turn / 2) * (turn % 2 == 1 and 1 or -1))
-        local ca, sa = math.cos(a) * scale, math.sin(a) * scale
+        local ang = math.rad(M.ALT_TURN * math.ceil(turn / 2) * (turn % 2 == 1 and 1 or -1))
+        local ca, sa = math.cos(ang) * scale, math.sin(ang) * scale
         site = try_spot(math.floor(c.x * ca - c.y * sa), math.floor(c.x * sa + c.y * ca))
       end
       if site then break end
@@ -432,45 +372,26 @@ function M.place_procedural(surface, seed, spacing)
     end
     return site
   end
-
-  local starter_water, deferred_water, starter_power
-  for _, c in ipairs(layout.plan(M.CITIES, seed, spacing)) do
-    -- the same pair rules as the plan (the starting trio, power and water cities apart)
-    local function apart(t) return layout.need(c, t, spacing) * M.MIN_APART end
-    local site
-    if c.starter_water then
-      -- 2.9.5: the lake shore nearest spawn; without one near enough, it stands by the
-      -- starter power city instead (placed right after it)
-      site = sites.find_shore(surface, 0, 0, placed, apart, M.STARTER_SHORE_SEARCH)
-      if not site then deferred_water = c end
-    elseif c.starter and starter_water then
-      site = next_to(c, starter_water, apart)
-    elseif c.name == layout.WATER then
-      -- 2.9.4: on a lake shore; if no lake is in reach, any land
-      site = sites.find_shore(surface, c.x, c.y, placed, apart) or near_plan(c, apart, sites.find)
-    else
-      site = near_plan(c, apart, sites.find)
-    end
-    if c == deferred_water then
-      -- placed after the starter power city
-    elseif site and place_at(c, site) then
-      if c.starter_water then starter_water = c end
-      if c.starter then starter_power = c end
+  for _, c in ipairs(layout.plan(seed, spacing)) do
+    c.label = site_label(c)
+    local site = near_plan(c)
+    if site then
+      sites.clear(surface, site.x, site.y)
+      c.planned = { x = c.x, y = c.y }
+      c.x, c.y = site.x, site.y
+      for _, o in ipairs(layout.offsets(c.plots)) do
+        plots.paint(surface, { c.x + o[1], c.y + o[2] }, true)
+      end
+      c.tag_icon = M.TAG_ICON.name
+      placed[#placed + 1] = c
     else
       missing[#missing + 1] = c.label
     end
-    if c.starter and deferred_water then
-      local w = deferred_water
-      local function w_apart(t) return layout.need(w, t, spacing) * M.MIN_APART end
-      local wsite = starter_power and next_to(w, starter_power, w_apart)
-      if not (wsite and place_at(w, wsite)) then missing[#missing + 1] = w.label end
-      deferred_water = nil
-    end
-  end  for _, label in ipairs(missing) do log("tracktorio: no site for " .. label) end
-  M.compass_names(placed)
+  end
+  for _, label in ipairs(missing) do log("tracktorio: no land for " .. label) end
   storage.tt_layout = storage.tt_layout or {}
   storage.tt_layout[surface.name] = placed
-  -- 2.8.5 (user, playtest 2.8.7): every city is on the map from the start. Chart a little
+  -- 2.8.5 (user, playtest 2.8.7): every site is on the map from the start. Chart a little
   -- around each one; on_chunk_charted then puts its tag on. The rest of the map stays dark.
   local force = game.forces["player"]
   for _, c in ipairs(placed) do
@@ -479,9 +400,9 @@ function M.place_procedural(surface, seed, spacing)
   return placed, missing
 end
 
---- on_chunk_charted (2.8.5): on a procedural map a city's tag goes on when its chunk is
---- first charted. place_procedural charts every city at the start, so all tags show from
---- the start (user, playtest 2.8.7); this also re-tags a city for a force charting it later.
+--- on_chunk_charted (2.8.5): on a procedural map a site's tag goes on when its chunk is
+--- first charted. place_procedural charts every site at the start, so all tags show from
+--- the start (user, playtest 2.8.7); this also tags a site for a force charting it later.
 ---@param e EventData.on_chunk_charted
 function M.on_chunk_charted(e)
   local surface = game.get_surface(e.surface_index)
@@ -524,20 +445,16 @@ function M.remote_interface()
     retry_blocked = function() M.retry_blocked() end,
     tick_tags = function() return M.tick_tags() end,
     setup_player = function(player_index) M.setup_player(assert(game.get_player(player_index))) end,
-    -- 2.8.2: procedural layout for a seed (spacing defaults to the startup setting)
-    plan = function(seed, spacing) return layout.plan(M.CITIES, seed, spacing or layout.spacing()) end,
+    -- 2.15.6: procedural plot layout for a seed (spacing defaults to the startup setting)
+    plan = function(seed, spacing) return layout.plan(seed, spacing or layout.spacing()) end,
     spacing = function() return layout.spacing() end,
-    compass_names = function(placed) M.compass_names(placed); return placed end,
-    need = function(a, b, spacing) return layout.need(a, b, spacing or layout.spacing()) end,
+    offsets = function(n) return layout.offsets(n) end,
     place_procedural = function(surface_name, seed, spacing)
       local placed, missing = M.place_procedural(assert(game.get_surface(surface_name)), seed, spacing or layout.spacing())
       return { placed = placed, missing = missing }
     end,
     mainland = function(surface_name, x, y) return sites.mainland(assert(game.get_surface(surface_name)), x, y) end,
     find_site = function(surface_name, x, y) return sites.find(assert(game.get_surface(surface_name)), x, y) end,
-    find_shore = function(surface_name, x, y, search)
-      return sites.find_shore(assert(game.get_surface(surface_name)), x, y, nil, nil, search)
-    end,
     layout = function()
       return { width = M.WIDTH, height = M.HEIGHT, spawn = M.SPAWN, cities = M.CITIES,
         patches = M.PATCHES, lakes = M.LAKES }

@@ -17,11 +17,18 @@ function M.area(position)
   return { left_top = { x = x - h, y = y - h }, right_bottom = { x = x + h, y = y + h } }
 end
 
---- Paint a plot under the city position `position`.
+--- Paint a plot under the city position `position`. `clear` also removes ore and
+--- anything else not the player's on it (map generation: a plot is clean ground).
 ---@param surface LuaSurface
 ---@param position MapPosition|number[]
-function M.paint(surface, position)
+---@param clear boolean?
+function M.paint(surface, position, clear)
   local a = M.area(position)
+  if clear then
+    for _, e in pairs(surface.find_entities_filtered({ area = a })) do
+      if e.valid and e.type ~= "character" and (e.force.name ~= "player" or e.type == "resource") then e.destroy() end
+    end
+  end
   local x0, y0, x1, y1 = a.left_top.x, a.left_top.y, a.right_bottom.x - 1, a.right_bottom.y - 1
   local tiles = {}
   for x = x0, x1 do
