@@ -15,8 +15,13 @@ decided during the build.
   (no blueprints; a scripted swap instead of normal building; a wrong pick can't be
   undone).
 - Agreed with it: no tier growth (you scale by building more cities), no rotation, plots
-  in small sites far apart (so belts between sites don't replace trains). The open
-  details are in PLAN 2.15.
+  in small sites far apart (so belts between sites don't replace trains).
+- Details (user): every city 12x12 (rejected 8x8: small next to a train); tiers that change
+  the kind (coal -> electric smelting) become separate city kinds swapped in place by the
+  upgrade planner, speed-only tiers go; output half of today's tier 1 to start (rejected a
+  third); sites of 1-3 plots, 300+ tiles apart, ~75 plots, a starter site of 4; removing a
+  city loses its contents (rejected: no removal); the hand-made MVP scenario leaves the menu
+  and stays only as the tests' fixed map (rejected: converting it to plots).
 - 2.14.1 onward is parked until 2.15 is done: a recorded full run would tune numbers
   that are about to change.
 
