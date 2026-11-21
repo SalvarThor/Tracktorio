@@ -745,3 +745,51 @@ Items:
       its power draw and status signals blink (see 2.12 discussion); the coal fuel flame
       badge gets lost on a busy belt; the user wants a primer on using city signals.
       2 and 3 locomotives researched, built and driven.
+
+### Phase 2.12: steady production and the coal fuel icon (DRAFT, waiting for the user's approval)
+
+Why (playtest 2.11, user): a city stands in for many machines but runs as one. Given less
+than its full input it crafts flat out until the input runs dry, then idles, so its power
+draw jumps between full and nothing and its status signal blinks. A steady input should
+give a steady output.
+
+Proposed (2026-11-21), to confirm with the user:
+- Each city gets a hidden beacon holding hidden "throttle" modules. A module lowers speed
+  and power draw together (each step -5% speed and -5% consumption), so a city at 60%
+  makes 60% of its output on 60% of its power. The engine floors both at 20%: below
+  that the city still runs in bursts, but far less often. No other effects (no
+  productivity, no pollution change).
+- The beacon reaches only its own city: its supply area ends inside the building, so a
+  player's drill next to the wall is never slowed. It can't be seen, selected or mined.
+- A controller every second sets the throttle from the city's buffers: it keeps a small
+  stock of the scarcest input (about two crafts' worth). The stock growing means the
+  input is faster than the city: speed up. Shrinking: slow down. Output backing up (the
+  player not taking it away fast enough) slows it down the same way, so a slow output
+  belt also gives a steady, slower city instead of stop-start.
+- Applies to the crafting cities and the research complex. Not to power cities (their
+  output already follows demand), water cities (no inputs) or the rocket silo.
+- The city window shows the speed ("Running at 60%"); the stock point sends it as a
+  signal (custom virtual signal "city speed", 0-100), and "running" stays on while it
+  runs at any speed.
+- Coal fuel gets an icon that reads as its own thing on a busy belt instead of coal with
+  a small badge. I mock up two or three options (for example a pressed briquette, or coal
+  with a strong orange glow) and the user picks one.
+
+Items:
+- [ ] 2.12.1 Spike: a hidden beacon with custom modules slows one city's speed and power
+      together, reaches nothing outside it (a drill at the wall keeps full speed), and
+      can be re-filled by script each second without hiccups. Check the 20% floor and how
+      2.1 stacks module effects in a beacon. Record what 2.1 does in DECISIONS.md.
+- [ ] 2.12.2 Throttle prototypes (beacon, modules) and the per-city beacon, placed with the
+      city, replaced on upgrade (the bigger building), removed with it.
+- [ ] 2.12.3 Controller: buffer-based speed setting every second, for inputs and backed-up
+      outputs; full input runs at 100%, no input still reads as starved.
+- [ ] 2.12.4 Window line and speed signal; status stays "running" at reduced speed.
+- [ ] 2.12.5 Tests: a steady half-rate belt gives a city that runs at about 50% with no
+      idle gaps over a minute (power draw stays within a narrow band); full input gives
+      full speed; cutting the input still starves it; a slow output belt gives a steady,
+      slower city; a drill at the wall is unaffected; upgrades keep it working.
+- [ ] 2.12.6 Coal fuel icon: mock-ups for the user, then the chosen one in game.
+- [ ] 2.12.7 SPEC, README and DECISIONS updated.
+- [ ] 2.12.8 `/playtest`: power graph and signals of a city fed below its full rate;
+      the new coal fuel icon on a busy belt.
