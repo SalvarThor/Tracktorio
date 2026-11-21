@@ -776,7 +776,7 @@ Decided with the user (2026-11-21): 5% steps with the 20% floor, and the speed s
   with a strong orange glow) and the user picks one.
 
 Items:
-- [ ] 2.12.1 Spike: a hidden beacon with custom modules slows one city's speed and power
+- [x] 2.12.1 Spike: a hidden beacon with custom modules slows one city's speed and power
       together, reaches nothing outside it (a drill at the wall keeps full speed), and
       can be re-filled by script each second without hiccups. Check the 20% floor and how
       2.1 stacks module effects in a beacon. Record what 2.1 does in DECISIONS.md.

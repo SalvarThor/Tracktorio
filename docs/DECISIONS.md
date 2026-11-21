@@ -4,6 +4,17 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.12.1 throttle spike
+- A hidden beacon (void energy, profile {1}, distribution effectivity 1, empty collision
+  mask, supply area distance 1 around a 0.8-tile box at the city's centre) with N modules
+  of speed -5% and consumption -5% gives its city exactly -5N% on both: 10 modules ->
+  50% crafting speed, 16 -> 20% (the floor). Effects add up linearly in one beacon.
+- The supply area overlaps only the city: a drill at the wall and a machine just outside
+  get no effect.
+- Cities now allow speed and consumption effects (they had none); only the throttle
+  beacon gives them, since the player has no beacons or modules.
+- The beacon hides its module icons in alt mode (icon scale 0).
+
 ## 2026-11-21: 2.11.5-2.11.6 locomotive tiers
 - Mk2 and Mk3 are copies of the vanilla locomotive with the user-approved stats (900 kW /
   1.2 MW, 290 / 324 km/h, fuel effectivity 125% / 150%, wear 5% / 3% per minute). Free

@@ -67,6 +67,14 @@ M.SERVICE_BOX_PORT = "tt-belt-port-service" -- 2.10.14: the same for a depot's r
 M.CONSTRUCTION_ICON = "item/steel-chest" -- 2.10.14: marks the construction port everywhere
 M.SIGNAL_POINT = "tt-signal-point" -- 2.11: a city's stock and status, for the circuit network
 M.CONSTRUCTION_SIGNAL_POINT = "tt-signal-point-construction" -- 2.11: materials its next tier still needs
+-- Throttle (2.12): a hidden beacon in each crafting city and the research complex, with
+-- modules taking THROTTLE_STEP off speed and power each; at most THROTTLE_MAX_STEPS (the
+-- engine floors speed and consumption at 20%).
+M.THROTTLE_BEACON = "tt-throttle-beacon"
+M.THROTTLE_MODULE = "tt-throttle-module"
+M.THROTTLE_CATEGORY = "tt-throttle"
+M.THROTTLE_STEP = 0.05
+M.THROTTLE_MAX_STEPS = 16
 M.SIGNAL = { -- 2.11: status signals of the stock point (value 1 while true)
   running = "tt-city-running", starved = "tt-city-starved",
   output_full = "tt-city-output-full", no_power = "tt-city-no-power",

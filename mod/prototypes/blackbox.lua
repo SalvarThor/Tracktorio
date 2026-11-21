@@ -200,7 +200,7 @@ function M.make_city(def)
     } or def.power and { type = "electric", usage_priority = "secondary-input" } or { type = "void" },
     energy_usage = def.burner and def.burner.power or def.power or "1W",
     module_slots = 0,
-    allowed_effects = {},
+    allowed_effects = { "speed", "consumption" }, -- 2.12: only the throttle beacon gives them
     fluid_boxes = make_fluid_boxes(def.fluid_boxes, src.fluid_boxes and src or data.raw["assembling-machine"]["assembling-machine-2"]),
     fluid_boxes_off_when_no_fluid_recipe = false,
     impact_category = "metal",
@@ -255,7 +255,7 @@ function M.make_lab(def)
     energy_source = { type = "electric", usage_priority = "secondary-input" },
     energy_usage = def.power,
     module_slots = 0,
-    allowed_effects = {},
+    allowed_effects = { "speed", "consumption" }, -- 2.12: only the throttle beacon gives them
     impact_category = "metal",
   } }
 end
