@@ -803,4 +803,6 @@ Items:
       rate); the speed jumped about (now rates averaged over ~10 s, at most one 5% step
       every 2 s, wobbles under a step ignored, faster only when about to run dry). Tests:
       a fixed max under the throttle; the shown speed stays calm on a real belt.
-- [ ] 2.12.11 `/playtest` of 2.12.10: the window's max stays put; the speed settles calmly.
+- [x] 2.12.11 `/playtest` of 2.12.10: the window's max stays put; the speed settles calmly.
+      Playtest 2026-11-21: both passed; clean log. Finding for later: the city window has
+      become information dense and needs a clearer layout.

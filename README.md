@@ -8,7 +8,7 @@ network, and design the stations that feed and drain the cities. Cities chain ac
 map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
 
-> Status: in development. Post-MVP phases 2.1 to 2.11 (procedural maps, water city, Factorissimo buildings, city signals) are
+> Status: in development. Post-MVP phases 2.1 to 2.12 (procedural maps, water city, Factorissimo buildings, city signals, steady production) are
 > built and playtested. Not on the mod portal yet.
 
 ## How to play
@@ -109,7 +109,7 @@ enough to pipe water from one to the other. The hand-made test map is kept for t
 ## How it was built
 
 The mod is built item by item from [docs/PLAN.md](docs/PLAN.md). Every item has automated
-in-game tests (252 at the moment). Every phase ends with a playtest round, and its
+in-game tests (262 at the moment). Every phase ends with a playtest round, and its
 findings go back into the plan. Decisions, and the reasons behind them, are logged in
 [docs/DECISIONS.md](docs/DECISIONS.md).
 
@@ -128,6 +128,7 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 | 2.9 | Water city: water only from water cities on lake shores, offshore pumps removed, a starter pair near spawn; a water budget test |
 | 2.10 | Factorissimo buildings that grow with each tier (8x8, 12x12, 16x16), belt ports in their walls instead of inserters (construction and repair packs too), roof icons, even output lanes |
 | 2.11 | City signals (stock, status, tier, construction needs) for the circuit network; locomotive Mk2 and Mk3 |
+| 2.12 | Steady production: cities fed below their full rate run steadily at that rate (hidden throttle beacons), speed in the window and as a signal; coal fuel briquettes |
 
 ## Next steps
 
