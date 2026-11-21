@@ -167,7 +167,8 @@ M.BANNED_ITEMS = {
 }
 
 -- Technologies hidden outright (planets and platforms are off).
-M.HIDDEN_TECH_PATTERNS = { "^planet%-discovery%-", "^space%-platform", "^rocket%-silo$" }
+-- (2.15.5: the Rocket silo technology stays visible: it unlocks the rocket silo city.)
+M.HIDDEN_TECH_PATTERNS = { "^planet%-discovery%-", "^space%-platform" }
 
 -- Researched for the player force at game start (SPEC MVP starting research).
 M.START_TECHNOLOGIES = {

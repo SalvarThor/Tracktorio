@@ -189,4 +189,40 @@ return {
       assert_.equals(new_point.get_wire_connector(RED, true).connection_count, 1, "the wire was lost")
     end,
   },
+  {
+    -- 2.15.5 (table agreed with the user)
+    name = "research: the starting cities can be built at once; each other city is unlocked by its technology",
+    fn = function()
+      local force = game.forces["player"]
+      local start = { "depot", "power", "water", "iron-smelting", "copper-smelting", "red-science", "research", "circuits" }
+      for _, n in ipairs(start) do
+        local r = assert(force.recipes["tt-build-tt-city-" .. n], "no build recipe for " .. n)
+        assert_.truthy(r.enabled, n .. " can't be built from the start")
+      end
+      for _, def in ipairs(city_defs.list) do
+        local recipe = "tt-build-" .. city_defs.entity_name(def.name)
+        if def.unlock then
+          local tech = assert(force.technologies[def.unlock], "no technology " .. def.unlock)
+          assert_.falsy(tech.prototype.hidden, def.unlock .. " is hidden")
+          local found = false
+          for _, e in ipairs(tech.prototype.effects) do
+            if e.type == "unlock-recipe" and e.recipe == recipe then found = true end
+          end
+          assert_.truthy(found, def.unlock .. " does not unlock " .. def.name)
+          if not tech.researched then
+            assert_.falsy(force.recipes[recipe].enabled, def.name .. " can be built before " .. def.unlock)
+          end
+        else
+          assert_.truthy(force.recipes[recipe].enabled, def.name .. " is not a starting city but has no technology")
+        end
+      end
+      -- researching one unlocks it
+      local steel = force.technologies["steel-processing"]
+      local was = steel.researched
+      steel.researched = true
+      assert_.truthy(force.recipes["tt-build-tt-city-steel"].enabled, "steel city still locked")
+      steel.researched = was
+      if not was then force.recipes["tt-build-tt-city-steel"].enabled = false end
+    end,
+  },
 }

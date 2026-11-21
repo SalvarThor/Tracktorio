@@ -117,19 +117,26 @@ return {
   {
     name = "restrictions: planets and platforms technologies are hidden",
     fn = function()
-      for _, name in ipairs({ "space-platform", "planet-discovery-vulcanus", "rocket-silo" }) do
+      for _, name in ipairs({ "space-platform", "planet-discovery-vulcanus" }) do
         local t = prototypes.technology[name]
         assert_.truthy(t and t.hidden, name .. " not hidden")
       end
+      -- 2.15.5: Rocket silo stays, and gives the rocket silo city alone
+      local silo = prototypes.technology["rocket-silo"]
+      assert_.falsy(silo.hidden, "rocket-silo hidden")
+      assert_.equals(#silo.effects, 1, "rocket-silo effects")
+      assert_.equals(silo.effects[1].recipe, "tt-build-tt-city-rocket-silo")
     end,
   },
   {
     -- 2.6.2: hiding a tech whose only unlocks were banned cut everything behind it
     name = "restrictions: a tech hidden for giving only banned things doesn't cut the tree",
     fn = function()
-      local amp = prototypes.technology["advanced-material-processing"]
-      assert_.truthy(amp.hidden, "advanced material processing should be hidden (steel furnace only)")
-      local planet = { "^planet%-discovery%-", "^space%-platform", "^rocket%-silo$" }
+      -- 2.15.5: Advanced material processing unlocks electric smelting now; Solar energy
+      -- (the solar panel) is one that gives nothing left
+      assert_.truthy(prototypes.technology["solar-energy"].hidden, "solar energy should be hidden (solar panel only)")
+      assert_.falsy(prototypes.technology["advanced-material-processing"].hidden, "advanced material processing hidden")
+      local planet = { "^planet%-discovery%-", "^space%-platform" }
       for name, t in pairs(prototypes.technology) do
         if not t.hidden then
           for pre, p in pairs(t.prerequisites) do
@@ -140,7 +147,7 @@ return {
         end
       end
       local concrete = prototypes.technology["concrete"]
-      assert_.truthy(concrete.prerequisites["steel-processing"], "concrete did not inherit steel processing")
+      assert_.truthy(concrete.prerequisites["advanced-material-processing"], "concrete lost advanced material processing")
     end,
   },
 }

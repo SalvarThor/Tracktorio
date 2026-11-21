@@ -4,6 +4,24 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-21: 2.15.5 cities unlocked by research (table approved by the user)
+- From the start: coal fuel depot, coal power, water, iron and copper smelting, red
+  science, research complex, circuits (Electronics is a starting technology).
+- Repair pack city: Repair pack. Steel: Steel processing. Green science: Logistic science
+  pack. Electric iron and copper smelting: Advanced material processing (red + green;
+  vanilla's electric furnace is on Advanced material processing 2, the user's call: mid-game
+  is better for getting coal off the smelting lines). Refinery and solid fuel depot: Oil
+  processing. Plastic: Plastics. Sulfur and sulfuric acid: Sulfur processing. Advanced
+  circuits: Advanced circuit. Blue science: Chemical science pack. Processing units:
+  Processing unit. Low density structure: Low density structure. Rocket fuel depot: Rocket
+  fuel. Uranium: Uranium processing. Nuclear power: Nuclear power. Rocket silo: Rocket silo.
+- The unlocks are added in data-final-fixes before restrictions.lua, so a technology that
+  had nothing else left (Advanced material processing: the steel furnace only) stays
+  visible instead of being spliced out of the tree.
+- Rocket silo leaves HIDDEN_TECH_PATTERNS; its other effects (vanilla silo, rocket part,
+  cargo landing pad, platform starter pack) are dropped. Planet and platform techs stay
+  hidden.
+
 ## 2026-11-21: 2.15.4 building and removing cities
 - One path for every city that appears: `cities.adopt(entity)` (protection, hidden
   generator, record, placement hooks). `cities.place` (script) calls it after

@@ -952,9 +952,12 @@ Items:
       Done: cities.adopt sets up every city that appears (script, hand, robot, ghost
       revive, fast replace); mining empties it first; the electric swap keeps the signal
       wires. Robot builds now raise our build handler too.
-- [ ] 2.15.5 Research: each city kind is unlocked by a technology. The starting research
+- [x] 2.15.5 Research: each city kind is unlocked by a technology. The starting research
       gives the depot, coal power, water and both smelting cities; the rest go to the
       vanilla technologies they match (a table for the user to check before it's built).
+      Done with the user's table (city_defs.UNLOCK): circuits and red science start too;
+      electric smelting on Advanced material processing. Rocket silo is no longer hidden: it
+      gives the rocket silo city alone.
 - [ ] 2.15.6 Map generation: the layout plans plot sites instead of cities (decision 4).
       Land finding (sites.lua) is reused; each site gets a map tag.
 - [ ] 2.15.7 City outputs rebalanced (decision 3): rates, power draw, port belts.

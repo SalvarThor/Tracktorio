@@ -76,7 +76,7 @@ for i, def in ipairs(defs.list) do
       name = config.CITY_BUILD_RECIPE_PREFIX .. name,
       localised_name = { "entity-name." .. name },
       categories = { config.FREE_CATEGORY },
-      enabled = true, -- 2.15.5 gates them by research
+      enabled = def.unlock == nil, -- the rest are unlocked by research (city_research.lua)
       ingredients = {},
       energy_required = config.FREE_CRAFT_TIME,
       results = { { type = "item", name = name, amount = 1 } },

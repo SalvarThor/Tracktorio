@@ -307,6 +307,32 @@ M.list = {
   },
 }
 
+-- The technology that unlocks building each city kind (2.15.5, agreed with the user
+-- 2026-11-21): the vanilla technology for the same thing. Kinds not listed are there from
+-- the start: depot, coal power, water, iron and copper smelting, red science, the research
+-- complex and circuits (Electronics is a starting technology).
+M.UNLOCK = {
+  ["repair-packs"] = "repair-pack",
+  ["steel"] = "steel-processing",
+  ["green-science"] = "logistic-science-pack",
+  ["electric-iron-smelting"] = "advanced-material-processing",
+  ["electric-copper-smelting"] = "advanced-material-processing",
+  ["refinery"] = "oil-processing",
+  ["solid-fuel-depot"] = "oil-processing",
+  ["plastic"] = "plastics",
+  ["sulfur"] = "sulfur-processing",
+  ["sulfuric-acid"] = "sulfur-processing",
+  ["advanced-circuits"] = "advanced-circuit",
+  ["blue-science"] = "chemical-science-pack",
+  ["processing-units"] = "processing-unit",
+  ["low-density-structure"] = "low-density-structure",
+  ["rocket-fuel-depot"] = "rocket-fuel",
+  ["uranium"] = "uranium-processing",
+  ["nuclear-power"] = "nuclear-power",
+  ["rocket-silo"] = "rocket-silo",
+}
+for _, def in ipairs(M.list) do def.unlock = M.UNLOCK[def.name] end
+
 ---@param name string city definition name, e.g. "iron-smelting"
 function M.entity_name(name) return M.PREFIX .. name end
 
