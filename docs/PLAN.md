@@ -807,7 +807,7 @@ Items:
       Playtest 2026-11-21: both passed; clean log. Finding for later: the city window has
       become information dense and needs a clearer layout.
 
-### Phase 2.13: a clearer city window (DRAFT, waiting for the user's approval)
+### Phase 2.13: a clearer city window (approved by the user 2026-11-21)
 
 Why (playtest 2.12, user): the city window grew a section per phase and is now dense:
 explanations sit between live numbers, flow columns are described in a header instead of
