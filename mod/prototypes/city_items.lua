@@ -35,6 +35,12 @@ end
 local FLAGS_KEEP = { ["placeable-neutral"] = true, ["not-rotatable"] = true, ["not-flammable"] = true,
   ["not-repairable"] = true, ["not-in-kill-statistics"] = true, ["not-in-made-in"] = true, ["player-creation"] = true }
 
+---@type table<string, boolean> city kinds that have a later kind (coal smelting)
+local upgraded = {}
+for _, def in ipairs(defs.list) do
+  if def.upgrade_from then upgraded[def.upgrade_from] = true end
+end
+
 for i, def in ipairs(defs.list) do
   local name = defs.entity_name(def.name)
   local entity = assert(entity_of(name), "tt: no city entity " .. name)
@@ -56,9 +62,19 @@ for i, def in ipairs(defs.list) do
   -- the upgrade planner swaps a city for its later kind (electric smelting, 2.15.2)
   entity.fast_replaceable_group = "tt-city-" .. (def.upgrade_from or def.name)
 
-  local icons = { { icon = entity.icon or (entity.icons and entity.icons[1].icon), icon_size = 64 } }
-  local badge = product_icon(def)
-  if badge then icons[#icons + 1] = { icon = badge, icon_size = 64, scale = 0.25, shift = { 8, 8 }, floating = true } end
+  -- Icon (user, playtest 2.15.10): what the city makes, full size, so cities tell apart in
+  -- the quickbar; the city building small in the top left says it is a city. Smelting kinds
+  -- with a later kind get a coal mark, the electric kind a lightning mark (bottom right).
+  local building = entity.icon or (entity.icons and entity.icons[1].icon)
+  local product = product_icon(def)
+  local icons = { { icon = product or building, icon_size = 64 } }
+  if product then
+    icons[#icons + 1] = { icon = building, icon_size = 64, scale = 0.25, shift = { -8, -8 }, floating = true }
+  end
+  local mark = def.upgrade_from and "__base__/graphics/icons/signal/signal-lightning.png"
+    or (upgraded[def.name] and "__base__/graphics/icons/coal.png")
+  if mark then icons[#icons + 1] = { icon = mark, icon_size = 64, scale = 0.25, shift = { 8, 8 }, floating = true } end
+  entity.icons, entity.icon = icons, nil
   data:extend({
     {
       type = "item",
