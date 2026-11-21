@@ -28,7 +28,8 @@ Starting Freeplay with the mod on gives the same game, with a note saying so.
 - **Only trains transport.** No cars, tanks, spidertrons, roboports or logistic robots.
   Belts, pipes and inserters are for station logistics.
 - **Personal construction robots.** You start in power armor with two personal roboports
-  and 20 construction robots, so building goes fast. More robots are free to craft.
+  and 20 construction robots that fly five times as fast as normal and never need
+  charging. More robots are free to craft.
 - **Logistics are free.** Rails, signals, stops, trains, inserters, belts, chests, pipes,
   pumps, poles, circuit entities, miners and pumpjacks cost nothing to craft. Research
   still unlocks them.

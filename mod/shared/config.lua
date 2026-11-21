@@ -192,6 +192,9 @@ M.START_TECHNOLOGIES = {
 -- What every new player starts wearing and carrying (user, 2026-11-21): personal
 -- construction robots. Power armor (6x8 grid) holds the reactor (4x4, no fuel), two
 -- roboports (2x2, 10 robots each) and two batteries (1x2).
+-- Construction robots fly this many times the vanilla speed and use no energy (user,
+-- 2026-11-21, like Speedy Bot Start).
+M.ROBOT_SPEED_FACTOR = 5
 M.START_KIT = {
   armor = "power-armor",
   equipment = {

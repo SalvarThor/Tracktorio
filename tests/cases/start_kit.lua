@@ -38,4 +38,13 @@ return {
       end
     end,
   },
+  {
+    name = "start kit: construction robots fly 5x the vanilla speed and need no charging",
+    fn = function()
+      local bot = prototypes.entity["construction-robot"]
+      assert_.truthy(math.abs(bot.speed - 0.3) < 1e-9, "speed " .. tostring(bot.speed))
+      assert_.equals(bot.energy_per_move, 0, "energy per move")
+      assert_.equals(bot.energy_per_tick, 0, "energy per tick")
+    end,
+  },
 }

@@ -16,6 +16,9 @@ decided during the build.
 - Construction robots are a free hand-craft, unlocked from the start (Construction
   robotics joins the start research), to replace lost ones. Armor and equipment stay
   uncraftable: the kit is all there is.
+- Construction robots fly 5x the vanilla speed (0.3 tiles/tick) and use no energy, like
+  the user's Speedy Bot Start, so they never wait at a personal roboport to recharge
+  (user asked for fast bots). Research speed bonuses come on top.
 - Robots repair damaged entities near the player with repair packs from the player's
   inventory, locomotives included. That matches the spec's manual repair on site.
 - Speedy Bot Start (the user's QoL mod) adds nothing in a Tracktorio game: it hands out its
