@@ -3,7 +3,7 @@
 # (read only). List required dependencies too. `./tools/playtest.ps1 -NoExtraMods` skips them.
 # The user's QoL mods (2026-11-21, phase 2.14):
 Kux-SpeedyBotStart
-even-distribution
+# even-distribution  (2.1.0 crashes on init: reads LuaItemPrototype.fuel_category, removed in 2.1)
 far-reach
 infinity-invo
 jetpack
