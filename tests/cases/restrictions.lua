@@ -34,6 +34,18 @@ return {
     end,
   },
   {
+    -- playtest 2.15.10: a mini loader mod's loaders could not be crafted
+    name = "restrictions: another mod's inserter is free to hand-craft; its furnace is not",
+    fn = function()
+      local r = assert(prototypes.recipe["tracktorio-test-modded-inserter"])
+      assert_.equals(#r.ingredients, 0, "modded inserter ingredients")
+      assert_.equals(r.categories[1], "tt-free", "modded inserter category")
+      local f = assert(prototypes.recipe["tracktorio-test-modded-furnace"])
+      assert_.truthy(f.categories[1] ~= "tt-free", "the modded furnace is free")
+      assert_.truthy(f.hide_from_player_crafting, "the modded furnace shows in the crafting menu")
+    end,
+  },
+  {
     name = "restrictions: banned recipes are hidden and disabled for the player",
     fn = function()
       local force = game.forces["player"]

@@ -4,6 +4,7 @@
 -- (restrictions.lua makes their recipes free, config.FREE_ITEMS), unlocked by research.
 -- Look: the vanilla locomotive in another default colour, its icon with the tier number.
 local config = require("shared.config")
+local util = require("util")
 
 local function icons(tier)
   return {
@@ -43,10 +44,9 @@ for tier, t in pairs(config.LOCOMOTIVE_TIERS) do
     -- a name ending in -2 reads as level 2 of "tt-locomotive": name the locale keys outright
     localised_name = { "technology-name." .. name },
     localised_description = { "technology-description." .. name },
-    icons = {
-      { icon = "__base__/graphics/technology/railway.png", icon_size = 256 },
-      { icon = "__base__/graphics/icons/signal/signal_" .. tier .. ".png", icon_size = 64, scale = 1, shift = { 80, -80 }, floating = true },
-    },
+    -- vanilla's speed mark, as on upgrade technologies (playtest 2.15.10: the big signal
+    -- tile with the tier number looked out of place); the name says Mk2 or Mk3
+    icons = util.technology_icon_constant_speed("__base__/graphics/technology/railway.png"),
     prerequisites = t.prerequisites,
     effects = { { type = "unlock-recipe", recipe = name } },
     unit = { count = t.research_count, ingredients = t.research, time = 30 },

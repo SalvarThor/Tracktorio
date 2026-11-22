@@ -27,8 +27,14 @@ local function product_icon(def)
   end
   if not sprite then return nil end
   local kind, name = string.match(sprite, "^(%a+)/(.+)$")
-  local proto = kind == "fluid" and data.raw.fluid[name] or data.raw.item[name]
-  return proto and proto.icon
+  if kind == "fluid" then return data.raw.fluid[name] and data.raw.fluid[name].icon end
+  -- any item type: repair packs are "repair-tool", science packs "tool" (playtest 2.15.10:
+  -- looking only in data.raw.item left those cities with the bare building icon)
+  for type in pairs(defines.prototypes.item) do
+    local proto = data.raw[type] and data.raw[type][name]
+    if proto then return proto.icon or (proto.icons and proto.icons[1].icon) end
+  end
+  return nil
 end
 
 ---@type table<string, boolean>

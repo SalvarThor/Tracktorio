@@ -210,7 +210,24 @@ M.START_KIT = {
 }
 
 local function set(list) local s = {} for _, v in ipairs(list) do s[v] = true end return s end
+-- Other mods' items (user, playtest 2.15.10: a mini loader mod's loaders could not be
+-- crafted): an item that places an entity of one of these types is free too, gated by its
+-- mod's research like the vanilla ones. The station-logistics, rail, extraction and circuit
+-- types of FREE_ITEMS; not logistic containers, vehicles, machines or power generation.
+M.FREE_TYPES = {
+  "straight-rail", "curved-rail-a", "curved-rail-b", "half-diagonal-rail", "legacy-straight-rail",
+  "legacy-curved-rail", "rail-ramp", "rail-support", "elevated-straight-rail", "elevated-curved-rail-a",
+  "elevated-curved-rail-b", "elevated-half-diagonal-rail", "rail-signal", "rail-chain-signal", "train-stop",
+  "locomotive", "cargo-wagon", "fluid-wagon",
+  "inserter", "transport-belt", "underground-belt", "splitter", "lane-splitter", "loader", "loader-1x1",
+  "container", "pipe", "pipe-to-ground", "pump", "storage-tank", "electric-pole",
+  "arithmetic-combinator", "decider-combinator", "constant-combinator", "selector-combinator",
+  "power-switch", "programmable-speaker", "display-panel", "lamp",
+  "mining-drill", "radar",
+}
+
 M.FREE_SET = set(M.FREE_ITEMS)
+M.FREE_TYPE_SET = set(M.FREE_TYPES)
 M.BANNED_SET = set(M.BANNED_ITEMS)
 
 return M

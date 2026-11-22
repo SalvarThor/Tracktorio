@@ -22,3 +22,21 @@ slow.name = "tt-test-slow-loader"
 slow.speed = data.raw["loader-1x1"]["loader-1x1"].speed / 4
 slow.next_upgrade = nil
 data:extend({ slow })
+
+-- Playtest 2.15.10: another mod's inserter (free, as an inserter) and its furnace (not).
+do
+  local inserter = table.deepcopy(data.raw.inserter["inserter"])
+  inserter.name = "tracktorio-test-modded-inserter"
+  inserter.minable = { mining_time = 0.1, result = inserter.name }
+  local furnace = table.deepcopy(data.raw.furnace["stone-furnace"])
+  furnace.name = "tracktorio-test-modded-furnace"
+  furnace.minable = { mining_time = 0.1, result = furnace.name }
+  local function item(name)
+    return { type = "item", name = name, icon = "__base__/graphics/icons/inserter.png", stack_size = 50, place_result = name }
+  end
+  local function recipe(name)
+    return { type = "recipe", name = name, enabled = true, ingredients = { { type = "item", name = "iron-plate", amount = 2 } },
+      results = { { type = "item", name = name, amount = 1 } } }
+  end
+  data:extend({ inserter, furnace, item(inserter.name), item(furnace.name), recipe(inserter.name), recipe(furnace.name) })
+end

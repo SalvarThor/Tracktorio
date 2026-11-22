@@ -4,6 +4,21 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-22: 2.15.10 other mods' logistics items are free; two icon fixes
+- User, playtest 2.15.10: a mod's mini loaders (loader_mini_1x1) could not be crafted after
+  research. Only recipes in the free category can be hand-crafted, and the free list named
+  vanilla items only. Decision: an item from any mod that places an entity of a station
+  logistics, rail, extraction or circuit type (`config.FREE_TYPES`: inserters, belts,
+  loaders, chests, pipes, poles, combinators, drills, radars, rails, trains...) is free
+  too, still gated by its own mod's research. Logistic containers, vehicles, machines and
+  power generation are not on the list, so no mod can bring those back. One recipe per
+  item is made free (the one named after it); the others are hidden.
+- Rejected: adding each mod's items by name (breaks with every new mod).
+- Icons: city items looked for their product in `data.raw.item` only, so the repair pack
+  (a `repair-tool`) and science pack (`tool`) cities showed just the building. They now
+  look through every item type. The locomotive Mk2/Mk3 technologies drop the large
+  signal tile with the tier number for vanilla's speed mark; the name gives the tier.
+
 ## 2026-11-22: 2.15.10 power cities at 20 MW and 100 MW
 - User, playtest 2.15.10: 2.7 MW per coal power city (5.4 MW halved by the 2.15.7 rate
   cut) runs about one electric smelting city (2.16 MW), so power meant a power city per

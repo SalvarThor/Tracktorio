@@ -29,11 +29,39 @@ local function ban(name, recipe)
   banned_recipes[name] = true
 end
 
+-- Items from other mods that place an entity of a free type (config.FREE_TYPES).
+---@type table<string, string> entity name -> type
+local entity_type = {}
+for type in pairs(defines.prototypes.entity) do
+  for name in pairs(data.raw[type] or {}) do entity_type[name] = type end
+end
+---@type table<string, boolean>
+local free_items = {}
+for name in pairs(config.FREE_SET) do free_items[name] = true end
+for type in pairs(defines.prototypes.item) do
+  for name, item in pairs(data.raw[type] or {}) do
+    local place = item.place_result
+    if place and config.FREE_TYPE_SET[entity_type[place] or ""] and not config.BANNED_SET[name]
+        and string.sub(name, 1, 3) ~= "tt-" then
+      free_items[name] = true
+    end
+  end
+end
+-- each free item keeps one recipe: the one named after it, else the first found
+---@type table<string, string>
+local free_recipe = {}
+for name, recipe in pairs(data.raw.recipe) do
+  local item = main_item(recipe)
+  if item and free_items[item] and not has_category(recipe, "recycling") then
+    if name == item or not free_recipe[item] then free_recipe[item] = name end
+  end
+end
+
 for name, recipe in pairs(data.raw.recipe) do
   local item = main_item(recipe)
   if item and not has_category(recipe, "recycling") then
-    if config.FREE_SET[item] then
-      if name == item then
+    if free_items[item] then
+      if free_recipe[item] == name then
         recipe.ingredients = {}
         recipe.energy_required = config.FREE_CRAFT_TIME
         recipe.categories = { config.FREE_CATEGORY }
