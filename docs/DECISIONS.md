@@ -4,6 +4,17 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-22: 2.15.10 vanilla starting patches near spawn
+- User, playtest 2.15.10: the uncovered area around spawn had no coal or any ore, only
+  uranium further out. The cause was the 2026-11-20 rule "no resources near spawn"
+  (`nauvis.START_CLEAR`, 300 tiles), made when a fixed depot city stood at spawn: it
+  removed exactly vanilla's starting patches. The user reverses it: resources behave as in
+  vanilla (small iron, copper, coal and stone patches near spawn, bigger ones further out,
+  no uranium in the starting area). The clear-up now removes only enemies.
+- Plots are not placed on ore: a site whose box holds a resource is rejected (painting a
+  plot removes the ore under it, which would eat the starter patches next to the starter
+  site).
+
 ## 2026-11-21: 2.15.10 a site's map tag names the city built on it
 - User, playtest 2.15.10: without names the map is hard to read. Building a city on a plot
   sets its site's tag to the city's name and its item icon; removing it sets "City plot"

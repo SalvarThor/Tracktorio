@@ -2,14 +2,13 @@
 -- scenario), the mod plays on Nauvis with its vanilla terrain and resources. Its own
 -- scenario keeps the fixed, hand-made map (scripts/map.lua).
 -- User decisions (DECISIONS.md, 2026-11-20): biters forced off, whatever the map settings;
--- no resources near spawn; cities laid out by scripts/layout.lua and scripts/sites.lua.
+-- plots laid out by scripts/layout.lua and scripts/sites.lua. Resources are vanilla,
+-- starting patches included (playtest 2.15.10; until then none within 300 tiles of spawn).
 local map = require("scripts.map")
 local start_kit = require("scripts.start_kit")
 local layout = require("scripts.layout")
 
 local M = {}
-
-M.START_CLEAR = 300 -- no resources within this many tiles of spawn (tuning)
 
 --- Is this game the freeplay scenario (New Game)? Freeplay registers its remote interface
 --- when its control.lua loads, before any on_init.
@@ -35,34 +34,20 @@ function M.setup_freeplay()
   remote.call("freeplay", "set_respawn_items", {})
 end
 
---- Remove what a chunk area may hold that Tracktorio doesn't allow: enemies anywhere,
---- resources near spawn.
+--- Remove what a chunk area may hold that Tracktorio doesn't allow: enemies.
 ---@param surface LuaSurface
 ---@param area BoundingBox
----@param spawn MapPosition
 ---@return integer enemies removed
-local function clean(surface, area, spawn)
+local function clean(surface, area)
   local removed = 0
   for _, e in pairs(surface.find_entities_filtered({ area = area, force = "enemy" })) do
     e.destroy()
     removed = removed + 1
   end
-  local r2 = M.START_CLEAR * M.START_CLEAR
-  local lt, rb = area.left_top or area[1], area.right_bottom or area[2]
-  local lx, ly = lt.x or lt[1], lt.y or lt[2]
-  local rx, ry = rb.x or rb[1], rb.y or rb[2]
-  -- skip chunks wholly outside the clear radius
-  local nx = math.max(lx, math.min(spawn.x, rx)) - spawn.x
-  local ny = math.max(ly, math.min(spawn.y, ry)) - spawn.y
-  if nx * nx + ny * ny > r2 then return removed end
-  for _, e in pairs(surface.find_entities_filtered({ area = area, type = "resource" })) do
-    local dx, dy = e.position.x - spawn.x, e.position.y - spawn.y
-    if dx * dx + dy * dy <= r2 then e.destroy() end
-  end
   return removed
 end
 
---- Make a surface a Tracktorio map: biters off, no resources near spawn, the plot layout.
+--- Make a surface a Tracktorio map: biters off, the plot layout.
 --- Returns the placed sites and the labels of any that found no land (scripts/map.lua).
 ---@param surface LuaSurface
 ---@param seed integer?
@@ -84,7 +69,7 @@ function M.prepare(surface, seed, spacing)
   game.forces["enemy"].reset_evolution()
   -- chunks that exist already (around spawn at the start)
   for chunk in surface.get_chunks() do
-    if surface.is_chunk_generated(chunk) then clean(surface, chunk.area, spawn) end
+    if surface.is_chunk_generated(chunk) then clean(surface, chunk.area) end
   end
   return map.place_procedural(surface, seed or mgs.seed or 0, spacing or layout.spacing())
 end
@@ -96,7 +81,7 @@ function M.on_chunk_generated(e)
   if spawn then
     -- counted so a test can tell whether the map generator still places nests after
     -- prepare turned enemy bases off (the clean-up hides it otherwise)
-    local n = clean(e.surface, e.area, spawn)
+    local n = clean(e.surface, e.area)
     storage.tt_nauvis_removed = storage.tt_nauvis_removed or {}
     storage.tt_nauvis_removed[e.surface.index] = (storage.tt_nauvis_removed[e.surface.index] or 0) + n
   end
@@ -155,7 +140,6 @@ function M.remote_interface()
       local placed, missing = M.prepare(assert(game.get_surface(surface_name)), seed, spacing)
       return { placed = placed, missing = missing }
     end,
-    start_clear = function() return M.START_CLEAR end,
     setup_freeplay = function() M.setup_freeplay() end,
     --- Tests: run the player-created step as if the game had started `how` ("scenario",
     --- "freeplay"), then restore.

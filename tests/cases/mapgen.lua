@@ -233,28 +233,34 @@ return {
     end,
   },
   {
-    name = "mapgen: a prepared Nauvis has no biters (also in later chunks) and no resources near spawn",
+    -- playtest 2.15.10 (user): resources as in vanilla, small starting patches near spawn
+    -- (until then none within 300 tiles); plots never stand on ore
+    name = "mapgen: a prepared Nauvis has no biters (also in later chunks), keeps the vanilla starting patches, and no plot on ore",
     fn = function(ctx)
       local mgs = game.surfaces["nauvis"].map_gen_settings
       mgs.seed = 271828
       mgs.no_enemies_mode = false
       local s = game.create_surface("tt-mapgen-nauvis", mgs)
-      local clear = remote.call("tt-nauvis", "start_clear")
-      s.request_to_generate_chunks({ 0, 0 }, math.ceil(clear / 32) + 4)
+      local NEAR = 200
+      s.request_to_generate_chunks({ 0, 0 }, math.ceil(NEAR / 32) + 1)
       s.force_generate_chunk_requests()
-      local near = { { -clear, -clear }, { clear, clear } }
-      local before = s.count_entities_filtered({ area = near, type = "resource" })
-      assert_.truthy(before > 0, "the seed has no resources near spawn to clear")
+      local near = { { -NEAR, -NEAR }, { NEAR, NEAR } }
       local result = remote.call("tt-nauvis", "prepare", s.name, 271828, SPACING)
       assert_.equals(#result.missing, 0, "missing " .. serpent.line(result.missing))
       assert_.truthy(s.peaceful_mode, "not peaceful")
       assert_.falsy(game.map_settings.enemy_expansion.enabled, "expansion on")
       assert_.equals(s.count_entities_filtered({ force = "enemy" }), 0, "enemies left")
-      for _, r in pairs(s.find_entities_filtered({ area = near, type = "resource" })) do
-        local d = math.sqrt(r.position.x ^ 2 + r.position.y ^ 2)
-        assert_.truthy(d > clear, r.name .. " " .. math.floor(d) .. " tiles from spawn")
+      for _, ore in ipairs({ "coal", "iron-ore", "copper-ore", "stone" }) do
+        assert_.truthy(s.count_entities_filtered({ area = near, name = ore }) > 0, "no " .. ore .. " within " .. NEAR .. " of spawn")
       end
-      local outer = s.count_entities_filtered({ area = { { -clear - 120, -clear - 120 }, { clear + 120, clear + 120 } }, type = "resource" })
+      assert_.equals(s.count_entities_filtered({ area = near, name = "uranium-ore" }), 0, "uranium near spawn")
+      for _, c in ipairs(result.placed) do
+        for _, o in ipairs(remote.call("tt-map", "offsets", c.plots)) do
+          local px, py = c.x + o[1], c.y + o[2]
+          assert_.equals(s.count_entities_filtered({ area = { { px - 10, py - 10 }, { px + 10, py + 10 } }, type = "resource" }), 0,
+            c.label .. " has ore within 4 tiles of its plot")
+        end
+      end
       local starter
       for _, c in ipairs(result.placed) do if c.starter then starter = c end end
       assert_.truthy(starter and math.sqrt(starter.x ^ 2 + starter.y ^ 2) < 200, "starter site not near spawn")
@@ -263,7 +269,6 @@ return {
       s.force_generate_chunk_requests()
       ctx:wait(2, function()
         assert_.equals(s.count_entities_filtered({ force = "enemy" }), 0, "enemies in later chunks")
-        log("mapgen: resources " .. before .. " near spawn before, " .. outer .. " within " .. (clear + 120) .. " after")
         game.delete_surface(s)
       end)
     end,

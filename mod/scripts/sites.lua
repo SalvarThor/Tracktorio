@@ -168,6 +168,9 @@ local function confirmed(surface, x, y, r)
   local area = { { x - r, y - r }, { x + r, y + r } }
   if surface.count_tiles_filtered({ area = area, collision_mask = "water_tile", limit = 1 }) > 0 then return false end
   if surface.count_tiles_filtered({ area = area, name = "out-of-map", limit = 1 }) > 0 then return false end
+  -- not on an ore patch: painting the plot would remove that ore (playtest 2.15.10: the
+  -- vanilla starting patches stay near spawn, where the starter site is)
+  if surface.count_entities_filtered({ area = area, type = "resource", limit = 1 }) > 0 then return false end
   return M.mainland(surface, x, y)
 end
 
