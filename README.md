@@ -17,8 +17,8 @@ shipping, not production design. You win by launching a rocket.
 
 Enable the mod, then New Game -> Mod scenarios -> **Tracktorio**. You get the usual map
 settings (seed, preview, resources). A new Nauvis map each game has about 75 city plots, one
-city each, far apart and all marked on the map from the start; two plots next to spawn
-are for your first power and water cities. Biters are always off. The "City spacing"
+city each, far apart and all marked on the map from the start; two of them stand next
+to spawn. Biters are always off. The "City spacing"
 startup setting (Settings -> Mod settings -> Startup) scales the distance between plots.
 
 Starting Freeplay with the mod on gives the same game, with a note saying so.

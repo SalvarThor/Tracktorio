@@ -2,7 +2,7 @@
 
 ## Thesis
 
-Factorio with the factory turned into black boxes. Cities are factories that convert inputs to outputs automatically at the rate they're supplied. The player builds them, for free once researched, but only on plots the map provides. Each city is modest, so a product comes from several cities, and a train goes to whichever stop of that name is nearest and has room, as in vanilla. The player mines raw resources, builds the cities, the train network and the stations that feed and drain them. The win condition is a rocket launch. The challenge is shipping, not production design.
+Factorio with the factory turned into black boxes. Cities are factories that convert inputs to outputs automatically at the rate they're supplied. The player builds them, for free once researched, but only on plots the map provides. Each city runs at half the rate of its vanilla equivalent. The player mines raw resources, builds the cities, the train network and the stations that feed and drain them. The win condition is a rocket launch. The challenge is shipping, not production design.
 
 Cities chain across the map the same way a factory does, and the train network is the belts. When a supply runs short, the answer is another city on another plot, and more rail.
 
@@ -51,7 +51,7 @@ Shared behaviour:
 (User decisions 2026-11-21, phase 2.15.)
 
 - Map generation paints plots: 12x12 building spots with a marked border, visible on the map. A city can only be built on a plot, and any city fits any plot. Plots can't be mined or covered with other tiles.
-- One plot per site, at least 300 tiles between sites, so belting between cities is clearly worse than rail. About 75 plots on a map: using them all takes a vast train network, and that is the challenge. A starter site of 2 plots near spawn takes the first power and water cities; the depot and smelting go on the nearest single plots. (User decision 2026-11-21, playtest 2.15.10; before that, sites of 1-3 and a starter of 4, which let neighbouring cities trade by short belts.)
+- One plot per site, at least 300 tiles between sites, so belting between cities is clearly worse than rail. About 75 plots on a map: using them all takes a vast train network, and that is the challenge. A starter site of 2 plots stands near spawn. (User decision 2026-11-21, playtest 2.15.10; before that, sites of 1-3 and a starter of 4, which let neighbouring cities trade by short belts.)
 - Each site has a map tag.
 - Rejected: buildings already on the map, unassigned, that the player gives a role once (no blueprints, and a wrong pick can't be undone).
 
