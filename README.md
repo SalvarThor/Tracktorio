@@ -4,9 +4,8 @@ A Factorio 2.1 mod (with Space Age) where **trains are the whole game**.
 
 All production happens in "black box" cities that turn inputs into outputs on their own.
 You don't build furnaces or assemblers: you build cities, for free, on the plots the map
-provides. Each city is modest, so a product soon comes from several cities, and your trains
-go to whichever stop of that name is nearest and has room. You mine raw resources, lay the
-rail network, and design the stations that feed and drain the cities. Cities chain across
+provides. Each city runs at half the rate of its vanilla equivalent. You mine raw
+resources, lay the rail network, and design the stations that feed and drain the cities. Cities chain across
 the map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
 
