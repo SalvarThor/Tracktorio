@@ -4,7 +4,8 @@ A Factorio 2.1 mod (with Space Age) where **trains are the whole game**.
 
 All production happens in "black box" cities that turn inputs into outputs on their own.
 You don't build furnaces or assemblers: you build cities, for free, on the plots the map
-provides. Each city runs at half the rate of its vanilla equivalent. You mine raw
+provides. Each city runs at half the rate of its vanilla equivalent, except the power
+cities (20 MW coal, 100 MW nuclear). You mine raw
 resources, lay the rail network, and design the stations that feed and drain the cities. Cities chain across
 the map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
@@ -55,7 +56,7 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 |---|---|
 | Smelting | iron, copper (coal-fired); electric iron and copper (no coal, swapped in place with the upgrade planner); steel |
 | Water | water city (no inputs, 300 water/s); the only water source, since offshore pumps are removed |
-| Power | coal power city (coal + water in, electricity out to your poles); nuclear power city (uranium fuel cells + water in, 10 MW, burns flat out like a real reactor); uranium city (uranium ore + iron in, fuel cells out) |
+| Power | coal power city (coal + water in, 20 MW out to your poles); nuclear power city (uranium fuel cells + water in, 100 MW, burns flat out like a real reactor); uranium city (uranium ore + iron in, fuel cells out) |
 | Fuel depots | coal fuel, solid fuel, rocket fuel |
 | Oil and chemistry | refinery (crude oil + water in, light oil + petroleum gas out), plastic, sulfur, sulfuric acid |
 | Intermediates | electronic circuits, advanced circuits, processing units, low density structure, repair packs |
@@ -73,7 +74,8 @@ refinery, and so on).
   power and stop without it.
 - **Modest rates:** a city makes half of what its vanilla equivalent would (an iron
   smelting city 7.5 plates/s, half a yellow belt). More output means another city on
-  another plot.
+  another plot. Power cities are the exception: 20 MW from a coal power city, fed by one
+  water city, and 100 MW from a nuclear one.
 - **Buildings and ports:** cities are 12x12 Factorissimo buildings. Run a belt straight
   into a port in the wall; each port shows its item and an in or out arrow. One yellow
   belt per item is enough.

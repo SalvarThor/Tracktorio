@@ -27,6 +27,28 @@ end
 
 return {
   {
+    -- user, playtest 2.15.10: 20 MW, not halved; one water city (300/s) feeds it
+    name = "power: the coal power city makes 20 MW from 5 coal/s and 206 water/s",
+    fn = function()
+      local p = assert(prototypes.entity[CITY])
+      local r = p.fixed_recipe
+      local per_s = p.get_crafting_speed() / r.energy
+      local coal, water = 0, 0
+      for _, i in ipairs(r.ingredients) do
+        if i.name == "coal" then coal = i.amount * per_s elseif i.name == "water" then water = i.amount * per_s end
+      end
+      assert_.truthy(math.abs(coal - 5) < 1e-6, "coal/s " .. coal)
+      assert_.truthy(math.abs(water - 20e6 / 97e3) < 0.01 and water < 300, "water/s " .. water)
+      assert_.equals(r.products[1].temperature, 500)
+      local gen = assert(prototypes.entity["tt-power-generator"])
+      local out = gen.get_max_energy_production() * 60
+      assert_.truthy(math.abs(out - 20e6) < 1e3, "generator " .. out)
+      -- the generator burns exactly what the city makes
+      local steam = r.products[1].amount * per_s
+      assert_.truthy(math.abs(steam * 97e3 - out) < 1e3, "steam made " .. steam .. "/s for a " .. out .. " W generator")
+    end,
+  },
+  {
     name = "power: placing the power city adds a linked hidden generator",
     fn = function()
       local city = power_rig(500, nil)

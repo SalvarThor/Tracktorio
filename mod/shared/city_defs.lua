@@ -9,8 +9,11 @@
 local M = {}
 
 M.PREFIX = "tt-city-"
-M.POWER_STEAM_TEMP = 165 -- steam at 165 C carries 30 kJ/unit (0.2 kJ/C above 15 C)
-M.NUCLEAR_STEAM_TEMP = 500 -- 97 kJ/unit, as from vanilla heat exchangers (2.6.4)
+-- Both power cities make 500 C steam, 97 kJ/unit (0.2 kJ/C above 15 C), as from vanilla
+-- heat exchangers (2.6.4). The coal power city made 165 C steam (30 kJ) until playtest
+-- 2.15.10, when it went to 20 MW on one water city's output (user).
+M.POWER_STEAM_TEMP = 500
+M.NUCLEAR_STEAM_TEMP = 500
 
 --- Energy in one unit of steam at `temp` C (water heat capacity 0.2 kJ/C, from 15 C).
 ---@param temp number
@@ -38,10 +41,15 @@ end
 
 local depot_recipe = { energy_required = 1, ingredients = { item("coal", 2) }, results = { item("tt-coal-fuel", 1) } }
 
+-- Coal power (user, playtest 2.15.10): 20 MW, not halved (the rate cut left 2.7 MW, about
+-- one electric smelting city). Coal at vanilla's 4 MJ: 5 coal/s. One water city's 300/s
+-- feeds it: 500 C steam, 206.2 water/s (vanilla 165 C steam would need 667/s).
+M.COAL_POWER_W = 20e6
+local coal_steam_per_s = M.COAL_POWER_W / M.steam_joules(M.POWER_STEAM_TEMP)
 local power_recipe = {
   energy_required = 1,
-  ingredients = { item("coal", 1), { type = "fluid", name = "water", amount = 150 } },
-  results = { { type = "fluid", name = "steam", amount = 150, temperature = M.POWER_STEAM_TEMP } },
+  ingredients = { item("coal", 5), { type = "fluid", name = "water", amount = coal_steam_per_s } },
+  results = { { type = "fluid", name = "steam", amount = coal_steam_per_s, temperature = M.POWER_STEAM_TEMP } },
 }
 
 -- Intermediate cities (PLAN 2.2.2). Power = the vanilla assembling machine 2s (speed 0.75,
@@ -152,10 +160,11 @@ local uranium_recipe = { energy_required = 100,
 -- Nuclear power (2.6.4): uranium fuel cells burn in the city's burner (8 GJ each) while it
 -- turns water into 500 C steam for a hidden generator, like reactor + heat exchangers +
 -- turbines. 20 MW at T1 = 206.2 steam/s (vanilla's 2 heat exchangers) and 1 cell per
--- 400 s. It runs flat out like a vanilla reactor (playtest 2.6.6, user): unused steam is
+-- 400 s. Since playtest 2.15.10 (user) 100 MW, not halved: 1031 water/s (a few water
+-- cities) and a cell per 80 s. It runs flat out like a vanilla reactor (playtest 2.6.6, user): unused steam is
 -- vented by scripts/nuclear.lua so it keeps burning. No depleted cells (user): the fuel
 -- cell's burnt result is removed.
-local NUCLEAR_W = 20e6
+local NUCLEAR_W = 100e6
 local nuclear_steam_per_s = NUCLEAR_W / M.steam_joules(M.NUCLEAR_STEAM_TEMP)
 local nuclear_recipe = { energy_required = 1,
   ingredients = { fluid("water", 100) },
@@ -196,9 +205,10 @@ M.list = {
     crafting_speed = 2, power = "840kW", recipe = depot_recipe,
   },
   {
-    -- Coal + water -> steam into a hidden generator. 150 steam per craft; the generator burns
-    -- `generator_usage` steam per tick: 3 = 180/s = 5.4 MW.
+    -- Coal + water -> steam into a hidden generator, which burns `generator_usage` steam
+    -- per tick: 206.2/s = 20 MW. Not halved (full_rate).
     name = "power",
+    full_rate = true,
     roof_icon = "item/steam-engine", -- 2.10: painted on the roof (default: the first product)
     graphics = { type = "assembling-machine", name = "centrifuge" }, -- 2.4.3: the refinery city took the oil refinery look
     map_color = { r = 0.9, g = 0.85, b = 0.3 },
@@ -206,7 +216,7 @@ M.list = {
       pipe_in("water"),
       { production_type = "output", linked_id = 1, filter = "steam" },
     },
-    crafting_speed = 1.2, recipe = power_recipe, generator_usage = 3,
+    crafting_speed = 1, recipe = power_recipe, generator_usage = coal_steam_per_s / 60,
   },
   {
     name = "nuclear-power",
@@ -214,6 +224,7 @@ M.list = {
     graphics = { type = "reactor", name = "nuclear-reactor" },
     map_color = { r = 0.35, g = 0.85, b = 0.3 },
     generator = "tt-nuclear-generator",
+    full_rate = true, -- 100 MW, not halved (user, playtest 2.15.10)
     steam_temp = M.NUCLEAR_STEAM_TEMP,
     burner = { fuel_categories = { "nuclear" }, fuel = "uranium-fuel-cell" },
     fluid_boxes = {
@@ -311,6 +322,7 @@ M.list = {
 -- product needs several cities ("my steel is maxed out, I need another steel city"). The
 -- derivations above stay as written (full rates); speed, power, steam and research speed
 -- are all scaled here. The rocket silo keeps its rate: its output is the win, not a flow.
+-- Power cities (`full_rate`) keep theirs too, raised in playtest 2.15.10 (user).
 M.RATE = 0.5
 do
   local function power(str)
@@ -319,7 +331,7 @@ do
     return string.format("%g%s", tonumber(n) * M.RATE, unit)
   end
   for _, def in ipairs(M.list) do
-    if def.kind ~= "silo" then
+    if def.kind ~= "silo" and not def.full_rate then
       if def.crafting_speed then def.crafting_speed = def.crafting_speed * M.RATE end
       if def.researching_speed then def.researching_speed = def.researching_speed * M.RATE end
       if def.generator_usage then def.generator_usage = def.generator_usage * M.RATE end

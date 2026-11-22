@@ -128,7 +128,7 @@ return {
     fn = function(ctx)
       h.clear_area({ { 1270, -12 }, { 1296, 14 } })
       local city = h.place_city("tt-city-power", { 1280.5, 0.5 })
-      city.insert({ name = "coal", count = 20 })
+      city.insert({ name = "coal", count = 50 }) -- 10 crafts, 2062 steam: more than its boxes hold
       h.pipe_at(city, "water", "input", true)
       ctx:wait_until(function() return info(city).status == "output_full" end, 60 * 60, function()
         local p = assert(game.players[1])

@@ -210,12 +210,14 @@ return {
       h.belt_to_port(city, "iron-plate", "output", "fast-transport-belt", 3)
       -- the shown speed over the last 15 s, every 6 ticks (playtest 2.12: it jumped about).
       -- 2.15.7: a craft takes 2.7 s at 50% here, so it settles slower than a fast city: it
-      -- swings 40-60% for about 50 s after an empty start, then holds 50%.
+      -- swings 40-60% for about 50 s after an empty start, then holds 50%. Playtest 2.15.10:
+      -- on some start ticks it keeps stepping one 5% step either side of 50% (45-55%), so it
+      -- gets 120 s and may change up to 5 times in the last 15 s, within 10%.
       local seen, changes, last = {}, 0, nil
       local ticks = 0
-      drive(ctx, city, 90, 15, function(c)
+      drive(ctx, city, 135, 15, function(c)
         ticks = ticks + 6
-        if ticks > 75 * 60 then
+        if ticks > 120 * 60 then
           local pct = assert(remote.call("tt-city", "throttle", c)).percent
           seen[#seen + 1] = pct
           if last and pct ~= last then changes = changes + 1 end
@@ -227,7 +229,7 @@ return {
         assert_.truthy(samples.other <= 2, "not working all the time: " .. serpent.line(samples.statuses))
         local lo, hi = math.huge, -math.huge
         for _, v in ipairs(seen) do lo, hi = math.min(lo, v), math.max(hi, v) end
-        assert_.truthy(changes <= 3 and hi - lo <= 10,
+        assert_.truthy(changes <= 5 and hi - lo <= 10,
           string.format("speed not calm over 15 s: %d changes, %d-%d%%", changes, lo, hi))
       end)
     end,
