@@ -172,27 +172,6 @@ return {
     end,
   },
   {
-    -- 2.10.6
-    name = "belt ports: repair packs on a belt into a depot's service port reach its service chest",
-    fn = function(ctx)
-      local x = X + 980
-      h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
-      local city = h.place_city("tt-city-depot", { x + 0.5, 0.5 })
-      h.belt_to_port(city, "service", "input")
-      -- belt_to_port fills the infinity chest with the port's name: give it packs instead
-      local spot = h.port_spots(city, "service", "input")[1]
-      local d = ({ [defines.direction.west] = { -1, 0 }, [defines.direction.east] = { 1, 0 },
-        [defines.direction.north] = { 0, -1 }, [defines.direction.south] = { 0, 1 } })[spot.dir]
-      local inf = h.surface().find_entity("infinity-chest", { spot.pos[1] + 3 * d[1], spot.pos[2] + 3 * d[2] })
-      assert(inf, "no supply chest").set_infinity_container_filter(1, { name = "repair-pack", count = 50, mode = "exactly" })
-      ctx:wait(300, function()
-        local s = assert(remote.call("tt-city", "service_status", city))
-        assert_.truthy(s.packs > 0, "no packs arrived")
-        assert_.equals(city.get_item_count("repair-pack"), 0, "packs went into the depot's recipe inventory")
-      end)
-    end,
-  },
-  {
     name = "footprint: on the fixed map every city's footprint is clear of water, ore and other cities",
     fn = function()
       local surface = remote.call("tt-map", "generate", "tt-map-footprint")

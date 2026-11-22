@@ -80,10 +80,6 @@ local red_recipe = { energy_required = 1,
 -- = 1.5 MW.
 local green_recipe = { energy_required = 2,
   ingredients = { item("iron-plate", 9), item("electronic-circuit", 2) }, results = { item("logistic-science-pack", 2) } }
--- Repair packs (2.3.4): 2 circuits + 2 gears (4 iron), 0.5 s (vanilla). 30 packs/min = 1
--- assembler 2 for the packs' 0.33 + 0.67 for gears = 150 kW.
-local repair_recipe = { energy_required = 1,
-  ingredients = { item("iron-plate", 4), item("electronic-circuit", 2) }, results = { item("repair-pack", 1) } }
 
 -- Refinery (2.4.3): vanilla advanced oil processing (100 crude + 50 water -> 25 heavy +
 -- 45 light + 55 gas, 5 s) with the heavy oil cracked inside (25 heavy + ~19 water -> ~19
@@ -176,11 +172,10 @@ local nuclear_recipe = { energy_required = 1,
 M.WATER_PER_S = 600
 local water_recipe = { energy_required = 1, ingredients = {}, results = { fluid("water", M.WATER_PER_S) } }
 
---- A depot-type city making a locomotive fuel (service port, 2.3.3); light oil in.
+--- A depot-type city making a locomotive fuel; light oil in.
 local function fuel_depot(name, graphics, map_color, power_kw, recipe, speed)
   return {
     name = name,
-    service = true,
     graphics = { type = "assembling-machine", name = graphics },
     map_color = map_color,
     fluid_boxes = {
@@ -200,7 +195,6 @@ M.list = {
   {
     -- Counts as chemical plants (210 kW, 0.5 fuel/s each): 2 fuel/s = 840 kW at T1.
     name = "depot",
-    service = true, -- has a service port for repairing locomotives (2.3.3)
     graphics = { type = "assembling-machine", name = "assembling-machine-3" },
     map_color = { r = 0.3, g = 0.3, b = 0.3 },
     crafting_speed = 2, power = "840kW", recipe = depot_recipe,
@@ -254,8 +248,6 @@ M.list = {
     { r = 0.85, g = 0.25, b = 0.25 }, 1100, red_recipe, 1),
   assembler_city("green-science", { type = "assembling-machine", name = "assembling-machine-2" },
     { r = 0.35, g = 0.85, b = 0.35 }, 1500, green_recipe, 1),
-  assembler_city("repair-packs", { type = "assembling-machine", name = "foundry" },
-    { r = 0.75, g = 0.55, b = 0.85 }, 150, repair_recipe, 0.5),
   {
     name = "refinery",
     graphics = { type = "assembling-machine", name = "oil-refinery" },
@@ -347,7 +339,6 @@ end
 -- the start: depot, coal power, water, iron and copper smelting, red science, the research
 -- complex and circuits (Electronics is a starting technology).
 M.UNLOCK = {
-  ["repair-packs"] = "repair-pack",
   ["steel"] = "steel-processing",
   ["green-science"] = "logistic-science-pack",
   ["electric-iron-smelting"] = "advanced-material-processing",

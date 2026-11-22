@@ -30,7 +30,6 @@ M.CITIES = {
   { name = "tt-city-red-science", x = 400, y = 200, label = "Red science city", tag_icon = "automation-science-pack" },
   { name = "tt-city-green-science", x = -400, y = 0, label = "Green science city", tag_icon = "logistic-science-pack" },
   { name = "tt-city-research", x = -160, y = 230, label = "Research complex", tag_icon = "lab" },
-  { name = "tt-city-repair-packs", x = 160, y = 230, label = "Repair pack city", tag_icon = "repair-pack" },
   -- 2.4.5: the oil chain
   { name = "tt-city-refinery", x = -160, y = -250, label = "Refinery city", tag_icon = "pumpjack" },
   { name = "tt-city-solid-fuel-depot", x = 280, y = -250, label = "Solid fuel depot", tag_icon = "solid-fuel" },
@@ -442,7 +441,6 @@ M.TAG_NAMES = {
   ["tt-city-green-science"] = "Green science city",
   ["tt-city-blue-science"] = "Blue science city",
   ["tt-city-research"] = "Research complex",
-  ["tt-city-repair-packs"] = "Repair pack city",
   ["tt-city-refinery"] = "Refinery city",
   ["tt-city-solid-fuel-depot"] = "Solid fuel depot",
   ["tt-city-rocket-fuel-depot"] = "Rocket fuel depot",

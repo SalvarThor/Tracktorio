@@ -1,7 +1,7 @@
 -- City size and port layout (PLAN 2.10, 2.15). Plain data, read by both stages.
 --
 -- Every city is a 12x12 Factorissimo building (2.15; the rocket silo keeps the vanilla 9x9).
--- Every item, fluid and service delivery enters or leaves through a port: a spot just
+-- Every item and fluid enters or leaves through a port: a spot just
 -- outside the wall. Spots follow the Factorissimo art: offsets +-2.5 along each wall from
 -- its middle (8 spots).
 local M = {}
@@ -20,8 +20,6 @@ local OUT_ORDER = {
   { "south", -2.5 }, { "south", 2.5 }, { "east", 2.5 }, { "east", -2.5 },
   { "west", 2.5 }, { "west", -2.5 }, { "north", 2.5 }, { "north", -2.5 },
 }
-
-M.SERVICE_ITEM = "repair-pack"
 
 --- Tile size of a city.
 ---@param def table city definition (shared/city_defs.lua)
@@ -57,7 +55,7 @@ local function flows(def)
 end
 
 --- All ports of a city. Each port:
----   { kind = "item"|"fluid"|"service", name = item/fluid name or nil,
+---   { kind = "item"|"fluid", name = item/fluid name or nil,
 ---     flow = "input"|"output", wall = "north"|"east"|"south"|"west", offset = number }
 --- Ports are listed inputs first; the order is stable (data and control stage agree).
 ---@param def table
@@ -83,30 +81,7 @@ function M.ports(def)
       if f.flow == flow then add(f.kind, f.name, f.flow) end
     end
   end
-  if def.service then add("service", M.SERVICE_ITEM, "input") end
   return ports
-end
-
---- The first port of `kind` ("service", ...) on a city, or nil.
----@param def table
----@param kind string
-function M.find(def, kind)
-  for _, p in ipairs(M.ports(def)) do
-    if p.kind == kind then return p end
-  end
-end
-
---- World position of the hidden chest behind a city's service port, or nil.
---- `by_entity` is shared/city_defs.lua's table (passed in: that module requires this one).
----@param city LuaEntity
----@param kind "service"
----@param by_entity table
-function M.box_position(city, kind, by_entity)
-  local info = by_entity[city.name]
-  local p = info and M.find(info.def, kind)
-  if not p then return nil end
-  local spot = M.spot(p, M.size(info.def))
-  return { x = city.position.x + spot.box[1], y = city.position.y + spot.box[2] }
 end
 
 local WALL = {
@@ -115,9 +90,7 @@ local WALL = {
 
 --- Where a port sits on a city of `size` tiles, relative to the city's centre:
 --- `outside` is the tile just outside the wall (where the belt or pipe ends), `inside` the
---- building tile behind it (the port's loader), `box` two tiles further in (the hidden
---- chest of a service port, clear of every item port's front tile),
---- `direction` points out of the building.
+--- building tile behind it (the port's loader), `direction` points out of the building.
 ---@param port table
 ---@param size integer
 function M.spot(port, size)
@@ -132,7 +105,6 @@ function M.spot(port, size)
   return {
     outside = at(half + 0.5),
     inside = at(half - 0.5),
-    box = at(half - 2.5),
     direction = defines.direction[port.wall],
   }
 end

@@ -983,9 +983,11 @@ Items:
 - [x] 2.15.11 Iron and copper smelting (coal and electric) back to the full rate, 15 plates/s
       (user, playtest 2.15.10: iron was the one bottleneck felt).
       Done: `full_rate` on the four smelting kinds; tooltips, README and spec give 15/s.
-- [ ] 2.15.12 Remove train reliability (user, playtest 2.15.10): wear, breakdowns, the depot
+- [x] 2.15.12 Remove train reliability (user, playtest 2.15.10): wear, breakdowns, the depot
       service port and the repair pack city. Limp mode for fuel-empty trains and the Mk2/Mk3
       locomotives stay.
+      Done: 22 tests went with it (reliability, service, the service-port and breakdown cases);
+      200 pass.
 - [ ] 2.15.13 `/playtest`: a second city of one kind with same-name stops; no breakdowns; iron
       at 15/s.
 Stop. Report to the user. Then 2.14 resumes (the recorder and the full run).

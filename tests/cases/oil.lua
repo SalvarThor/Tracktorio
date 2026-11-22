@@ -109,12 +109,11 @@ return {
     end,
   },
   {
-    name = "oil: a solid fuel depot makes solid fuel from piped light oil and has a service port",
+    name = "oil: a solid fuel depot makes solid fuel from piped light oil",
     fn = function(ctx)
       local x = X + 120
       h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
       local city = h.place_city("tt-city-solid-fuel-depot", { x + 0.5, 0.5 })
-      assert_.truthy(assert(remote.call("tt-city", "service_status", city)).port, "no service port")
       h.pipe_at(city, "light-oil", "input", true)
       h.test_power({ x + 8.5, 0.5 }, 2e6)
       -- (the output port takes the fuel out of the city, so count crafts)
@@ -124,12 +123,11 @@ return {
     end,
   },
   {
-    name = "oil: a rocket fuel depot makes rocket fuel from solid fuel + piped light oil and has a service port",
+    name = "oil: a rocket fuel depot makes rocket fuel from solid fuel + piped light oil",
     fn = function(ctx)
       local x = X + 160
       h.clear_area({ { x - 12, -12 }, { x + 14, 14 } })
       local city = h.place_city("tt-city-rocket-fuel-depot", { x + 0.5, 0.5 })
-      assert_.truthy(assert(remote.call("tt-city", "service_status", city)).port, "no service port")
       city.insert({ name = "solid-fuel", count = 50 })
       h.pipe_at(city, "light-oil", "input", true)
       h.test_power({ x + 8.5, 0.5 }, 2e6)

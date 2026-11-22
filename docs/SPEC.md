@@ -26,7 +26,6 @@ All black boxes are the same entity concept with different recipe profiles.
   uranium city (uranium ore + iron in, fuel cells out). (User decision, 2026-11-20.)
 - **Depot city:** coal in, coal fuel (`tt-coal-fuel`) out. The only source of locomotive fuel.
 - **Research complex:** science packs in, research progress out. More complexes, more research speed.
-- **Repair pack city:** feeds depot servicing.
 
 Shared behaviour:
 
@@ -41,7 +40,7 @@ Shared behaviour:
   chemical plants (840 kW at full output); smelting cities and the goal box need no power.
   (User decision, playtest 1.10.)
 - A full output stalls the box and an empty input starves it, so backpressure works like a backed-up belt.
-- Black boxes accept and give items only through belt ports in their walls, and fluids only through pipes: a belt runs straight into a port, as in Factorissimo. Inserters can't reach a city, and the player cannot hand-feed a city or take its output by hand. A depot's repair packs come in through a port too. Each port is clearly marked with its item and direction. (User decision 2026-11-20, phase 2.10; before that, inserters and pumps.)
+- Black boxes accept and give items only through belt ports in their walls, and fluids only through pipes: a belt runs straight into a port, as in Factorissimo. Inserters can't reach a city, and the player cannot hand-feed a city or take its output by hand. Each port is clearly marked with its item and direction. (User decision 2026-11-20, phase 2.10; before that, inserters and pumps.)
 - Every city is a 12x12 building (the rocket silo keeps the vanilla 9x9), one port per item, all facing the same way: cities can't be rotated. (User decisions 2026-11-21, phase 2.15; before that cities grew 8x8 / 12x12 / 16x16 with tier upgrades delivered as construction materials.)
 - A city can be removed; everything inside it is lost (it can't go into the player's inventory: cities are hands-off).
 - Every city has a signal point in its door for the circuit network: it sends what the city holds, its status and speed. It only sends; train limits, interrupts and combinators are the player's. (User decision 2026-11-21, phase 2.11; the second point, for tier upgrade needs, went with the upgrades in 2.15.)
@@ -55,14 +54,11 @@ Shared behaviour:
 - Each site has a map tag.
 - Rejected: buildings already on the map, unassigned, that the player gives a role once (no blueprints, and a wrong pick can't be undone).
 
-## Reliability and depots
+## Locomotives
 
-- Each locomotive has a reliability % that decays with use. Newer tiers decay more slowly.
-- Locomotive tiers: the vanilla locomotive, Mk2 and Mk3, free and unlocked by research. Each tier has more power, a higher top speed and better fuel use, and wears 7.5% / 5% / 3% per minute of driving. (User decision 2026-11-21, phase 2.11.)
-- Low reliability means a higher chance of random breakdowns.
-- A broken-down train goes into limp mode: it keeps running at reduced speed and slows everything behind it. It stays that way until cured. (Limp mode itself ships in MVP for fuel-empty trains; see MVP.)
-- The only cures are a depot visit (service bay) or a manual repair by the engineer on site using repair packs.
-- A service bay at a depot restores reliability and consumes repair packs, so depots need a repair pack supply line as well as fuel.
+- Locomotive tiers: the vanilla locomotive, Mk2 and Mk3, free and unlocked by research. Each tier has more power, a higher top speed and better fuel use. (User decision 2026-11-21, phase 2.11.)
+- No reliability or breakdowns. (User decision 2026-11-22, playtest 2.15.10: built in phase 2.3, then removed with the depot service bay and the repair pack city. A breakdown was an event the train schedule could not see, and placing a new locomotive by hand was an easier cure than a repair pack supply line. Could come back later as a schedulable mechanic.)
+- Limp mode stays for fuel-empty trains (see MVP).
 
 ## Black box visuals: Factorissimo
 
@@ -104,7 +100,7 @@ Default order, open to change:
 
 1. City tier upgrades.
 2. Intermediate cities and the research complex, with research gating.
-3. Reliability, depots and the repair pack city.
+3. Reliability, depots and the repair pack city. (Built, then removed in playtest 2.15.10.)
 4. Fuel progression cities (solid fuel, rocket fuel).
 5. Full chain to a rocket silo box.
 6. More power cities and the nuclear power city (moved ahead of elevated rails, user

@@ -4,6 +4,19 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-22: 2.15.12 train reliability removed
+- User, playtest 2.15.10: repair packs come late, placing a new locomotive by hand is an
+  easy way round a breakdown, and a breakdown is not something a train schedule can react
+  to (no event, no interrupt condition). Drop it, at least for now. User's choice of scope:
+  the whole chain.
+- Removed: wear and breakdowns (scripts/reliability.lua), depot servicing and the service
+  port (scripts/service.lua, the service chest and its belt port), the repair pack city,
+  breakdown alerts and messages, `/tt-reliability`, `tt-reliability` remote. Kept: limp
+  mode for fuel-empty trains (MVP), Mk2 and Mk3 locomotives (power, speed, fuel use).
+  25 city kinds remain. Their code is in git history (before this commit) if it comes back.
+- Rejected: wear off but the repair pack city and service ports kept, unused (dead
+  content); a startup setting (code to keep working for an option that is off).
+
 ## 2026-11-22: 2.15.11 iron and copper smelting at the full rate
 - User, playtest 2.15.10 (a 4.5 h run): iron was the one production bottleneck felt. The
   dump agrees: the only iron city ran flat out (0.73 of 0.75 crafts/s) and red science,

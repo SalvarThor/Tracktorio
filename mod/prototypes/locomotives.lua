@@ -1,6 +1,5 @@
 -- Locomotive tiers (PLAN 2.11.5). The vanilla locomotive is tier 1; tiers 2 and 3 are
--- copies with more power, a higher top speed, better fuel use and (scripts/reliability.lua,
--- config.RELIABILITY_DECAY_PER_MINUTE) slower wear. Free like every train entity
+-- copies with more power, a higher top speed and better fuel use. Free like every train entity
 -- (restrictions.lua makes their recipes free, config.FREE_ITEMS), unlocked by research.
 -- Look: the vanilla locomotive in another default colour, its icon with the tier number.
 local config = require("shared.config")

@@ -1,7 +1,6 @@
 -- Belt ports (PLAN 2.10.4). Every item a city takes or gives has a port in its wall: a
 -- hidden loader (prototypes/belt_port.lua) under the wall tile, filtered to that item.
--- Construction materials and the depot's repair packs come in the same way (2.10.6). The
--- player's belt ends on the tile just outside and runs in (or out). Where each port sits
+-- The player's belt ends on the tile just outside and runs in (or out). Where each port sits
 -- comes from shared/port_layout.lua; the markers drawn here show the item and which way
 -- it goes. Fluid ports (pipe connections) get the same markers.
 --
@@ -15,9 +14,6 @@ local cities = require("scripts.cities")
 local M = {}
 
 local CHECK_TICKS = 10
-
--- Marker icons of the ports that aren't for one recipe item or fluid.
-local SPRITE = { service = "item/repair-pack" }
 
 local INWARD = {
   [defines.direction.north] = defines.direction.south, [defines.direction.south] = defines.direction.north,
@@ -92,10 +88,8 @@ function M.attach(city, record)
     local spot = port_layout.spot(p, size)
     local inward = p.flow == "input"
     if p.kind ~= "fluid" then
-      -- item ports feed the city; the service port feeds the hidden chest behind it
-      -- (scripts/service.lua), whose slot filters decide what it takes
       local loader = city.surface.create_entity({
-        name = p.kind == "item" and config.BELT_PORT or config.SERVICE_BOX_PORT,
+        name = config.BELT_PORT,
         position = { city.position.x + spot.inside[1], city.position.y + spot.inside[2] },
         direction = inward and INWARD[spot.direction] or spot.direction,
         type = inward and "input" or "output",
@@ -103,10 +97,8 @@ function M.attach(city, record)
         create_build_effect_smoke = false,
       })
       if loader then
-        if p.kind == "item" then
-          loader.set_filter(1, p.name)
-          loader.loader_filter_mode = "whitelist"
-        end
+        loader.set_filter(1, p.name)
+        loader.loader_filter_mode = "whitelist"
         cities.protect(loader)
         record.belt_ports[#record.belt_ports + 1] = loader
         if not inward then
@@ -117,7 +109,7 @@ function M.attach(city, record)
         end
       end
     end
-    draw_marker(city, spot, SPRITE[p.kind] or ((p.kind == "item" and "item/" or "fluid/") .. p.name), inward)
+    draw_marker(city, spot, (p.kind == "item" and "item/" or "fluid/") .. p.name, inward)
   end
 end
 
@@ -198,8 +190,8 @@ cities.on_any_placed(M.attach)
 ---@param inserter LuaEntity
 local function reaches_city(inserter)
   local function is_city(t)
-    return t ~= nil and t.valid and (t.name == config.BELT_PORT or t.name == config.SERVICE_BOX_PORT
-      or t.name == config.SERVICE_PORT or (cities.is_city(t) and t.name ~= config.CITY.goal))
+    return t ~= nil and t.valid and (t.name == config.BELT_PORT
+      or (cities.is_city(t) and t.name ~= config.CITY.goal))
   end
   return is_city(inserter.pickup_target) or is_city(inserter.drop_target)
 end

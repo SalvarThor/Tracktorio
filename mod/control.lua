@@ -13,8 +13,6 @@ local belt_ports = require("scripts.belt_ports") -- 2.10.4: registers its placem
 local signals = require("scripts.signals") -- 2.11: registers its placement hook
 local throttle = require("scripts.throttle") -- 2.12: registers its placement hook
 local notify = require("scripts.notify")
-local reliability = require("scripts.reliability")
-local service = require("scripts.service")
 local silo = require("scripts.silo")
 local nuclear = require("scripts.nuclear")
 local nauvis = require("scripts.nauvis")
@@ -62,8 +60,6 @@ city_remote.open_gui = function(player_index, entity)
   city_gui.open(player, entity)
 end
 city_remote.recent_messages = function() return notify.recent() end
-city_remote.service_status = function(entity) return service.status(entity) end
-city_remote.service_tick = function(seconds) service.tick(seconds) end
 city_remote.silo_status = function(entity) return silo.status(entity) end
 city_remote.silo_tick = function() silo.tick() end
 city_remote.nuclear_tick = function() return nuclear.tick() end
@@ -106,29 +102,15 @@ remote.add_interface("tt-city", city_remote)
 silo.on_launched(goal.rocket_launched)
 map.on_city_blocked(notify.city_blocked)
 map.on_lake_blocked(notify.lake_blocked)
-reliability.on_breakdown(notify.breakdown)
-reliability.on_cured(notify.repaired)
 remote.add_interface("tt-goal", goal.remote_interface())
 remote.add_interface("tt-limp", limp.remote_interface())
 remote.add_interface("tt-map", map.remote_interface())
 remote.add_interface("tt-nauvis", nauvis.remote_interface())
-remote.add_interface("tt-reliability", {
-  get = function(loco) return reliability.fraction(loco) end,
-  set = function(loco, fraction) reliability.set(loco, fraction) end,
-  --- Tests: apply `ticks` of driving wear now.
-  wear = function(loco, ticks) reliability.wear(loco, ticks) end,
-  chance = function(fraction, ticks) return reliability.chance(fraction, ticks) end,
-  is_broken = function(loco) return reliability.is_broken(loco) end,
-  --- Tests: break a locomotive down now.
-  break_down = function(loco) reliability.break_down(loco) end,
-})
 script.on_init(function()
   state.init()
   cities.init()
   goal.init()
   city_gui.init()
-  notify.init()
-  reliability.init()
   silo.init()
   limp.scan()
   research.init()
@@ -153,30 +135,20 @@ migrate = function()
   cities.init()
   goal.init()
   city_gui.init()
-  notify.init()
-  reliability.init()
   silo.init()
   state.migrate()
   research.init() -- start technologies added later (e.g. 2.2.3) reach existing saves
   -- Grow an existing scenario map to the current layout (2.2.6: new cities, bigger map).
   local surface = game.get_surface(map.SURFACE)
   if surface then map.extend(surface) end
-  service.ensure_all() -- 2.3.4: depots get their service port
   local total = 0
   for _, r in pairs(storage.tt_cities) do
     if r.entity.valid then total = total + 1 end
   end
   local blocked = 0
   for _ in pairs(storage.tt_map_blocked or {}) do blocked = blocked + 1 end
-  local depots, serviced = 0, 0
-  for _, r in pairs(storage.tt_cities) do
-    if r.entity.valid and service.has_service(r.name) then
-      depots = depots + 1
-      if r.service_port and r.service_port.valid then serviced = serviced + 1 end
-    end
-  end
-  log(string.format("tt: configuration changed: schema %s -> %d; cities: %d (spots blocked: %d); depots with a service port: %d/%d",
-    tostring(from), storage.tt_schema, total, blocked, serviced, depots))
+  log(string.format("tt: configuration changed: schema %s -> %d; cities: %d (spots blocked: %d)",
+    tostring(from), storage.tt_schema, total, blocked))
   limp.scan()
   goal_gui.rebuild_all()
 end
@@ -190,7 +162,6 @@ end)
 
 script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   goal.tick()
-  service.tick()
   silo.tick()
   nuclear.tick()
   goal_gui.update_all()
@@ -198,7 +169,6 @@ script.on_nth_tick(config.GOAL_TICK_INTERVAL, function()
   city_gui.update_all()
   map.tick_tags()
   map.retry_blocked()
-  notify.tick()
   throttle.tick()
   signals.tick()
 end)

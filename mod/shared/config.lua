@@ -22,11 +22,6 @@ M.LIMP_ACCELERATION = 0.6
 M.LIMP_INTERVAL = 10
 M.LIMP_PASS_TICKS = 60
 
--- Reliability (PLAN 2.3): a locomotive's health. Driving drains it; the poll above applies
--- the wear for the time since the locomotive was last seen, if it is moving.
--- Fraction of max health lost per minute of driving, per locomotive prototype (tiers later).
-M.RELIABILITY_DECAY_PER_MINUTE = { locomotive = 0.075, ["tt-locomotive-2"] = 0.05, ["tt-locomotive-3"] = 0.03 }
-
 -- Locomotive tiers (PLAN 2.11, user 2026-11-21). Tier 1 is the vanilla locomotive (600 kW,
 -- 1.2 tiles/tick = 259 km/h, effectivity 1). Speeds in tiles per tick (x 216 = km/h).
 M.LOCOMOTIVE_TIER_NAME = { [2] = "tt-locomotive-2", [3] = "tt-locomotive-3" }
@@ -40,9 +35,6 @@ M.LOCOMOTIVE_TIERS = {
     prerequisites = { "tt-locomotive-2", "advanced-circuit", "chemical-science-pack" }, research_count = 300,
     research = { { "automation-science-pack", 1 }, { "logistic-science-pack", 1 }, { "chemical-science-pack", 1 } } },
 }
-M.RELIABILITY_FLOOR = 0.10 -- wear never takes a locomotive below this fraction
--- While moving, chance per second of a breakdown = BREAKDOWN_CHANCE x (1 - health)^2.
-M.BREAKDOWN_CHANCE = 0.02
 
 -- City entity names (prototypes/cities.lua).
 M.CITY = {
@@ -67,7 +59,6 @@ M.PLOT_LAYER = "tt_plot"
 M.CITY_SUBGROUP = "tt-cities"
 M.CITY_BUILD_RECIPE_PREFIX = "tt-build-" -- recipe "tt-build-<city entity name>" crafts its item
 M.BELT_PORT = "tt-belt-port" -- 2.10.4: hidden loader under a city wall
-M.SERVICE_BOX_PORT = "tt-belt-port-service" -- 2.10.14: the same for a depot's repair packs
 M.SIGNAL_POINT = "tt-signal-point" -- 2.11: a city's stock and status, for the circuit network
 -- 2.15.10 (user, playtest): a hidden, unpowered radar in every city keeps its surroundings
 -- live on the map, CITY_RADAR_CHUNKS chunks around it (2 = 5x5 chunks)
@@ -87,18 +78,6 @@ M.SIGNAL = { -- 2.11: status signals of the stock point (value 1 while true)
   speed = "tt-city-speed", -- 2.12: its speed in percent
 }
 
--- Service port beside each depot city (PLAN 2.3.3): takes repair packs only. Locomotives of
--- a train stopped at a train stop within SERVICE_RANGE tiles of the depot's edge are
--- repaired at SERVICE_HP_PER_SECOND each, using one pack per SERVICE_HP_PER_PACK.
-M.SERVICE_PORT = "tt-service-port"
-M.SERVICE_SLOTS = 4
-M.SERVICE_ITEM = "repair-pack"
-M.SERVICE_RANGE = 30
--- A train standing still with a locomotive this close to a stop in range is serviced too,
--- so manually driven trains count (automatic ones are found via get_stopped_train).
-M.SERVICE_STOP_RADIUS = 10
-M.SERVICE_HP_PER_SECOND = 100
-M.SERVICE_HP_PER_PACK = 300 -- the vanilla repair pack's durability
 -- How often the goal box is emptied and counted, and the rate window (for the UI).
 M.GOAL_TICK_INTERVAL = 60
 M.RATE_WINDOW_TICKS = 60 * 60

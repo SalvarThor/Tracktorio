@@ -21,8 +21,6 @@ return {
     "__tracktorio-tests__/cases/city_ui",
     "__tracktorio-tests__/cases/ui_22",
     "__tracktorio-tests__/cases/limp",
-    "__tracktorio-tests__/cases/reliability",
-    "__tracktorio-tests__/cases/service",
     "__tracktorio-tests__/cases/fuels",
     "__tracktorio-tests__/cases/locomotives",
     "__tracktorio-tests__/cases/oil",

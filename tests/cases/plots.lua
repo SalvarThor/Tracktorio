@@ -145,7 +145,6 @@ return {
         position = { cx, 0 }, force = "player" }))
       local _, city = ghost.revive({ raise_revive = true })
       assert(city and city.valid, "ghost did not revive")
-      assert_.truthy(remote.call("tt-city", "service_status", city), "the depot has no service port")
       assert_.equals(parts(city).points, 1, "signal points")
     end,
   },

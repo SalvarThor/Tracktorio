@@ -50,7 +50,7 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 
 ## What's in the game now
 
-**26 city types**, each buildable on any plot once researched:
+**25 city types**, each buildable on any plot once researched:
 
 | Group | Cities |
 |---|---|
@@ -59,7 +59,7 @@ The full design is in [docs/SPEC.md](docs/SPEC.md).
 | Power | coal power city (coal + water in, 20 MW out to your poles); nuclear power city (uranium fuel cells + water in, 100 MW, burns flat out like a real reactor); uranium city (uranium ore + iron in, fuel cells out) |
 | Fuel depots | coal fuel, solid fuel, rocket fuel |
 | Oil and chemistry | refinery (crude oil + water in, light oil + petroleum gas out), plastic, sulfur, sulfuric acid |
-| Intermediates | electronic circuits, advanced circuits, processing units, low density structure, repair packs |
+| Intermediates | electronic circuits, advanced circuits, processing units, low density structure |
 | Science | red, green and blue science cities, and a research complex that works like 10 labs |
 | Endgame | rocket silo |
 
@@ -73,8 +73,8 @@ refinery, and so on).
 - Electric cities draw what the equivalent vanilla buildings would. They slow down on low
   power and stop without it.
 - **Modest rates:** a city makes half of what its vanilla equivalent would (a steel city
-  0.5 steel/s from 2.5 iron/s). More output means another city on another plot. Smelting and power cities
-  are the exception: an iron or copper smelting city makes 15 plates/s (one yellow belt),
+  0.5 steel/s from 2.5 iron/s). More output means another city on another plot. Smelting
+  and power cities are the exception: an iron or copper smelting city makes 15 plates/s (one yellow belt),
   a coal power city 20 MW, fed by one water city, and a nuclear one 100 MW.
 - **Buildings and ports:** cities are 12x12 Factorissimo buildings. Run a belt straight
   into a port in the wall; each port shows its item and an in or out arrow. One yellow
@@ -94,15 +94,8 @@ refinery, and so on).
 
 **Trains**
 - **Limp mode:** a locomotive that runs out of fuel crawls instead of stopping dead.
-- **Reliability:** a locomotive's health is its reliability. It wears down as the train
-  drives, and the lower it gets, the more likely the train breaks down.
-- **Breakdowns:** a broken-down train crawls until it's back at full health.
-- **Repair:** repair a locomotive by hand with repair packs, or stop it at any train
-  stop within 30 tiles of a depot. Depots repair it using packs delivered to their
-  **service port**.
 - **Locomotive Mk2 and Mk3:** researched with green and then blue science. More power,
-  a higher top speed and better fuel use, and they wear out slower (5% and 3% per minute
-  of driving, against 7.5%).
+  a higher top speed and better fuel use.
 - **Better fuels:** solid fuel and rocket fuel give trains more acceleration and top speed
   (vanilla values).
 
@@ -134,7 +127,7 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 | 1 (MVP) | Black box cities, free logistics, restrictions, power and depot cities, limp mode, map, city UI. The MVP win was delivering plates to a goal box. |
 | 2.1 | City tiers, construction ports, upgrade messages, tier pips |
 | 2.2 | Circuit and science cities, research complex, research gating, bigger map |
-| 2.3 | Reliability, breakdowns, depot servicing, repair pack city |
+| 2.3 | Reliability, breakdowns, depot servicing, repair pack city (removed in 2.15.12) |
 | 2.4 | Oil: refinery, solid and rocket fuel depots, fluid cities, oil field |
 | 2.5 | Full chain to the rocket: steel, plastic, sulfur, acid, advanced circuits, processing units, low density structure, blue science, rocket silo; the launch wins |
 | 2.6 | Power expansion: three more coal power cities, a second lake, uranium mining with acid, a uranium city, a nuclear power city; a power budget test |
@@ -146,12 +139,11 @@ findings go back into the plan. Decisions, and the reasons behind them, are logg
 | 2.12 | Steady production: cities fed below their full rate run steadily at that rate (hidden throttle beacons), speed in the window and as a signal; coal fuel briquettes |
 | 2.13 | A clearer city window: coloured status, a flows table, short port lines, explanations in tooltips |
 | 2.14.0 | The user's QoL mods in the playtest; personal construction robots from the start |
-| 2.15 | The player builds the cities: plots on the map, free city items gated by research, half rates so a product needs several cities; tiers and construction ports removed |
+| 2.15 | The player builds the cities: plots on the map, free city items gated by research, half rates (smelting and power excepted); tiers, construction ports and train reliability removed |
 
 ## Next steps
 
 Open ideas:
-- Tune breakdowns to be rarer for real play.
 - Maybe drop the "city" naming.
 - Nuclear fuel control: the nuclear power city puts out a circuit signal (its steam level)
   so players can wire the fuel inserter to save fuel, as in vanilla nuclear setups.
@@ -170,7 +162,6 @@ Windows, PowerShell, Factorio 2.1 with Space Age. Machine paths are in
 
 Debug commands for playtests:
 - `/tt-dump`: snapshot of the mod's state to `script-output`.
-- `/tt-reliability [percent]`: show or set a locomotive's reliability.
 - `/tt-silo-fill <parts>`: set the rocket parts in a silo.
 - `/tt-goal`: show the goal status.
 

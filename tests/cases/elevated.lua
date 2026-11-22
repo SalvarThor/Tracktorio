@@ -168,29 +168,4 @@ return {
       end)
     end,
   },
-  {
-    -- 2.7.4
-    name = "elevated: a train that breaks down on elevated track limps, and a repair cures it",
-    fn = function(ctx)
-      local _, loco = overpass(X + 700, "tt-elevated-C")
-      assert(loco.get_fuel_inventory()).insert({ name = "tt-coal-fuel", count = 10 })
-      local train = assert(loco.train)
-      local schedule = train.get_schedule()
-      schedule.add_record({ station = "tt-elevated-C", wait_conditions = { { type = "time", compare_type = "and", ticks = 600 } } })
-      schedule.go_to_station(1)
-      train.manual_mode = false
-      ctx:wait_until(function()
-        return on_elevated(loco.train)
-      end, 60 * 30, function()
-        remote.call("tt-reliability", "break_down", loco)
-        remote.call("tt-limp", "check_all")
-        assert_.truthy(remote.call("tt-limp", "is_limping", loco), "broken train on elevated track not limping")
-        assert_.truthy(math.abs(loco.train.max_forward_speed - LIMP_MAX) < 0.001, "max speed " .. loco.train.max_forward_speed)
-        loco.health = loco.max_health -- a repair pack on site
-        ctx:wait(130, function()
-          assert_.falsy(remote.call("tt-limp", "is_limping", loco), "still limping after repair")
-        end)
-      end)
-    end,
-  },
 }

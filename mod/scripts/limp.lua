@@ -7,7 +7,6 @@
 --
 -- storage.tt_limp = { locos = { { entity, unit, seen }, ... }, index = { [unit] = i }, cursor = n }
 local config = require("shared.config")
-local reliability = require("scripts.reliability")
 
 local M = {}
 
@@ -28,7 +27,6 @@ local function untrack_at(i)
   local s = storage.tt_limp
   local last = #s.locos
   s.index[s.locos[i].unit] = nil
-  reliability.forget(s.locos[i].unit)
   if i ~= last then
     s.locos[i] = s.locos[last]
     s.index[s.locos[i].unit] = i
@@ -60,13 +58,6 @@ function M.check(loco)
   if not burner then return nil end
   local inv = burner.inventory
   local burning = burning_name(burner)
-  if reliability.train_broken(loco) then
-    -- broken down (2.3.2): limp even with fuel inside, until the train is repaired
-    if burning == config.LIMP_FUEL then return nil end
-    burner.currently_burning = config.LIMP_FUEL
-    burner.remaining_burning_fuel = config.LIMP_FUEL_JOULES
-    return "limp"
-  end
   if burning == nil and inv.is_empty() then
     burner.currently_burning = config.LIMP_FUEL
     burner.remaining_burning_fuel = config.LIMP_FUEL_JOULES
@@ -96,7 +87,6 @@ function M.tick()
     local loco = s.locos[i].entity
     if loco.valid then
       M.check(loco)
-      reliability.update(s.locos[i])
       i = i + 1
     else
       untrack_at(i) -- the swapped-in entry is checked next

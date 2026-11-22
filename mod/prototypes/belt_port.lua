@@ -33,11 +33,4 @@ port.belt_animation_set = {
 port.next_upgrade = nil
 port.fast_replaceable_group = nil
 
--- A depot's service port (2.10.6) feeds a hidden chest two tiles in, clear of the tile in
--- front of every item port. Its own prototype, so it explains itself when hovered (2.10.14).
-local service_port = table.deepcopy(port)
-service_port.name = config.SERVICE_BOX_PORT
-service_port.container_distance = 2
-service_port.icon = "__base__/graphics/icons/repair-pack.png"
-
-data:extend({ port, service_port })
+data:extend({ port })

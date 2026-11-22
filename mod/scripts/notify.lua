@@ -1,22 +1,13 @@
--- Player-facing messages: chat with a map link, custom alerts, flying text (breakdowns,
--- repairs, blocked map spots), and a check whether a city's network looks too weak.
+-- Player-facing messages: chat with a map link (blocked map spots), and a check whether a
+-- city's network looks too weak.
 local city_defs = require("shared.city_defs")
 
 local M = {}
-
-function M.init()
-  storage.tt_alerts = storage.tt_alerts or {} -- { { player_index, entity, expires? }, ... } (no expiry: removed by code)
-end
 
 --- Megawatts with up to two decimals and no trailing zeros ("0.95", "1.9", "21.6").
 local function mw(watts)
   local s = string.format("%.2f", watts / 1e6):gsub("0+$", ""):gsub("%.$", "")
   return s
-end
-
----@param entity LuaEntity
-local function gps(entity)
-  return string.format("[gps=%d,%d,%s]", math.floor(entity.position.x), math.floor(entity.position.y), entity.surface.name)
 end
 
 --- Steam per tick -> watts (165 C steam: 30 kJ/unit).
@@ -107,54 +98,6 @@ function M.lake_blocked(surface, position)
   local message = { "tt-notify.lake-blocked",
     string.format("[gps=%d,%d,%s]", math.floor(position.x), math.floor(position.y), surface.name) }
   tell(game.forces["player"], message)
-end
-
---- A locomotive broke down (2.3.2): chat message and an alert that stays until it is repaired.
----@param loco LuaEntity
-function M.breakdown(loco)
-  ---@type any
-  local message = { "tt-notify.breakdown", gps(loco) }
-  tell(loco.force --[[@as LuaForce]], message)
-  for _, player in pairs(loco.force.connected_players) do
-    player.add_custom_alert(loco, { type = "entity", name = loco.name }, { "tt-notify.breakdown-alert" }, true)
-    storage.tt_alerts[#storage.tt_alerts + 1] = { player_index = player.index, entity = loco }
-  end
-end
-
---- A broken locomotive is back at full health: drop its alert.
----@param loco LuaEntity
-function M.repaired(loco)
-  local keep = {}
-  for _, a in ipairs(storage.tt_alerts) do
-    if a.entity == loco then
-      local player = game.get_player(a.player_index)
-      if player then player.remove_alert({ entity = loco, type = defines.alert_type.custom }) end
-    else
-      keep[#keep + 1] = a
-    end
-  end
-  storage.tt_alerts = keep
-  if loco.valid then
-    for _, player in pairs(loco.force.connected_players) do
-      if player.surface == loco.surface then
-        player.create_local_flying_text({ text = { "tt-notify.repaired" }, position = loco.position, time_to_live = 180 })
-      end
-    end
-  end
-end
-
---- Drop expired custom alerts (every GOAL_TICK_INTERVAL).
-function M.tick()
-  local keep = {}
-  for _, a in ipairs(storage.tt_alerts) do
-    local player = game.get_player(a.player_index)
-    if (a.expires and game.tick >= a.expires) or not a.entity.valid then
-      if player and a.entity.valid then player.remove_alert({ entity = a.entity, type = defines.alert_type.custom }) end
-    else
-      keep[#keep + 1] = a
-    end
-  end
-  storage.tt_alerts = keep
 end
 
 return M

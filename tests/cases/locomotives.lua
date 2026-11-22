@@ -1,5 +1,5 @@
 -- 2.11.5: locomotive tiers. Tier 1 is the vanilla locomotive; Mk2 and Mk3 have more power,
--- a higher top speed, better fuel use and slower wear. Free, unlocked by research.
+-- a higher top speed and better fuel use. Free, unlocked by research.
 local assert_ = require("__tracktorio-tests__/assert")
 local h = require("__tracktorio-tests__/helpers")
 
@@ -7,9 +7,9 @@ local E = defines.direction.east
 local X = 46000
 
 local TIERS = {
-  { name = "locomotive", power = 600e3, speed = 1.2, effectivity = 1, wear = 0.075 },
-  { name = "tt-locomotive-2", power = 900e3, speed = 290 / 216, effectivity = 1.25, wear = 0.05 },
-  { name = "tt-locomotive-3", power = 1.2e6, speed = 324 / 216, effectivity = 1.5, wear = 0.03 },
+  { name = "locomotive", power = 600e3, speed = 1.2, effectivity = 1 },
+  { name = "tt-locomotive-2", power = 900e3, speed = 290 / 216, effectivity = 1.25 },
+  { name = "tt-locomotive-3", power = 1.2e6, speed = 324 / 216, effectivity = 1.5 },
 }
 
 --- A 600-tile line at y with a locomotive of `name` on coal fuel, sent to the far end.
@@ -64,22 +64,7 @@ return {
     end,
   },
   {
-    name = "locomotives: wear per minute of driving is 7.5% / 5% / 3% by tier",
-    fn = function()
-      for i, t in ipairs(TIERS) do
-        local y = 600 + i * 10
-        h.clear_area({ { X - 4, y - 4 }, { X + 30, y + 4 } })
-        for x = X, X + 24, 2 do h.create("straight-rail", { x, y }, { direction = E }) end
-        local loco = h.create(t.name, { X + 6, y }, { direction = E, raise_built = true })
-        remote.call("tt-reliability", "set", loco, 1)
-        remote.call("tt-reliability", "wear", loco, 3600)
-        local lost = 1 - remote.call("tt-reliability", "get", loco)
-        assert_.truthy(math.abs(lost - t.wear) < 1e-6, t.name .. " lost " .. lost .. " in a minute")
-      end
-    end,
-  },
-  {
-    name = "locomotives: a broken-down or fuel-empty Mk3 limps like the first locomotive",
+    name = "locomotives: a fuel-empty Mk3 limps like the first locomotive",
     fn = function(ctx)
       local y = 660
       h.clear_area({ { X - 4, y - 4 }, { X + 64, y + 4 } })
@@ -88,14 +73,10 @@ return {
       remote.call("tt-limp", "check_all")
       assert_.truthy(remote.call("tt-limp", "is_limping", loco), "a fuel-empty Mk3 does not limp")
       assert(loco.get_fuel_inventory()).insert({ name = "tt-coal-fuel", count = 5 })
+      local max = assert(loco.train).max_forward_speed
+      assert_.truthy(math.abs(max - 324 / 216 * 0.25) < 0.001, "limp top speed " .. max)
       ctx:wait(70, function()
         assert_.falsy(remote.call("tt-limp", "is_limping", loco), "still limping after refuelling")
-        remote.call("tt-reliability", "break_down", loco)
-        remote.call("tt-limp", "check_all")
-        assert_.truthy(remote.call("tt-reliability", "is_broken", loco), "not broken")
-        assert_.truthy(remote.call("tt-limp", "is_limping", loco), "a broken Mk3 does not limp")
-        local max = assert(loco.train).max_forward_speed
-        assert_.truthy(math.abs(max - 324 / 216 * 0.25) < 0.001, "limp top speed " .. max)
       end)
     end,
   },

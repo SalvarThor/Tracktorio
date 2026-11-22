@@ -4,7 +4,7 @@
 --
 -- storage.tt_cities[unit_number] = { entity = LuaEntity, name = string, surface_index,
 --   position, companion = LuaEntity?, belt_ports, signal_points, throttle (their modules),
---   service_port = LuaEntity?, service = table? (scripts/service.lua) }
+--   radar }
 -- storage.tt_hand_transfers = count of hand transfers that reached a city (should stay 0;
 --   operable=false is expected to block them, see DECISIONS.md A2).
 
@@ -118,12 +118,10 @@ function M.place(name, surface, position, force)
   return entity
 end
 
---- Remove a city's attached entities (ports, points, generator, beacon, service chest).
+--- Remove a city's attached entities (ports, points, generator, beacon, radar).
 ---@param record table
 local function remove_parts(record)
-  for _, key in ipairs({ "companion", "service_port" }) do
-    if record[key] and record[key].valid then record[key].destroy() end
-  end
+  if record.companion and record.companion.valid then record.companion.destroy() end
   for _, loader in ipairs(record.belt_ports or {}) do -- 2.10.4
     if loader.valid then loader.destroy() end
   end
@@ -136,7 +134,7 @@ end
 
 --- Track a city that now stands on the map, placed by script or built by the player (by
 --- hand, ghost, robot, blueprint or the upgrade planner): protect it, give it its hidden
---- generator, and run the placement hooks (ports, signal point, throttle, service). Records
+--- generator, and run the placement hooks (ports, signal point, throttle, radar). Records
 --- whose city is gone are cleared first; one that stood at the same spot was just replaced
 --- in place (2.15.4), so the replace hooks see it before its parts go.
 ---@param entity LuaEntity

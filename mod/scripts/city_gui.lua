@@ -5,7 +5,6 @@ local city_defs = require("shared.city_defs")
 local cities = require("scripts.cities")
 local city_info = require("scripts.city_info")
 local goal = require("scripts.goal")
-local service = require("scripts.service")
 
 local M = {}
 
@@ -182,14 +181,12 @@ local function add_ports(body, port_list)
   if not port_list or #port_list == 0 then return end
   add_heading(body, { "tt-gui.city-ports" }, { "tt-gui.city-ports-tip" })
   for i, p in ipairs(port_list) do
-    local what = p.kind == "service" and "[item=repair-pack]"
-      or ("[" .. p.kind .. "=" .. p.name .. "]")
+    local what = "[" .. p.kind .. "=" .. p.name .. "]"
     ---@type any
     local extra = ""
     ---@type any
     local tip = nil
-    if p.kind == "service" then tip = { "tt-gui.city-port-service-tip" }
-    elseif p.belt then
+    if p.belt then
       local belt = "[item=" .. BELT_ITEM[p.belt] .. "]"
       extra, tip = belt, { "tt-gui.city-port-belt-tip", belt, fmt(p.per_s) }
     elseif p.per_s then extra = { "tt-gui.city-port-rate", fmt(p.per_s) } end
@@ -200,18 +197,6 @@ local function add_ports(body, port_list)
   -- 2.11: the signal point in the door
   add_text(body, { "tt-gui.city-signals", "[img=item/constant-combinator]" }, false, "signals").tooltip =
     { "tt-gui.city-signals-tip" }
-end
-
---- A depot's servicing in one line; the rules in its tooltip (2.3.3).
----@param body LuaGuiElement
----@param city LuaEntity
-local function add_service(body, city)
-  local s = service.status(city)
-  if not s then return end
-  local how = { "tt-gui.service-how", tostring(config.SERVICE_RANGE) }
-  add_heading(body, { "tt-gui.service-title" }, how)
-  add_text(body, { "tt-gui.service-packs", "[item=" .. config.SERVICE_ITEM .. "]", tostring(s.packs or 0), tostring(s.serviced) },
-    false, "service").tooltip = how
 end
 
 --- The research complex: status, current research and the packs inside.
@@ -272,7 +257,6 @@ local function fill_city(body, entity)
     add_text(body, { "tt-gui.silo-launched", tostring(info.silo.launched) })
   end
   add_ports(body, info.ports)
-  add_service(body, entity)
 end
 
 --- The city a belt port belongs to.
@@ -309,22 +293,15 @@ local function fill(frame, entity)
   body.clear()
   if entity.name == config.CITY.goal then
     fill_goal(body)
-  elseif entity.name == config.SERVICE_PORT then
-    local city = service.city_of_port(entity)
-    if city then
-      add_text(body, { "tt-gui.port-for", city.localised_name }, true, "status")
-      add_service(body, city)
-    end
   else
     fill_city(body, entity)
   end
 end
 
---- Entities with a window: crafting cities, the goal box, service ports.
+--- Entities with a window: crafting cities and the goal box.
 ---@param entity LuaEntity?
 function M.has_window(entity)
   if not (entity and entity.valid) then return false end
-  if entity.name == config.SERVICE_PORT then return true end
   return cities.is_city(entity) and (entity.type == "assembling-machine" or entity.type == "lab" or entity.type == "rocket-silo"
     or entity.name == config.CITY.goal)
 end
@@ -381,8 +358,7 @@ local function on_open_input(e)
     return
   end
   -- a belt port (2.10) or signal point (2.11) opens its city's window
-  if selected and (selected.name == config.BELT_PORT or selected.name == config.SERVICE_BOX_PORT
-      or selected.name == config.SIGNAL_POINT) then
+  if selected and (selected.name == config.BELT_PORT or selected.name == config.SIGNAL_POINT) then
     selected = city_of_belt_port(selected)
   end
   if selected and M.has_window(selected) then

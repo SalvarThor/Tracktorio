@@ -119,7 +119,6 @@ end
 
 --- Every port for `name` flowing `flow`:
 --- list of { pos, dir } with `pos` the tile just outside the wall and `dir` out of the city.
---- `name` may also be "service" (2.10.6).
 ---@param city LuaEntity
 ---@param name string
 ---@param flow "input"|"output"
@@ -184,13 +183,6 @@ function M.belt_to_port(city, name, flow, belt, length)
       chest.remove_unfiltered_items = true
     end
   end
-end
-
---- Where the hidden chest behind a city's service port is (2.10.6).
----@param city LuaEntity
----@param kind "service"
-function M.box_spot(city, kind)
-  return port_layout.box_position(city, kind, city_defs.by_entity)
 end
 
 --- An infinity pipe at a city's fluid port: a supply (`fill` true) or a drain.
