@@ -149,7 +149,7 @@ return {
       mgs.width, mgs.height = OLD_W, OLD_H
       surface.map_gen_settings = mgs
       -- Ports of the destroyed cities go one tick later; remove them now.
-      for _, e in pairs(surface.find_entities_filtered({ name = { "tt-belt-port", "tt-belt-port-service", "tt-service-port", "tt-signal-point", "tt-throttle-beacon" } })) do
+      for _, e in pairs(surface.find_entities_filtered({ name = { "tt-belt-port", "tt-belt-port-service", "tt-service-port", "tt-signal-point", "tt-throttle-beacon", "tt-hidden-radar" } })) do
         local near = false
         for _, c in ipairs(new_cities) do if math.abs(e.position.x - c.x) < 8 and math.abs(e.position.y - c.y) < 8 then near = true end end
         if near then e.destroy() end

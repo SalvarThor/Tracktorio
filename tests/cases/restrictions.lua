@@ -3,7 +3,8 @@ local assert_ = require("__tracktorio-tests__/assert")
 
 local FREE = { "rail", "locomotive", "cargo-wagon", "fluid-wagon", "train-stop", "rail-signal",
   "inserter", "transport-belt", "iron-chest", "pipe", "pump",
-  "small-electric-pole", "big-electric-pole", "electric-mining-drill", "decider-combinator" }
+  "small-electric-pole", "big-electric-pole", "electric-mining-drill", "decider-combinator",
+  "radar" } -- user, playtest 2.15.10
 local BANNED = { "stone-furnace", "assembling-machine-1", "oil-refinery", "chemical-plant", "boiler",
   "steam-engine", "solar-panel", "car", "tank", "spidertron",
   "logistic-robot", "roboport", "requester-chest", "lab", "rocket-silo", "foundry", "recycler",
@@ -16,7 +17,7 @@ local START_ENABLED = { "rail", "locomotive", "cargo-wagon", "fluid-wagon", "tra
   "splitter", "pipe", "pipe-to-ground", "pump", "small-electric-pole",
   "medium-electric-pole", "big-electric-pole", "burner-mining-drill", "electric-mining-drill" }
 -- Free but research-gated: not unlocked at start.
-local GATED = { "arithmetic-combinator", "fast-inserter", "fast-transport-belt", "rail-ramp", "pumpjack" }
+local GATED = { "arithmetic-combinator", "fast-inserter", "fast-transport-belt", "rail-ramp", "pumpjack", "radar" }
 
 local function player() return assert(game.players[1], "no player") end
 

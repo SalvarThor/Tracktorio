@@ -131,6 +131,7 @@ local function remove_parts(record)
     if point.valid then point.destroy() end
   end
   if record.throttle and record.throttle.beacon.valid then record.throttle.beacon.destroy() end -- 2.12
+  if record.radar and record.radar.valid then record.radar.destroy() end -- 2.15.10
 end
 
 --- Track a city that now stands on the map, placed by script or built by the player (by
@@ -166,6 +167,11 @@ function M.adopt(entity)
     entity.add_fluid_box_linked_connection(comp.city_link_id, companion, comp.companion_link_id)
     record.companion = companion
   end
+  -- 2.15.10 (user, playtest): the city's surroundings stay live on the map
+  local radar = surface.create_entity({ name = config.CITY_RADAR, position = entity.position, force = entity.force })
+  assert(radar, "tt: could not place the city radar")
+  M.protect(radar)
+  record.radar = radar
   storage.tt_cities[entity.unit_number] = record
   script.register_on_object_destroyed(entity)
   if placed_hooks[name] then placed_hooks[name](entity) end

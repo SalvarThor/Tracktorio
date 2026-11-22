@@ -69,6 +69,10 @@ M.CITY_BUILD_RECIPE_PREFIX = "tt-build-" -- recipe "tt-build-<city entity name>"
 M.BELT_PORT = "tt-belt-port" -- 2.10.4: hidden loader under a city wall
 M.SERVICE_BOX_PORT = "tt-belt-port-service" -- 2.10.14: the same for a depot's repair packs
 M.SIGNAL_POINT = "tt-signal-point" -- 2.11: a city's stock and status, for the circuit network
+-- 2.15.10 (user, playtest): a hidden, unpowered radar in every city keeps its surroundings
+-- live on the map, CITY_RADAR_CHUNKS chunks around it (2 = 5x5 chunks)
+M.CITY_RADAR = "tt-hidden-radar"
+M.CITY_RADAR_CHUNKS = 2
 -- Throttle (2.12): a hidden beacon in each crafting city and the research complex, with
 -- modules taking THROTTLE_STEP off speed and power each; at most THROTTLE_MAX_STEPS (the
 -- engine floors speed and consumption at 20%).
@@ -138,6 +142,8 @@ M.FREE_ITEMS = {
   "power-switch", "programmable-speaker", "display-panel", "small-lamp",
   -- extraction
   "burner-mining-drill", "electric-mining-drill", "big-mining-drill", "pumpjack",
+  -- map view (user, playtest 2.15.10): watch stations and mines from the map
+  "radar",
 }
 
 -- Items the player must never get (SPEC: transformation happens in cities; transport is

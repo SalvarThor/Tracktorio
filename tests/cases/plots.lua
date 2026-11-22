@@ -45,6 +45,7 @@ local function parts(city)
     points = s.count_entities_filtered({ area = area, name = "tt-signal-point" }),
     beacons = s.count_entities_filtered({ area = area, name = "tt-throttle-beacon" }),
     generators = s.count_entities_filtered({ area = area, name = "tt-power-generator" }),
+    radars = s.count_entities_filtered({ area = area, name = "tt-hidden-radar" }),
   }
 end
 
@@ -129,6 +130,7 @@ return {
       assert_.equals(n.ports, 3, "belt ports")
       assert_.equals(n.points, 1, "signal points")
       assert_.equals(n.beacons, 1, "throttle beacons")
+      assert_.equals(n.radars, 1, "city radar")
       local power = build("tt-city-power", X + 140)
       assert_.equals(parts(power).generators, 1, "power city generator")
     end,
@@ -164,7 +166,7 @@ return {
       assert_.equals(inv.get_item_count("iron-plate"), plates, "plates came out of the city")
       ctx:wait(2, function()
         local s = h.surface()
-        assert_.equals(s.count_entities_filtered({ area = area, name = { "tt-belt-port", "tt-signal-point", "tt-throttle-beacon" } }), 0,
+        assert_.equals(s.count_entities_filtered({ area = area, name = { "tt-belt-port", "tt-signal-point", "tt-throttle-beacon", "tt-hidden-radar" } }), 0,
           "parts left behind")
       end)
     end,
@@ -185,8 +187,29 @@ return {
       assert_.equals(n.ports, 2, "belt ports (ore in, plates out)")
       assert_.equals(n.points, 1, "signal points")
       assert_.equals(n.beacons, 1, "throttle beacons")
+      assert_.equals(n.radars, 1, "city radar")
       local new_point = assert(remote.call("tt-city", "signal_points", new).stock)
       assert_.equals(new_point.get_wire_connector(RED, true).connection_count, 1, "the wire was lost")
+    end,
+  },
+  {
+    -- user, playtest 2.15.10: zoom in on any city from the map
+    name = "build: a city's hidden radar charts the chunks around it, without power, and no further",
+    fn = function(ctx)
+      local mgs = game.surfaces["nauvis"].map_gen_settings
+      mgs.seed = 4242
+      local s = game.create_surface("tt-radar-test", mgs)
+      s.request_to_generate_chunks({ 0, 0 }, 1)
+      s.force_generate_chunk_requests()
+      local city = assert(s.create_entity({ name = "tt-city-iron-smelting", position = { 0, 0 }, force = "player", raise_built = true }))
+      local force = game.forces["player"]
+      assert_.equals(s.count_entities_filtered({ area = city.bounding_box, name = "tt-hidden-radar" }), 1, "city radar")
+      ctx:wait(600, function()
+        assert_.truthy(force.is_chunk_charted(s, { 0, 0 }), "the city's chunk is not charted")
+        assert_.truthy(force.is_chunk_charted(s, { 2, -2 }), "a chunk two away is not charted")
+        assert_.falsy(force.is_chunk_charted(s, { 6, 0 }), "a chunk six away is charted")
+        game.delete_surface(s)
+      end)
     end,
   },
   {

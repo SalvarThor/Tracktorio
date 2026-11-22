@@ -4,6 +4,20 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-22: 2.15.10 city radars and the free radar
+- User, playtest 2.15.10: the player must be able to zoom in on cities from the map and see
+  what is going on. The vanilla radar could not be built (its recipe has ingredients, and
+  only free recipes can be hand-crafted). User's choice: both.
+- Decision: every city has a hidden radar (`tt-hidden-radar`): void energy, no sector scans,
+  nearby scan of `config.CITY_RADAR_CHUNKS` = 2 chunks (5x5 chunks around the city), not
+  selectable, not on the map, placed and removed with the city like its other parts. The
+  vanilla radar joins the free items, unlocked by its vanilla technology (red science), for
+  stations and mines; it needs power as usual.
+- Named `tt-hidden-radar`, not `tt-city-radar`: everything starting `tt-city-` counts as a
+  city (`cities.is_city_name`).
+- Rejected: only the free radar (a remote city would need a pole line just to be watched);
+  only the city radar (no way to watch mines and junctions).
+
 ## 2026-11-22: 2.15.10 vanilla starting patches near spawn
 - User, playtest 2.15.10: the uncovered area around spawn had no coal or any ore, only
   uranium further out. The cause was the 2026-11-20 rule "no resources near spawn"
