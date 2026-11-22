@@ -22,8 +22,8 @@ return {
       assert_.equals(#i.recipe.ingredients, 2, "ingredient count")
       assert_.equals(i.recipe.products[1].name, "iron-plate")
       assert_.equals(i.recipe.products[1].amount, 10)
-      -- 10 plates per 1 s cycle at speed 0.75 (half of 1.5, 2.15.7) -> 450/min max
-      assert_.equals(math.floor(i.recipe.products[1].per_min_max + 0.5), 450)
+      -- 10 plates per 1 s cycle at speed 1.5 (full rate again since playtest 2.15.10) -> 900/min max
+      assert_.equals(math.floor(i.recipe.products[1].per_min_max + 0.5), 900)
     end,
   },
   {

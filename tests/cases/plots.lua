@@ -270,8 +270,8 @@ return {
         ctx:wait(60 * 8, function()
           for i, city in ipairs(made) do
             local n = city.products_finished - start[i]
-            -- 0.75 crafts/s at full speed: 6 in 8 s
-            assert_.truthy(n >= 5, "city " .. i .. " made " .. n .. " in 8 s")
+            -- 1.5 crafts/s at full speed: 12 in 8 s
+            assert_.truthy(n >= 10, "city " .. i .. " made " .. n .. " in 8 s")
             assert_.equals(remote.call("tt-city", "info", city).status, "running", "city " .. i)
           end
         end)

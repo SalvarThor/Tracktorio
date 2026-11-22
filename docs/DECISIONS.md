@@ -4,6 +4,17 @@ Newest first. One entry per decision: date, decision, why, alternatives rejected
 Design decisions made before the build started are in SPEC.md; this log covers what is
 decided during the build.
 
+## 2026-11-22: 2.15.11 iron and copper smelting at the full rate
+- User, playtest 2.15.10 (a 4.5 h run): iron was the one production bottleneck felt. The
+  dump agrees: the only iron city ran flat out (0.73 of 0.75 crafts/s) and red science,
+  circuits and repair packs all wanted more.
+- Decision: iron and copper smelting, coal-fired and electric, skip the rate cut
+  (`full_rate`): 15 plates/s, one yellow belt, the rate before 2.15.7. Copper too (user's
+  choice): circuits take 1.5 copper per iron, so it would be the next wall.
+- Rejected: iron only.
+- Test: the steady-feed throttle test feeds 3.75 ore/s, now a quarter of the full rate, so
+  it expects about 25% (was 50%).
+
 ## 2026-11-22: 2.15.10 other mods' logistics items are free; two icon fixes
 - User, playtest 2.15.10: a mod's mini loaders (loader_mini_1x1) could not be crafted after
   research. Only recipes in the free category can be hand-crafted, and the free list named

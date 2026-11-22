@@ -2,7 +2,7 @@
 
 ## Thesis
 
-Factorio with the factory turned into black boxes. Cities are factories that convert inputs to outputs automatically at the rate they're supplied. The player builds them, for free once researched, but only on plots the map provides. Each city runs at half the rate of its vanilla equivalent; power cities are the exception (20 MW coal, 100 MW nuclear). The player mines raw resources, builds the cities, the train network and the stations that feed and drain them. The win condition is a rocket launch. The challenge is shipping, not production design.
+Factorio with the factory turned into black boxes. Cities are factories that convert inputs to outputs automatically at the rate they're supplied. The player builds them, for free once researched, but only on plots the map provides. Each city runs at half the rate of its vanilla equivalent; iron and copper smelting (15 plates/s) and power cities (20 MW coal, 100 MW nuclear) are the exceptions. The player mines raw resources, builds the cities, the train network and the stations that feed and drain them. The win condition is a rocket launch. The challenge is shipping, not production design.
 
 Cities chain across the map the same way a factory does, and the train network is the belts. When a supply runs short, the answer is another city on another plot, and more rail.
 
@@ -30,7 +30,7 @@ All black boxes are the same entity concept with different recipe profiles.
 
 Shared behaviour:
 
-- Conversion runs at the rate of the slowest input, capped by the city's rate. Rates are modest (iron smelting 7.5 plates/s, half a yellow belt, to start): the way to more output is more cities. (User decision 2026-11-21, phase 2.15.) Power cities are not halved: a coal power city makes 20 MW on one water city's water, a nuclear power city 100 MW. (User decision 2026-11-22, playtest 2.15.10.)
+- Conversion runs at the rate of the slowest input, capped by the city's rate. Rates are modest (half the vanilla equivalent): the way to more output is more cities. (User decision 2026-11-21, phase 2.15.) Iron and copper smelting are not halved: 15 plates/s, one yellow belt. (User decision 2026-11-22, playtest 2.15.10.) Power cities are not halved: a coal power city makes 20 MW on one water city's water, a nuclear power city 100 MW. (User decision 2026-11-22, playtest 2.15.10.)
 - A city fed (or drained) below its full rate runs steadily at that rate rather than in bursts: its speed and power draw drop together, down to 20%. (User decision 2026-11-21, phase 2.12.)
 - Decided: a city draws electricity from the player's pole network when its vanilla
   equivalent uses electric buildings. It draws what those buildings would need for the same

@@ -110,7 +110,7 @@ return {
     end,
   },
   {
-    name = "belt ports: one yellow belt per item runs a smelting city at its full 7.5/s",
+    name = "belt ports: one yellow belt per item runs a smelting city at its full 15/s",
     fn = function(ctx)
       local x = X + 700
       h.clear_area({ { x - 14, -14 }, { x + 16, 16 } })
@@ -122,7 +122,7 @@ return {
         local start = city.products_finished
         ctx:wait(600, function()
           local plates = (city.products_finished - start) * 10
-          assert_.truthy(plates >= 70, "plates in 10 s: " .. plates .. " (want 75)")
+          assert_.truthy(plates >= 140, "plates in 10 s: " .. plates .. " (want 150)")
         end)
       end)
     end,
@@ -227,9 +227,9 @@ return {
       end
       local t1 = by(h.place_city("tt-city-iron-smelting", { x + 0.5, 0.5 }))
       assert_.equals(t1["item/iron-ore/input"][1].belt, "yellow")
-      assert_.equals(t1["item/iron-ore/input"][1].per_s, 7.5)
+      assert_.equals(t1["item/iron-ore/input"][1].per_s, 15)
       assert_.equals(t1["item/coal/input"][1].belt, "yellow")
-      assert_.equals(t1["item/iron-plate/output"][1].per_s, 7.5)
+      assert_.equals(t1["item/iron-plate/output"][1].per_s, 15)
       assert_.falsy(t1["construction/nil/input"], "a construction port")
       local e = by(h.place_city("tt-city-electric-iron-smelting", { x + 30.5, 0.5 }))
       assert_.equals(#e["item/iron-ore/input"], 1, "electric ore ports")

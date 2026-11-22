@@ -4,8 +4,8 @@ A Factorio 2.1 mod (with Space Age) where **trains are the whole game**.
 
 All production happens in "black box" cities that turn inputs into outputs on their own.
 You don't build furnaces or assemblers: you build cities, for free, on the plots the map
-provides. Each city runs at half the rate of its vanilla equivalent, except the power
-cities (20 MW coal, 100 MW nuclear). You mine raw
+provides. Each city runs at half the rate of its vanilla equivalent, except the iron and
+copper smelting cities (15 plates/s) and the power cities (20 MW coal, 100 MW nuclear). You mine raw
 resources, lay the rail network, and design the stations that feed and drain the cities. Cities chain across
 the map the way a factory does, and the train network is the belts. The challenge is
 shipping, not production design. You win by launching a rocket.
@@ -72,10 +72,10 @@ refinery, and so on).
 - Each city runs at the rate of its slowest input and stops when its output is full.
 - Electric cities draw what the equivalent vanilla buildings would. They slow down on low
   power and stop without it.
-- **Modest rates:** a city makes half of what its vanilla equivalent would (an iron
-  smelting city 7.5 plates/s, half a yellow belt). More output means another city on
-  another plot. Power cities are the exception: 20 MW from a coal power city, fed by one
-  water city, and 100 MW from a nuclear one.
+- **Modest rates:** a city makes half of what its vanilla equivalent would (a steel city
+  0.5 steel/s from 2.5 iron/s). More output means another city on another plot. Smelting and power cities
+  are the exception: an iron or copper smelting city makes 15 plates/s (one yellow belt),
+  a coal power city 20 MW, fed by one water city, and a nuclear one 100 MW.
 - **Buildings and ports:** cities are 12x12 Factorissimo buildings. Run a belt straight
   into a port in the wall; each port shows its item and an in or out arrow. One yellow
   belt per item is enough.

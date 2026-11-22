@@ -29,6 +29,7 @@ local function smelting(name, ore, plate, map_color, electric)
   return {
     name = electric and ("electric-" .. name) or name,
     upgrade_from = electric and name or nil,
+    full_rate = true, -- 15 plates/s, not halved (user, playtest 2.15.10: iron was the bottleneck)
     graphics = { type = "furnace", name = "electric-furnace" },
     map_color = map_color,
     -- 10 plates/s at speed 1.5 = 15 plates/s (900/min, one yellow belt). Electric furnace

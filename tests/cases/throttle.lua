@@ -200,7 +200,7 @@ return {
     end,
   },
   {
-    name = "throttle: an electric smelting city fed 3.75 ore/s (half its 7.5/s) runs steadily at about 50%, unaided",
+    name = "throttle: an electric smelting city fed 3.75 ore/s (a quarter of its 15/s) runs steadily at about 25%, unaided",
     fn = function(ctx)
       local x = X + 3300
       h.clear_area({ { x - 16, -16 }, { x + 18, 16 } })
@@ -212,7 +212,8 @@ return {
       -- 2.15.7: a craft takes 2.7 s at 50% here, so it settles slower than a fast city: it
       -- swings 40-60% for about 50 s after an empty start, then holds 50%. Playtest 2.15.10:
       -- on some start ticks it keeps stepping one 5% step either side of 50% (45-55%), so it
-      -- gets 120 s and may change up to 5 times in the last 15 s, within 10%.
+      -- gets 120 s and may change up to 5 times in the last 15 s, within 10%. Since smelting
+      -- went back to 15/s (playtest 2.15.10) the same feed is a quarter: about 25%.
       local seen, changes, last = {}, 0, nil
       local ticks = 0
       drive(ctx, city, 135, 15, function(c)
@@ -225,7 +226,7 @@ return {
         end
       end, function(samples)
         local t = assert(remote.call("tt-city", "throttle", city))
-        assert_.truthy(t.percent >= 40 and t.percent <= 60, "speed " .. t.percent .. "%")
+        assert_.truthy(t.percent >= 20 and t.percent <= 35, "speed " .. t.percent .. "%")
         assert_.truthy(samples.other <= 2, "not working all the time: " .. serpent.line(samples.statuses))
         local lo, hi = math.huge, -math.huge
         for _, v in ipairs(seen) do lo, hi = math.min(lo, v), math.max(hi, v) end
